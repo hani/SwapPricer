@@ -29,10 +29,10 @@ public class DateTests {
   }
 
   public void holiday() {
-    assertTrue(manager.isHoliday("GBLO", new LocalDate(2010, 12, 27)));
+    assertEquals(manager.getAdjustedDate("GBLO", new LocalDate(2010, 12, 27), BusinessDayConvention.FOLLOWING), new LocalDate(2010, 12, 29));
   }
 
   public void notHoliday() {
-    assertFalse(manager.isHoliday("GBLO", new LocalDate(2011, 8, 10)));
+    assertEquals(manager.getAdjustedDate("GBLO", new LocalDate(2011, 8, 10), BusinessDayConvention.MODFOLLOWING), new LocalDate(2011, 8, 10));
   }
 }

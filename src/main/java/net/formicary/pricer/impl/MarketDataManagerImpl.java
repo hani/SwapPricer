@@ -2,11 +2,13 @@ package net.formicary.pricer.impl;
 
 import javax.inject.Inject;
 
-import com.mongodb.*;
+import net.formicary.pricer.BusinessDayConvention;
 import net.formicary.pricer.MarketDataManager;
+import net.objectlab.kit.datecalc.common.HolidayHandlerType;
+import net.objectlab.kit.datecalc.joda.LocalDateCalculator;
+import net.objectlab.kit.datecalc.joda.LocalDateKitCalculatorsFactory;
 import org.joda.time.LocalDate;
 
-import static net.formicary.pricer.Calendars.*;
 /**
  * @author hani
  *         Date: 8/10/11
@@ -14,22 +16,29 @@ import static net.formicary.pricer.Calendars.*;
  */
 public class MarketDataManagerImpl implements MarketDataManager {
 
-  private DB db;
-
   @Inject
-  public void setMongo(Mongo mongo) {
-    this.db = mongo.getDB("pricer");
-  }
+  private LocalDateKitCalculatorsFactory factory;
 
   @Override
-  public boolean isHoliday(String businessCenter, LocalDate date) {
-    DBCollection calendar = db.getCollection("calendar");
-    BasicDBObject query = new BasicDBObject();
-    query.put(Financialcentrecode.toString(), businessCenter);
-    query.put(Holidaydate.toString(), date.toString());
-    if(calendar.findOne(query) != null) {
-      return true;
+  public LocalDate getAdjustedDate(String businessCentre, LocalDate date, BusinessDayConvention convention) {
+    if(convention == BusinessDayConvention.NONE) {
+      return date;
     }
-    return false;
+    LocalDateCalculator calc = factory.getDateCalculator(businessCentre, getHolidayHandlerType(convention));
+    calc.setStartDate(date);
+    return calc.getCurrentBusinessDate();
+  }
+
+  private String getHolidayHandlerType(BusinessDayConvention convention) {
+    switch(convention) {
+      case FOLLOWING:
+        return HolidayHandlerType.FORWARD;
+      case MODFOLLOWING:
+        return HolidayHandlerType.MODIFIED_FOLLOWING;
+      case PRECEDING:
+        return HolidayHandlerType.BACKWARD;
+      default:
+        return "";
+    }
   }
 }

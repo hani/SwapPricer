@@ -5,9 +5,9 @@ package net.formicary.pricer;
  *         Date: 8/10/11
  *         Time: 10:48 AM
  */
-public enum Calendars {
-  Financialcentrename,
-  Financialcentrecode,
-  Holidaydate,
-  Holidayname
+public enum BusinessDayConvention {
+  NONE,
+  FOLLOWING,
+  MODFOLLOWING,
+  PRECEDING
 }

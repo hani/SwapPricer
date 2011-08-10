@@ -8,5 +8,5 @@ import org.joda.time.LocalDate;
  *         Time: 9:54 AM
  */
 public interface MarketDataManager {
-  boolean isHoliday(String businessCenter, LocalDate date);
+  LocalDate getAdjustedDate(String businessCentre, LocalDate date, BusinessDayConvention convention);
 }

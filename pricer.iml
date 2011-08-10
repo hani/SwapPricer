@@ -19,6 +19,39 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
+          <root url="jar://$USER_HOME_GRADLE$/caches/artifacts/net.objectlab.kit/datecalc-common/c12498cf18507aa6433a94eb7d3e77d5/bundles/datecalc-common-1.2.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME_GRADLE$/caches/artifacts/net.objectlab.kit/datecalc-common/c12498cf18507aa6433a94eb7d3e77d5/sources/datecalc-common-1.2.0-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME_GRADLE$/caches/artifacts/net.objectlab.kit/datecalc-joda/c12498cf18507aa6433a94eb7d3e77d5/bundles/datecalc-joda-1.2.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME_GRADLE$/caches/artifacts/net.objectlab.kit/datecalc-joda/c12498cf18507aa6433a94eb7d3e77d5/sources/datecalc-joda-1.2.0-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME_GRADLE$/caches/artifacts/joda-time/joda-time/c12498cf18507aa6433a94eb7d3e77d5/jars/joda-time-2.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME_GRADLE$/caches/artifacts/joda-time/joda-time/c12498cf18507aa6433a94eb7d3e77d5/sources/joda-time-2.0-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
           <root url="jar://$USER_HOME_GRADLE$/caches/artifacts/com.google.inject/guice/c12498cf18507aa6433a94eb7d3e77d5/jars/guice-3.0.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -67,17 +100,6 @@
         </CLASSES>
         <JAVADOC />
         <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$USER_HOME_GRADLE$/caches/artifacts/joda-time/joda-time/c12498cf18507aa6433a94eb7d3e77d5/jars/joda-time-2.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$USER_HOME_GRADLE$/caches/artifacts/joda-time/joda-time/c12498cf18507aa6433a94eb7d3e77d5/sources/joda-time-2.0-sources.jar!/" />
-        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
