@@ -25,7 +25,7 @@ public class DateTests {
   }
 
   public void weekend() {
-
+    assertEquals(manager.getAdjustedDate("USNY", new LocalDate(2011, 8, 13), BusinessDayConvention.FOLLOWING), new LocalDate(2011, 8, 15));
   }
 
   public void holiday() {

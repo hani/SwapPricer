@@ -1,7 +1,6 @@
 package net.formicary.pricer;
 
 import java.io.IOException;
-import java.net.UnknownHostException;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
