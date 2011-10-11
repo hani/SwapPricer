@@ -16,7 +16,7 @@ dependencies {
   compile 'net.objectlab.kit:datecalc-joda:1.2.0'
   compile 'com.google.inject:guice:3.0'
   compile 'joda-time:joda-time:2.0'
-  compile 'org.mongodb:mongo-java-driver:2.6.3'
+  compile 'commons-io:commons-io:2.0.1'
   compile 'org.slf4j:slf4j-api:1.6.2'
   runtime 'ch.qos.logback:logback-classic:0.9.30'
   testCompile 'org.testng:testng:6.1.1'

@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
-import com.mongodb.Mongo;
 import net.formicary.pricer.impl.CalendarManagerImpl;
+import net.formicary.pricer.impl.CurveManagerImpl;
 import net.formicary.pricer.loader.HolidayLoader;
 import net.objectlab.kit.datecalc.joda.LocalDateKitCalculatorsFactory;
 import org.slf4j.Logger;
@@ -22,10 +22,10 @@ public class PricerModule implements Module {
   @Override
   public void configure(Binder binder) {
     binder.bind(CalendarManager.class).to(CalendarManagerImpl.class);
+    binder.bind(CurveManager.class).to(CurveManagerImpl.class);
     LocalDateKitCalculatorsFactory calculatorsFactory = LocalDateKitCalculatorsFactory.getDefaultInstance();
     try {
       HolidayLoader loader = new HolidayLoader(calculatorsFactory);
-      binder.bind(Mongo.class).toInstance(new Mongo());
     } catch(IOException e) {
       throw new RuntimeException(e);
     }

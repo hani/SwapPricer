@@ -105,11 +105,11 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME_GRADLE$/caches/artifacts-2/org.mongodb/mongo-java-driver/c12498cf18507aa6433a94eb7d3e77d5/jars/mongo-java-driver-2.6.3.jar!/" />
+          <root url="jar://$USER_HOME_GRADLE$/caches/artifacts-2/commons-io/commons-io/c12498cf18507aa6433a94eb7d3e77d5/jars/commons-io-2.0.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME_GRADLE$/caches/artifacts-2/org.mongodb/mongo-java-driver/c12498cf18507aa6433a94eb7d3e77d5/sources/mongo-java-driver-2.6.3-sources.jar!/" />
+          <root url="jar://$USER_HOME_GRADLE$/caches/artifacts-2/commons-io/commons-io/c12498cf18507aa6433a94eb7d3e77d5/sources/commons-io-2.0.1-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

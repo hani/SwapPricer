@@ -1,4 +1,4 @@
-package net.formicary.pricer;
+package net.formicary.pricer.model;
 
 /**
  * @author hani

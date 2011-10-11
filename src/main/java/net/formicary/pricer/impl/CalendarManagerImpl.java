@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 
-import net.formicary.pricer.BusinessDayConvention;
+import net.formicary.pricer.model.BusinessDayConvention;
 import net.formicary.pricer.CalendarManager;
 import net.formicary.pricer.model.DayCount;
 import net.objectlab.kit.datecalc.common.HolidayHandlerType;
