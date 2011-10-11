@@ -6,12 +6,11 @@ import javax.inject.Inject;
 
 import net.formicary.pricer.BusinessDayConvention;
 import net.formicary.pricer.CalendarManager;
+import net.formicary.pricer.model.DayCount;
 import net.objectlab.kit.datecalc.common.HolidayHandlerType;
 import net.objectlab.kit.datecalc.joda.LocalDateCalculator;
 import net.objectlab.kit.datecalc.joda.LocalDateKitCalculatorsFactory;
-import org.joda.time.LocalDate;
-import org.joda.time.Months;
-import org.joda.time.ReadablePeriod;
+import org.joda.time.*;
 
 /**
  * @author hani
@@ -22,6 +21,16 @@ public class CalendarManagerImpl implements CalendarManager {
 
   @Inject
   private LocalDateKitCalculatorsFactory factory;
+
+  @Override
+  public double getDayCountFraction(LocalDate start, LocalDate end, DayCount dayCount) {
+    switch(dayCount) {
+      case THIRTY_360:
+        return ((360f * (end.getYear() - start.getYear())) + (30f * (end.getMonthOfYear() - start.getMonthOfYear())) + (end.getDayOfMonth() - start.getDayOfMonth())) / 360f;
+      default:
+        throw new UnsupportedOperationException("DayCount " + dayCount + " is not supported");
+    }
+  }
 
   @Override
   public List<LocalDate> getDates(String businessCentre, LocalDate start, LocalDate end, BusinessDayConvention convention, String multiplier) {
@@ -66,6 +75,11 @@ public class CalendarManagerImpl implements CalendarManager {
     if(m > -1) {
       int count = Integer.parseInt(multiplier.substring(0, m));
       return Months.months(count);
+    }
+    int y = multiplier.indexOf('Y');
+    if(y > -1) {
+      int count = Integer.parseInt(multiplier.substring(0, y));
+      return Years.years(count);
     }
     throw new UnsupportedOperationException("Unparsable multiplier " + multiplier);
   }

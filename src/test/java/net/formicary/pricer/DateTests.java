@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import net.formicary.pricer.model.DayCount;
 import org.joda.time.LocalDate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -48,5 +49,11 @@ public class DateTests {
     assertEquals(i.next(), new LocalDate(2011, 5, 5));
     assertEquals(i.next(), new LocalDate(2011, 8, 5));
     assertEquals(i.next(), new LocalDate(2011, 11, 7));
+  }
+
+  public void dayCountFractionThirty360() {
+    LocalDate start = new LocalDate(2011, 2, 7);
+    LocalDate end = new LocalDate(2011, 8, 5);
+    assertTrue(Double.toString(manager.getDayCountFraction(start, end, DayCount.THIRTY_360)).startsWith("0.4944444"));
   }
 }
