@@ -6,8 +6,6 @@ import java.util.*;
 import javax.inject.Inject;
 
 import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.mongodb.*;
 import net.formicary.pricer.PricerModule;
 import net.objectlab.kit.datecalc.common.DefaultHolidayCalendar;
 import net.objectlab.kit.datecalc.common.HolidayCalendar;
