@@ -1,23 +1,42 @@
 package net.formicary.pricer.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.inject.Inject;
 
 import net.formicary.pricer.BusinessDayConvention;
-import net.formicary.pricer.MarketDataManager;
+import net.formicary.pricer.CalendarManager;
 import net.objectlab.kit.datecalc.common.HolidayHandlerType;
 import net.objectlab.kit.datecalc.joda.LocalDateCalculator;
 import net.objectlab.kit.datecalc.joda.LocalDateKitCalculatorsFactory;
 import org.joda.time.LocalDate;
+import org.joda.time.Months;
+import org.joda.time.ReadablePeriod;
 
 /**
  * @author hani
  *         Date: 8/10/11
  *         Time: 10:27 AM
  */
-public class MarketDataManagerImpl implements MarketDataManager {
+public class CalendarManagerImpl implements CalendarManager {
 
   @Inject
   private LocalDateKitCalculatorsFactory factory;
+
+  @Override
+  public List<LocalDate> getDates(String businessCentre, LocalDate start, LocalDate end, BusinessDayConvention convention, String multiplier) {
+    List<LocalDate> unadjustedDates = new ArrayList<LocalDate>();
+    LocalDate current = new LocalDate(start);
+    ReadablePeriod period = getPeriod(multiplier);
+    while(current.isBefore(end)) {
+      unadjustedDates.add(current);
+      current = current.plus(period);
+    }
+    for(int i = 0; i < unadjustedDates.size(); i++) {
+      unadjustedDates.set(i, getAdjustedDate(businessCentre, unadjustedDates.get(i), convention));
+    }
+    return unadjustedDates;
+  }
 
   @Override
   public LocalDate getAdjustedDate(String businessCentre, LocalDate date, BusinessDayConvention convention) {
@@ -40,5 +59,14 @@ public class MarketDataManagerImpl implements MarketDataManager {
       default:
         return "";
     }
+  }
+
+  private ReadablePeriod getPeriod(String multiplier) {
+    int m = multiplier.indexOf('M');
+    if(m > -1) {
+      int count = Integer.parseInt(multiplier.substring(0, m));
+      return Months.months(count);
+    }
+    throw new UnsupportedOperationException("Unparsable multiplier " + multiplier);
   }
 }

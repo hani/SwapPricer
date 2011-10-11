@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.mongodb.Mongo;
-import net.formicary.pricer.impl.MarketDataManagerImpl;
+import net.formicary.pricer.impl.CalendarManagerImpl;
 import net.formicary.pricer.loader.HolidayLoader;
 import net.objectlab.kit.datecalc.joda.LocalDateKitCalculatorsFactory;
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ public class PricerModule implements Module {
 
   @Override
   public void configure(Binder binder) {
-    binder.bind(MarketDataManager.class).to(MarketDataManagerImpl.class);
+    binder.bind(CalendarManager.class).to(CalendarManagerImpl.class);
     LocalDateKitCalculatorsFactory calculatorsFactory = LocalDateKitCalculatorsFactory.getDefaultInstance();
     try {
       HolidayLoader loader = new HolidayLoader(calculatorsFactory);

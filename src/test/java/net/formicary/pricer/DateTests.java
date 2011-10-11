@@ -1,5 +1,8 @@
 package net.formicary.pricer;
 
+import java.util.Iterator;
+import java.util.List;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.joda.time.LocalDate;
@@ -16,12 +19,12 @@ import static org.testng.Assert.*;
 @Test
 public class DateTests {
 
-  private MarketDataManager manager;
+  private CalendarManager manager;
 
   @BeforeClass
   public void init() {
     Injector injector = Guice.createInjector(new PricerModule());
-    manager = injector.getInstance(MarketDataManager.class);
+    manager = injector.getInstance(CalendarManager.class);
   }
 
   public void weekend() {
@@ -34,5 +37,16 @@ public class DateTests {
 
   public void notHoliday() {
     assertEquals(manager.getAdjustedDate("GBLO", new LocalDate(2011, 8, 10), BusinessDayConvention.MODFOLLOWING), new LocalDate(2011, 8, 10));
+  }
+
+  public void paymentDates() {
+    LocalDate start = new LocalDate(2011, 2, 5);
+    LocalDate end = new LocalDate(2012, 2, 5);
+    List<LocalDate> dates = manager.getDates("GBLO", start, end, BusinessDayConvention.MODFOLLOWING, "3M");
+    Iterator<LocalDate> i = dates.iterator();
+    assertEquals(i.next(), new LocalDate(2011, 2, 7));
+    assertEquals(i.next(), new LocalDate(2011, 5, 5));
+    assertEquals(i.next(), new LocalDate(2011, 8, 5));
+    assertEquals(i.next(), new LocalDate(2011, 11, 7));
   }
 }
