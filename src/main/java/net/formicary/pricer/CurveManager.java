@@ -10,5 +10,6 @@ import org.joda.time.LocalDate;
 public interface CurveManager {
   public String getForwardCurve(String ccy, String tenor);
   public String getDiscountCurve(String cc, String tenor);
-  public double getInterpolatedRate(LocalDate date, String ccy, String tenor);
+  double getInterpolatedDiscountRate(LocalDate date, String ccy);
+  double getInterpolatedForwardRate(LocalDate date, String ccy, String tenor);
 }

@@ -3,10 +3,11 @@ package net.formicary.pricer;
 import java.io.IOException;
 
 import net.formicary.pricer.impl.CurveManagerImpl;
+import org.joda.time.LocalDate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 
 /**
  * @author hani
@@ -29,5 +30,10 @@ public class CurveTests {
 
   public void verifyForwardMapping() {
     assertEquals(manager.getDiscountCurve("GBP", "OIS"), "GBP_SONIA_EOD");
+  }
+
+  public void calculateDiscountRate() {
+    double rate = manager.getInterpolatedDiscountRate(new LocalDate(2011, 8, 5), "USD");
+    assertTrue(Double.toString(rate).startsWith("0.00101388"));
   }
 }
