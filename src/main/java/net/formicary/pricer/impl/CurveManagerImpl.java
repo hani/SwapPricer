@@ -73,6 +73,13 @@ public class CurveManagerImpl implements CurveManager {
   }
 
   @Override
+  public double getDiscountFactor(LocalDate flowDate, LocalDate valuationDate, String ccy) {
+    double interpolatedZeroRate = getInterpolatedDiscountRate(flowDate, ccy);
+    int days = Days.daysBetween(flowDate, valuationDate).getDays();
+    return Math.exp(interpolatedZeroRate*-(days)/365);
+  }
+
+  @Override
   public double getInterpolatedDiscountRate(LocalDate date, String ccy) {
     String curve = mapping.get(ccy).get("OIS")[0];
     List<PillarPoint> points = curveData.get(curve);

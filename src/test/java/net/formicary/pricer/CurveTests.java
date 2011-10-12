@@ -29,11 +29,16 @@ public class CurveTests {
   }
 
   public void verifyForwardMapping() {
-    assertEquals(manager.getDiscountCurve("GBP", "OIS"), "GBP_SONIA_EOD");
+    assertEquals(manager.getForwardCurve("GBP", "OIS"), "GBP_SONIA_EOD");
   }
 
   public void calculateDiscountRate() {
     double rate = manager.getInterpolatedDiscountRate(new LocalDate(2011, 8, 5), "USD");
     assertTrue(Double.toString(rate).startsWith("0.00101388"));
+  }
+
+  public void calculateDiscountFactor() {
+    double df = manager.getDiscountFactor(new LocalDate(2011, 8, 5), new LocalDate(2011, 5, 25), "USD");
+    assertTrue(Double.toString(df).startsWith("0.999788"), Double.toString(df));
   }
 }
