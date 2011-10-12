@@ -44,7 +44,8 @@ public class DateTests {
   public void paymentDates() {
     LocalDate start = new LocalDate(2011, 2, 5);
     LocalDate end = new LocalDate(2012, 2, 5);
-    List<LocalDate> dates = manager.getDates("GBLO", start, end, BusinessDayConvention.MODFOLLOWING, "3M");
+    BusinessDayConvention[] conventions = new BusinessDayConvention[]{BusinessDayConvention.MODFOLLOWING, BusinessDayConvention.MODFOLLOWING, BusinessDayConvention.MODFOLLOWING};
+    List<LocalDate> dates = manager.getDates("GBLO", start, end, conventions, "3M");
     Iterator<LocalDate> i = dates.iterator();
     assertEquals(i.next(), new LocalDate(2011, 2, 7));
     assertEquals(i.next(), new LocalDate(2011, 5, 5));

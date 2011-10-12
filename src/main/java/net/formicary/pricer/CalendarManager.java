@@ -13,6 +13,10 @@ import org.joda.time.LocalDate;
  */
 public interface CalendarManager {
   LocalDate getAdjustedDate(String businessCentre, LocalDate date, BusinessDayConvention convention);
-  List<LocalDate> getDates(String businessCentre, LocalDate start, LocalDate end, BusinessDayConvention convention, String multiplier);
+  /**
+   * @param conventions An array of 3 business day conventions. The first is the start date convention, followed
+   * by the calculation period convention, and finally the termination date convention
+   */
+  List<LocalDate> getDates(String businessCentre, LocalDate start, LocalDate end, BusinessDayConvention[] conventions, String multiplier);
   double getDayCountFraction(LocalDate start, LocalDate end, DayCount dayCount);
 }

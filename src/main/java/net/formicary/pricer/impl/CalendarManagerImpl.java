@@ -33,7 +33,7 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
-  public List<LocalDate> getDates(String businessCentre, LocalDate start, LocalDate end, BusinessDayConvention convention, String multiplier) {
+  public List<LocalDate> getDates(String businessCentre, LocalDate start, LocalDate end, BusinessDayConvention conventions[], String multiplier) {
     List<LocalDate> unadjustedDates = new ArrayList<LocalDate>();
     LocalDate current = new LocalDate(start);
     ReadablePeriod period = getPeriod(multiplier);
@@ -41,9 +41,11 @@ public class CalendarManagerImpl implements CalendarManager {
       unadjustedDates.add(current);
       current = current.plus(period);
     }
-    for(int i = 0; i < unadjustedDates.size(); i++) {
-      unadjustedDates.set(i, getAdjustedDate(businessCentre, unadjustedDates.get(i), convention));
+    unadjustedDates.set(0, getAdjustedDate(businessCentre, unadjustedDates.get(0), conventions[0]));
+    for(int i = 0; i < unadjustedDates.size() - 1; i++) {
+      unadjustedDates.set(i, getAdjustedDate(businessCentre, unadjustedDates.get(i), conventions[1]));
     }
+    unadjustedDates.set(unadjustedDates.size() - 1, getAdjustedDate(businessCentre, unadjustedDates.get(unadjustedDates.size() - 1), conventions[2]));
     return unadjustedDates;
   }
 
