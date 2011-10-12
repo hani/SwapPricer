@@ -26,7 +26,7 @@ public class CalendarManagerImpl implements CalendarManager {
   public double getDayCountFraction(LocalDate start, LocalDate end, DayCount dayCount) {
     switch(dayCount) {
       case THIRTY_360:
-        return ((360f * (end.getYear() - start.getYear())) + (30f * (end.getMonthOfYear() - start.getMonthOfYear())) + (end.getDayOfMonth() - start.getDayOfMonth())) / 360f;
+        return ((360d * (end.getYear() - start.getYear())) + (30d * (end.getMonthOfYear() - start.getMonthOfYear())) + (end.getDayOfMonth() - start.getDayOfMonth())) / 360d;
       default:
         throw new UnsupportedOperationException("DayCount " + dayCount + " is not supported");
     }

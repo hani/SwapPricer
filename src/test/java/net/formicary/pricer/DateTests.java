@@ -55,6 +55,7 @@ public class DateTests {
   public void dayCountFractionThirty360() {
     LocalDate start = new LocalDate(2011, 2, 7);
     LocalDate end = new LocalDate(2011, 8, 5);
-    assertTrue(Double.toString(manager.getDayCountFraction(start, end, DayCount.THIRTY_360)).startsWith("0.4944444"));
+    String f = Double.toString(manager.getDayCountFraction(start, end, DayCount.THIRTY_360));
+    assertTrue(f.startsWith("0.49444444444444"), f);
   }
 }

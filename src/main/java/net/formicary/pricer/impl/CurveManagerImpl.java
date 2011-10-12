@@ -75,8 +75,8 @@ public class CurveManagerImpl implements CurveManager {
   @Override
   public double getDiscountFactor(LocalDate flowDate, LocalDate valuationDate, String ccy) {
     double interpolatedZeroRate = getInterpolatedDiscountRate(flowDate, ccy);
-    int days = Days.daysBetween(flowDate, valuationDate).getDays();
-    return Math.exp(interpolatedZeroRate*-(days)/365);
+    double days = Days.daysBetween(flowDate, valuationDate).getDays();
+    return Math.exp(interpolatedZeroRate*-(days)/365d);
   }
 
   @Override
@@ -88,8 +88,8 @@ public class CurveManagerImpl implements CurveManager {
         //we have our two dates, since we know the pillar list is sorted by ascending dates
         PillarPoint start = points.get(i - 1);
         PillarPoint end = points.get(i);
-        int daysFromStartToNow = Days.daysBetween(date, start.getMaturityDate()).getDays();
-        int daysBetweenPoints = Days.daysBetween(end.getMaturityDate(), start.getMaturityDate()).getDays();
+        double daysFromStartToNow = Days.daysBetween(date, start.getMaturityDate()).getDays();
+        double daysBetweenPoints = Days.daysBetween(end.getMaturityDate(), start.getMaturityDate()).getDays();
         return start.getZeroRate() + daysFromStartToNow * (end.getZeroRate() - start.getZeroRate()) / daysBetweenPoints;
       }
     }
