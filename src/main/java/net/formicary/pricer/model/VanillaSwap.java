@@ -1,5 +1,7 @@
 package net.formicary.pricer.model;
 
+import org.joda.time.LocalDate;
+
 /**
  * @author hani
  *         Date: 10/11/11
@@ -9,6 +11,15 @@ public class VanillaSwap {
   private String id;
   private SwapLeg fixedLeg;
   private SwapLeg floatingLeg;
+  private LocalDate valuationDate;
+
+  public LocalDate getValuationDate() {
+    return valuationDate;
+  }
+
+  public void setValuationDate(LocalDate valuationDate) {
+    this.valuationDate = valuationDate;
+  }
 
   public String getId() {
     return id;

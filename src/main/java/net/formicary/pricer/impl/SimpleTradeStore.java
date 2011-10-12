@@ -3,6 +3,8 @@ package net.formicary.pricer.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Singleton;
+
 import net.formicary.pricer.TradeStore;
 import net.formicary.pricer.model.VanillaSwap;
 
@@ -11,6 +13,7 @@ import net.formicary.pricer.model.VanillaSwap;
  *         Date: 10/11/11
  *         Time: 9:26 PM
  */
+@Singleton
 public class SimpleTradeStore implements TradeStore {
   private Map<String, VanillaSwap> map = new HashMap<String, VanillaSwap>();
 
@@ -19,7 +22,7 @@ public class SimpleTradeStore implements TradeStore {
     return map.get(id);
   }
 
-  public void setTrade(String id, VanillaSwap trade) {
-    map.put(id, trade);
+  public void addTrade(VanillaSwap trade) {
+    map.put(trade.getId(), trade);
   }
 }

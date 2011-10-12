@@ -19,7 +19,7 @@ import static org.testng.Assert.*;
  *         Time: 9:57 AM
  */
 @Test
-public class DateTests {
+public class CalendarTests {
 
   private CalendarManager manager;
 

@@ -82,6 +82,7 @@ public class CurveManagerImpl implements CurveManager {
   @Override
   public double getInterpolatedDiscountRate(LocalDate date, String ccy) {
     String curve = mapping.get(ccy).get("OIS")[0];
+    //todo the curve data we have is forward rates only, we need the historical rates from rep00003
     List<PillarPoint> points = curveData.get(curve);
     for(int i = 0; i < points.size(); i++) {
       if(points.get(i).getMaturityDate().isAfter(date)) {

@@ -25,6 +25,7 @@ public class SwapLeg {
   private String fixingCalendar;
   private String businessCentre;
   private double fixedRate;
+  private String currency;
 
   public BusinessDayConvention[] getBusinessDayConventions() {
     return new BusinessDayConvention[] {startBusinessDatConvention, periodBusinessDatConvention, endBusinessDatConvention};
@@ -164,5 +165,13 @@ public class SwapLeg {
 
   public void setFixingCalendar(String fixingCalendar) {
     this.fixingCalendar = fixingCalendar;
+  }
+
+  public String getCurrency() {
+    return currency;
+  }
+
+  public void setCurrency(String currency) {
+    this.currency = currency;
   }
 }

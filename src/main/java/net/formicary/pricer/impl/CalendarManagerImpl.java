@@ -34,6 +34,9 @@ public class CalendarManagerImpl implements CalendarManager {
 
   @Override
   public List<LocalDate> getDates(String businessCentre, LocalDate start, LocalDate end, BusinessDayConvention conventions[], String multiplier) {
+    if(end == null) {
+      throw new NullPointerException("end date is null");
+    }
     List<LocalDate> unadjustedDates = new ArrayList<LocalDate>();
     LocalDate current = new LocalDate(start);
     ReadablePeriod period = getPeriod(multiplier);
@@ -73,6 +76,9 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   private ReadablePeriod getPeriod(String multiplier) {
+    if(multiplier == null) {
+      throw new NullPointerException("null multiplier");
+    }
     int m = multiplier.indexOf('M');
     if(m > -1) {
       int count = Integer.parseInt(multiplier.substring(0, m));

@@ -22,7 +22,7 @@ public class PricerModule implements Module {
   public void configure(Binder binder) {
     binder.bind(CalendarManager.class).to(CalendarManagerImpl.class);
     binder.bind(CurveManager.class).to(CurveManagerImpl.class);
-    binder.bind(TradeStore.class).to(FpmlTradeStore.class);
+    binder.bind(TradeStore.class).to(SimpleTradeStore.class);
     LocalDateKitCalculatorsFactory calculatorsFactory = LocalDateKitCalculatorsFactory.getDefaultInstance();
     try {
       HolidayLoader loader = new HolidayLoader(calculatorsFactory);
