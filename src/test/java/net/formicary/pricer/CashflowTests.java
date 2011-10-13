@@ -2,7 +2,6 @@ package net.formicary.pricer;
 
 import java.util.List;
 
-import com.google.inject.Binder;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import net.formicary.pricer.impl.SimpleTradeStore;
