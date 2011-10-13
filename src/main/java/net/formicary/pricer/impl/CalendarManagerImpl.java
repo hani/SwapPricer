@@ -27,13 +27,17 @@ public class CalendarManagerImpl implements CalendarManager {
     switch(dayCount) {
       case THIRTY_360:
         return ((360d * (end.getYear() - start.getYear())) + (30d * (end.getMonthOfYear() - start.getMonthOfYear())) + (end.getDayOfMonth() - start.getDayOfMonth())) / 360d;
+      case ACT_360:
+        return Days.daysBetween(start, end).getDays() / 360d;
+      case ACT_365:
+        return Days.daysBetween(start, end).getDays() / 365d;
       default:
         throw new UnsupportedOperationException("DayCount " + dayCount + " is not supported");
     }
   }
 
   @Override
-  public List<LocalDate> getDates(String businessCentre, LocalDate start, LocalDate end, BusinessDayConvention conventions[], String multiplier) {
+  public List<LocalDate> getFixedFlowDates(String businessCentre, LocalDate start, LocalDate end, BusinessDayConvention conventions[], String multiplier) {
     if(end == null) {
       throw new NullPointerException("end date is null");
     }

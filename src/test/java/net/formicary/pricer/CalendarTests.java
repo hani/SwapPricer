@@ -41,11 +41,16 @@ public class CalendarTests {
     assertEquals(manager.getAdjustedDate("GBLO", new LocalDate(2011, 8, 10), BusinessDayConvention.MODFOLLOWING), new LocalDate(2011, 8, 10));
   }
 
+  public void dayCountFractionAct360() {
+    String f = Double.toString(manager.getDayCountFraction(new LocalDate(2011, 2, 7), new LocalDate(2011, 5, 5), DayCount.ACT_360));
+    assertTrue(f.startsWith("0.24166666"), f);
+  }
+
   public void paymentDates() {
     LocalDate start = new LocalDate(2011, 2, 5);
     LocalDate end = new LocalDate(2012, 2, 5);
     BusinessDayConvention[] conventions = new BusinessDayConvention[]{BusinessDayConvention.MODFOLLOWING, BusinessDayConvention.MODFOLLOWING, BusinessDayConvention.MODFOLLOWING};
-    List<LocalDate> dates = manager.getDates("GBLO", start, end, conventions, "3M");
+    List<LocalDate> dates = manager.getFixedFlowDates("GBLO", start, end, conventions, "3M");
     Iterator<LocalDate> i = dates.iterator();
     assertEquals(i.next(), new LocalDate(2011, 2, 7));
     assertEquals(i.next(), new LocalDate(2011, 5, 5));
