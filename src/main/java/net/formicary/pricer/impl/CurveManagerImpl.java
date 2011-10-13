@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.*;
 
 import net.formicary.pricer.CurveManager;
-import net.formicary.pricer.model.PillarPoint;
+import net.formicary.pricer.model.CurvePillarPoint;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.Days;
@@ -23,7 +23,7 @@ public class CurveManagerImpl implements CurveManager {
   //a map of currency -> (tenor -> forward,discount) curves
   private Map<String, Map<String, String[]>> mapping = new HashMap<String, Map<String, String[]>>();
   //a map of curve -> list of pillar points
-  private Map<String, List<PillarPoint>> curveData = new HashMap<String, List<PillarPoint>>();
+  private Map<String, List<CurvePillarPoint>> curveData = new HashMap<String, List<CurvePillarPoint>>();
 
   public CurveManagerImpl() throws IOException {
     loadCurveMapping("/curvemapping.csv");
@@ -34,19 +34,19 @@ public class CurveManagerImpl implements CurveManager {
     List<String> list = FileUtils.readLines(new File(fileName));
     for(int i = 1; i < list.size(); i++) {
       String[] data = list.get(i).split("\t");
-      PillarPoint p = getPillar(data);
-      List<PillarPoint> points = curveData.get(p.getCurve());
+      CurvePillarPoint p = getPillar(data);
+      List<CurvePillarPoint> points = curveData.get(p.getCurveName());
       if(points == null) {
-        points = new ArrayList<PillarPoint>();
-        curveData.put(p.getCurve(), points);
+        points = new ArrayList<CurvePillarPoint>();
+        curveData.put(p.getCurveName(), points);
       }
       points.add(p);
     }
   }
 
-  private PillarPoint getPillar(String[] data) {
-    PillarPoint p = new PillarPoint();
-    p.setCurve(data[0]);
+  private CurvePillarPoint getPillar(String[] data) {
+    CurvePillarPoint p = new CurvePillarPoint();
+    p.setCurveName(data[0]);
     p.setCloseDate(LocalDate.parse(data[1].substring(0, data[1].indexOf(' ')), DATE_FORMAT));
     p.setMaturityDate(LocalDate.parse(data[2].substring(0, data[2].indexOf(' ')), DATE_FORMAT));
     p.setAccrualFactor(Double.parseDouble(data[3]));
@@ -77,18 +77,18 @@ public class CurveManagerImpl implements CurveManager {
     //LCH uses OIS rate for futured fixed flows
     double interpolatedZeroRate = getInterpolatedForwardRate(flowDate, ccy, "OIS");
     double days = Days.daysBetween(valuationDate, flowDate).getDays();
-    return Math.exp(interpolatedZeroRate*-(days)/365d);
+    return Math.exp(interpolatedZeroRate * -(days) / 365d);
   }
 
   @Override
   public double getInterpolatedForwardRate(LocalDate date, String ccy, String tenor) {
     String curve = getForwardCurve(ccy, "OIS");
-    List<PillarPoint> points = curveData.get(curve);
+    List<CurvePillarPoint> points = curveData.get(curve);
     for(int i = 0; i < points.size(); i++) {
       if(points.get(i).getMaturityDate().isAfter(date)) {
         //we have our two dates, since we know the pillar list is sorted by ascending dates
-        PillarPoint start = points.get(i - 1);
-        PillarPoint end = points.get(i);
+        CurvePillarPoint start = points.get(i - 1);
+        CurvePillarPoint end = points.get(i);
         double daysFromStartToNow = Days.daysBetween(start.getMaturityDate(), date).getDays();
         double daysBetweenPoints = Days.daysBetween(start.getMaturityDate(), end.getMaturityDate()).getDays();
         return start.getZeroRate() + daysFromStartToNow * (end.getZeroRate() - start.getZeroRate()) / daysBetweenPoints;

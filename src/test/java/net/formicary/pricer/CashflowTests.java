@@ -25,7 +25,6 @@ public class CashflowTests {
 
   @BeforeClass
   public void init() {
-
     Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule());
     store = injector.getInstance(SimpleTradeStore.class);
     generator = injector.getInstance(CashflowGenerator.class);

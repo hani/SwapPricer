@@ -7,20 +7,20 @@ import org.joda.time.LocalDate;
  *         Date: 10/11/11
  *         Time: 10:30 AM
  */
-public class PillarPoint {
-  private String curve;
+public class CurvePillarPoint {
+  private String curveName;
   private LocalDate closeDate;
   private LocalDate maturityDate;
   private double accrualFactor;
   private double zeroRate;
   private double discountFactor;
 
-  public String getCurve() {
-    return curve;
+  public String getCurveName() {
+    return curveName;
   }
 
-  public void setCurve(String curve) {
-    this.curve = curve;
+  public void setCurveName(String curveName) {
+    this.curveName = curveName;
   }
 
   public LocalDate getCloseDate() {
