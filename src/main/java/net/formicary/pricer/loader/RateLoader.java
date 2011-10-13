@@ -33,7 +33,7 @@ public class RateLoader {
     DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
     int count = 0;
     while((line = is.readLine()) != null) {
-      count++;
+      if(line.trim().length() == 0) continue;
       String[] items = line.split("\t");
       Index index = new Index();
       index.setCurrency(items[0]);
@@ -42,11 +42,15 @@ public class RateLoader {
       index.setTenorPeriod(items[3]);
       index.setFixingDate(formatter.parseLocalDate(items[4]));
       index.setEffectiveDate(formatter.parseLocalDate(items[5]));
-      index.setRate(Double.parseDouble(items[6]));
-      index.setRegulatoryBody(items[7]);
-      ds.save(index);
-      if(count % 20000 == 0) {
-        log.info("Saved " + count  + " rates");
+      try {
+        index.setRate(Double.parseDouble(items[6]));
+        index.setRegulatoryBody(items[7]);
+        ds.save(index);
+        if(++count % 20000 == 0) {
+          log.info("Saved " + (count-1)  + " rates");
+        }
+      } catch(NumberFormatException e) {
+        log.info("Invalid rate found for index " + index + ":" + items[5]);
       }
     }
     log.info("Initialised historic rates in " + (System.currentTimeMillis() - now) + "ms with " + count + " rates");
