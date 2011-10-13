@@ -74,32 +74,27 @@ public class CurveManagerImpl implements CurveManager {
 
   @Override
   public double getDiscountFactor(LocalDate flowDate, LocalDate valuationDate, String ccy) {
-    double interpolatedZeroRate = getInterpolatedDiscountRate(flowDate, ccy);
+    //LCH uses OIS rate for futured fixed flows
+    double interpolatedZeroRate = getInterpolatedForwardRate(flowDate, ccy, "OIS");
     double days = Days.daysBetween(flowDate, valuationDate).getDays();
     return Math.exp(interpolatedZeroRate*-(days)/365d);
   }
 
   @Override
-  public double getInterpolatedDiscountRate(LocalDate date, String ccy) {
-    String curve = mapping.get(ccy).get("OIS")[0];
-    //todo the curve data we have is forward rates only, we need the historical rates from rep00003
+  public double getInterpolatedForwardRate(LocalDate date, String ccy, String tenor) {
+    String curve = getForwardCurve(ccy, "OIS");
     List<PillarPoint> points = curveData.get(curve);
     for(int i = 0; i < points.size(); i++) {
       if(points.get(i).getMaturityDate().isAfter(date)) {
         //we have our two dates, since we know the pillar list is sorted by ascending dates
         PillarPoint start = points.get(i - 1);
         PillarPoint end = points.get(i);
-        double daysFromStartToNow = Days.daysBetween(date, start.getMaturityDate()).getDays();
-        double daysBetweenPoints = Days.daysBetween(end.getMaturityDate(), start.getMaturityDate()).getDays();
+        double daysFromStartToNow = Days.daysBetween(start.getMaturityDate(), date).getDays();
+        double daysBetweenPoints = Days.daysBetween(start.getMaturityDate(), end.getMaturityDate()).getDays();
         return start.getZeroRate() + daysFromStartToNow * (end.getZeroRate() - start.getZeroRate()) / daysBetweenPoints;
       }
     }
     throw new IllegalArgumentException("No rate data found for date " + date + " currency " + ccy);
-  }
-
-  @Override
-  public double getInterpolatedForwardRate(LocalDate date, String ccy, String tenor) {
-    return 0;
   }
 
   @Override

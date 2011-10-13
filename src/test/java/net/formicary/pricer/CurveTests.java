@@ -33,7 +33,7 @@ public class CurveTests {
   }
 
   public void calculateDiscountRate() {
-    double rate = manager.getInterpolatedDiscountRate(new LocalDate(2011, 8, 5), "USD");
+    double rate = manager.getInterpolatedForwardRate(new LocalDate(2011, 8, 5), "USD", "OIS");
     assertTrue(Double.toString(rate).startsWith("0.00101388"));
   }
 
