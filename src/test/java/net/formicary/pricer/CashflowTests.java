@@ -50,6 +50,6 @@ public class CashflowTests {
     fixed.setStartDate(new LocalDate(2009, 2, 5));
     fixed.setEndDate(new LocalDate(2014, 2, 5));
     List<Cashflow> flows = generator.generateCashflows("LCH00004300325");
-    assertEquals(flows.size(), 5, flows.toString());
+    assertEquals(flows.size(), 6, flows.toString());
   }
 }

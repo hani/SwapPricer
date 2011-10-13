@@ -22,10 +22,10 @@ public class CashflowGenerator {
     SwapLeg fixed = swap.getFixedLeg();
     List<LocalDate> dates = calendarManager.getDates(fixed.getBusinessCentre(), fixed.getStartDate(), fixed.getEndDate(), fixed.getBusinessDayConventions(), fixed.getPeriodMultiplier());
     List<Cashflow> flows = new ArrayList<Cashflow>();
-    for(int i = 0; i < dates.size() - 1; i++) {
+    for(int i = 0; i < dates.size(); i++) {
       LocalDate start = dates.get(i);
       if(start.isAfter(swap.getValuationDate())) {
-        double dayCountFraction = calendarManager.getDayCountFraction(start, dates.get(i+1), fixed.getDayCount());
+        double dayCountFraction = calendarManager.getDayCountFraction(dates.get(i-1), dates.get(i), fixed.getDayCount());
         double undiscountedAmount = fixed.getNotional() * fixed.getFixedRate() * dayCountFraction;
         double discountFactor = curveManager.getDiscountFactor(start, swap.getValuationDate(), fixed.getCurrency());
         double discountedAmount = discountFactor * undiscountedAmount;
