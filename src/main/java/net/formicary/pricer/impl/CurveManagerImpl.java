@@ -76,7 +76,7 @@ public class CurveManagerImpl implements CurveManager {
   public double getDiscountFactor(LocalDate flowDate, LocalDate valuationDate, String ccy) {
     //LCH uses OIS rate for futured fixed flows
     double interpolatedZeroRate = getInterpolatedForwardRate(flowDate, ccy, "OIS");
-    double days = Days.daysBetween(flowDate, valuationDate).getDays();
+    double days = Days.daysBetween(valuationDate, flowDate).getDays();
     return Math.exp(interpolatedZeroRate*-(days)/365d);
   }
 
