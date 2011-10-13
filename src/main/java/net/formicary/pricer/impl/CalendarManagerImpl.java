@@ -40,7 +40,7 @@ public class CalendarManagerImpl implements CalendarManager {
     List<LocalDate> unadjustedDates = new ArrayList<LocalDate>();
     LocalDate current = new LocalDate(start);
     ReadablePeriod period = getPeriod(multiplier);
-    while(current.isBefore(end)) {
+    while(current.isBefore(end) || current.equals(end)) {
       unadjustedDates.add(current);
       current = current.plus(period);
     }

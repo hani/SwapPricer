@@ -26,7 +26,7 @@ public class CashflowTests {
   @BeforeClass
   public void init() {
 
-    Injector injector = Guice.createInjector(new PricerModule());
+    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule());
     store = injector.getInstance(SimpleTradeStore.class);
     generator = injector.getInstance(CashflowGenerator.class);
   }
@@ -34,9 +34,11 @@ public class CashflowTests {
   public void generateFixedCashflows() {
     VanillaSwap swap = new VanillaSwap();
     swap.setId("LCH00004300325");
+    swap.setValuationDate(new LocalDate(2011, 5, 27));
     store.addTrade(swap);
     SwapLeg fixed = new SwapLeg();
     swap.setFixedLeg(fixed);
+    fixed.setNotional(44025206);
     fixed.setBusinessCentre("GBLO");
     fixed.setDayCount(DayCount.THIRTY_360);
     fixed.setCurrency("USD");
@@ -48,6 +50,6 @@ public class CashflowTests {
     fixed.setStartDate(new LocalDate(2009, 2, 5));
     fixed.setEndDate(new LocalDate(2014, 2, 5));
     List<Cashflow> flows = generator.generateCashflows("LCH00004300325");
-    assertEquals(flows.size(), 6, flows.toString());
+    assertEquals(flows.size(), 5, flows.toString());
   }
 }
