@@ -20,7 +20,7 @@ public class CashflowGenerator {
   public List<Cashflow> generateCashflows(String id) {
     VanillaSwap swap = tradeStore.getTrade(id);
     SwapLeg fixed = swap.getFixedLeg();
-    List<LocalDate> dates = calendarManager.getFixedFlowDates(fixed.getBusinessCentre(), fixed.getStartDate(),
+    List<LocalDate> dates = calendarManager.getAdjustedDates(fixed.getBusinessCentre(), fixed.getStartDate(),
       fixed.getEndDate(), fixed.getBusinessDayConventions(), fixed.getPeriodMultiplier());
     List<Cashflow> flows = new ArrayList<Cashflow>();
     for(int i = 0; i < dates.size(); i++) {

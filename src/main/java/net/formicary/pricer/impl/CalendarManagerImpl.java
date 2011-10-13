@@ -37,7 +37,8 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
-  public List<LocalDate> getFixedFlowDates(String businessCentre, LocalDate start, LocalDate end, BusinessDayConvention conventions[], String multiplier) {
+  public List<LocalDate> getAdjustedDates(String businessCentre, LocalDate start, LocalDate end,
+    BusinessDayConvention conventions[], String multiplier) {
     if(end == null) {
       throw new NullPointerException("end date is null");
     }
