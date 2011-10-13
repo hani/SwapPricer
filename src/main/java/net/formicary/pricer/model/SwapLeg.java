@@ -18,13 +18,8 @@ public class SwapLeg {
   private String periodMultiplier;
   private int rollConvention;
   private int notional;
-  private String floatingRateIndex;
   private DayCount dayCount;
-  private int fixingDateOffset;
-  private boolean fixingRelativeToStart;
-  private String fixingCalendar;
   private String businessCentre;
-  private double fixedRate;
   private String currency;
 
   public BusinessDayConvention[] getBusinessDayConventions() {
@@ -45,14 +40,6 @@ public class SwapLeg {
 
   public void setBusinessCentre(String businessCentre) {
     this.businessCentre = businessCentre;
-  }
-
-  public double getFixedRate() {
-    return fixedRate;
-  }
-
-  public void setFixedRate(double fixedRate) {
-    this.fixedRate = fixedRate;
   }
 
   public LocalDate getStartDate() {
@@ -127,44 +114,12 @@ public class SwapLeg {
     this.notional = notional;
   }
 
-  public String getFloatingRateIndex() {
-    return floatingRateIndex;
-  }
-
-  public void setFloatingRateIndex(String floatingRateIndex) {
-    this.floatingRateIndex = floatingRateIndex;
-  }
-
   public DayCount getDayCount() {
     return dayCount;
   }
 
   public void setDayCount(DayCount dayCount) {
     this.dayCount = dayCount;
-  }
-
-  public int getFixingDateOffset() {
-    return fixingDateOffset;
-  }
-
-  public void setFixingDateOffset(int fixingDateOffset) {
-    this.fixingDateOffset = fixingDateOffset;
-  }
-
-  public boolean isFixingRelativeToStart() {
-    return fixingRelativeToStart;
-  }
-
-  public void setFixingRelativeToStart(boolean fixingRelativeToStart) {
-    this.fixingRelativeToStart = fixingRelativeToStart;
-  }
-
-  public String getFixingCalendar() {
-    return fixingCalendar;
-  }
-
-  public void setFixingCalendar(String fixingCalendar) {
-    this.fixingCalendar = fixingCalendar;
   }
 
   public String getCurrency() {

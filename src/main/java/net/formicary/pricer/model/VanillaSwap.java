@@ -9,8 +9,8 @@ import org.joda.time.LocalDate;
  */
 public class VanillaSwap {
   private String id;
-  private SwapLeg fixedLeg;
-  private SwapLeg floatingLeg;
+  private FixedLeg fixedLeg;
+  private FloatingLeg floatingLeg;
   private LocalDate valuationDate;
 
   public LocalDate getValuationDate() {
@@ -29,19 +29,19 @@ public class VanillaSwap {
     this.id = id;
   }
 
-  public SwapLeg getFixedLeg() {
+  public FixedLeg getFixedLeg() {
     return fixedLeg;
   }
 
-  public void setFixedLeg(SwapLeg fixedLeg) {
+  public void setFixedLeg(FixedLeg fixedLeg) {
     this.fixedLeg = fixedLeg;
   }
 
-  public SwapLeg getFloatingLeg() {
+  public FloatingLeg getFloatingLeg() {
     return floatingLeg;
   }
 
-  public void setFloatingLeg(SwapLeg floatingLeg) {
+  public void setFloatingLeg(FloatingLeg floatingLeg) {
     this.floatingLeg = floatingLeg;
   }
 }
