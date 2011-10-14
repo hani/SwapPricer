@@ -27,14 +27,13 @@ public class CashflowGenerator {
   }
 
   private List<Cashflow> generateFloatingFlows(LocalDate valuationDate, FloatingLeg leg) {
-    List<LocalDate> dates = calendarManager.getAdjustedDates(leg.getBusinessCentre(), leg.getStartDate(),
+    List<LocalDate> paymentDates = calendarManager.getAdjustedDates(leg.getBusinessCentre(), leg.getStartDate(),
       leg.getEndDate(), leg.getBusinessDayConventions(), leg.getPeriodMultiplier());
+    List<LocalDate> fixingDates = calendarManager.getFixingDates(leg.getBusinessCentre(), paymentDates, leg.getFixingDateOffset());
     List<Cashflow> flows = new ArrayList<Cashflow>();
-    for(int i = 0; i < dates.size(); i++) {
-      LocalDate start = dates.get(i);
+    for(int i = 0; i < paymentDates.size(); i++) {
+        LocalDate start = paymentDates.get(i);
       if(start.isAfter(valuationDate)) {
-        double dayCountFraction = calendarManager.getDayCountFraction(dates.get(i - 1), dates.get(i), leg.getDayCount());
-        double discountFactor = curveManager.getDiscountFactor(start, valuationDate, leg.getCurrency());
         Cashflow flow = new Cashflow();
         flow.setDate(start);
         flows.add(flow);

@@ -37,11 +37,52 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
-  public List<LocalDate> getAdjustedDates(String businessCentre, LocalDate start, LocalDate end,
-    BusinessDayConvention conventions[], String multiplier) {
+  public List<LocalDate> getFixingDates(String businessCentre, List<LocalDate> dates, final int fixingOffset) {
+    List<LocalDate> fixingDates = new ArrayList<LocalDate>();
+    LocalDateCalculator calc = factory.getDateCalculator(businessCentre, null);
+    for(LocalDate date : dates) {
+      //move by fixing offset, we only count business days
+      final int numberOfStepsLeft = Math.abs(fixingOffset);
+      final int step = (fixingOffset < 0 ? -1 : 1);
+
+      for (int i = 0; i < numberOfStepsLeft; i++) {
+        do {
+          date = date.plusDays(step);
+        }
+        while(calc.isNonWorkingDay(date));
+      }
+      fixingDates.add(date);
+    }
+    return fixingDates;
+  }
+
+  @Override
+  public List<LocalDate> getAdjustedDates(String businessCentre, LocalDate start, LocalDate end, BusinessDayConvention conventions[], String multiplier) {
     if(end == null) {
       throw new NullPointerException("end date is null");
     }
+    List<LocalDate> unadjustedDates = getDatesInRange(start, end, multiplier);
+    unadjustedDates.set(0, getAdjustedDate(businessCentre, unadjustedDates.get(0), conventions[0]));
+    for(int i = 0; i < unadjustedDates.size() - 1; i++) {
+      unadjustedDates.set(i, getAdjustedDate(businessCentre, unadjustedDates.get(i), conventions[1]));
+    }
+    unadjustedDates.set(unadjustedDates.size() - 1, getAdjustedDate(businessCentre, unadjustedDates.get(unadjustedDates.size() - 1), conventions[2]));
+    return unadjustedDates;
+  }
+
+  @Override
+  public List<LocalDate> adjustDates(String businessCentre, List<LocalDate> dates, BusinessDayConvention conventions[]) {
+    List<LocalDate> adjusted = new ArrayList<LocalDate>(dates);
+    dates.set(0, getAdjustedDate(businessCentre, dates.get(0), conventions[0]));
+    for(int i = 0; i < dates.size() - 1; i++) {
+      adjusted.set(i, getAdjustedDate(businessCentre, dates.get(i), conventions[1]));
+    }
+    adjusted.set(dates.size() - 1, getAdjustedDate(businessCentre, dates.get(dates.size() - 1), conventions[2]));
+    return adjusted;
+  }
+
+  @Override
+  public List<LocalDate> getDatesInRange(LocalDate start, LocalDate end, String multiplier) {
     List<LocalDate> unadjustedDates = new ArrayList<LocalDate>();
     LocalDate current = new LocalDate(start);
     ReadablePeriod period = getPeriod(multiplier);
@@ -49,11 +90,6 @@ public class CalendarManagerImpl implements CalendarManager {
       unadjustedDates.add(current);
       current = current.plus(period);
     }
-    unadjustedDates.set(0, getAdjustedDate(businessCentre, unadjustedDates.get(0), conventions[0]));
-    for(int i = 0; i < unadjustedDates.size() - 1; i++) {
-      unadjustedDates.set(i, getAdjustedDate(businessCentre, unadjustedDates.get(i), conventions[1]));
-    }
-    unadjustedDates.set(unadjustedDates.size() - 1, getAdjustedDate(businessCentre, unadjustedDates.get(unadjustedDates.size() - 1), conventions[2]));
     return unadjustedDates;
   }
 
@@ -76,7 +112,7 @@ public class CalendarManagerImpl implements CalendarManager {
       case PRECEDING:
         return HolidayHandlerType.BACKWARD;
       default:
-        return "";
+        return null;
     }
   }
 

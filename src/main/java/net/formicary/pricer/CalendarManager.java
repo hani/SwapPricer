@@ -17,7 +17,12 @@ public interface CalendarManager {
    * @param conventions An array of 3 business day conventions. The first is the start date convention, followed
    * by the calculation period convention, and finally the termination date convention
    */
-  List<LocalDate> getAdjustedDates(String businessCentre, LocalDate start, LocalDate end, BusinessDayConvention[]
-    conventions, String multiplier);
+  List<LocalDate> getAdjustedDates(String businessCentre, LocalDate start, LocalDate end, BusinessDayConvention[] conventions, String multiplier);
   double getDayCountFraction(LocalDate start, LocalDate end, DayCount dayCount);
+
+  List<LocalDate> adjustDates(String businessCentre, List<LocalDate> dates, BusinessDayConvention conventions[]);
+
+  List<LocalDate> getDatesInRange(LocalDate start, LocalDate end, String multiplier);
+
+  List<LocalDate> getFixingDates(String businessCentre, List<LocalDate> dates, int fixingOffset);
 }
