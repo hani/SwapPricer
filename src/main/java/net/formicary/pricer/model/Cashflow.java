@@ -11,6 +11,14 @@ public class Cashflow implements Comparable<Cashflow>{
   private double npv;
   private LocalDate date;
 
+  public Cashflow() {
+  }
+
+  public Cashflow(double npv, LocalDate date) {
+    this.npv = npv;
+    this.date = date;
+  }
+
   public double getNpv() {
     return npv;
   }

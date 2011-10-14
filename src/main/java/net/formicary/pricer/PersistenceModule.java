@@ -12,6 +12,7 @@ import com.google.code.morphia.mapping.MappedField;
 import com.google.code.morphia.mapping.MappingException;
 import com.google.inject.AbstractModule;
 import com.mongodb.Mongo;
+import net.formicary.pricer.impl.RateManagerImpl;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -32,6 +33,7 @@ public class PersistenceModule extends AbstractModule {
     } catch(UnknownHostException e) {
       addError(e);
     }
+    bind(RateManager.class).to(RateManagerImpl.class);
   }
 
   public class LocalDateConverter  extends TypeConverter implements SimpleValueConverter {

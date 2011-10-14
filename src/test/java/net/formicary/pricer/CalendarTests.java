@@ -1,5 +1,6 @@
 package net.formicary.pricer;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -63,5 +64,10 @@ public class CalendarTests {
     assertTrue(f.startsWith("0.49444444444444"), f);
     double d = manager.getDayCountFraction(new LocalDate(2013, 2, 5), new LocalDate(2013, 8, 5), DayCount.THIRTY_360);
     assertEquals(d, 0.5d);
+  }
+
+  public void fixingDates() {
+    List<LocalDate> dates = Arrays.asList(new LocalDate(2011, 2, 7));
+    assertEquals(manager.getFixingDates("GBLO", dates, -2).get(0), new LocalDate(2011, 2, 3));
   }
 }
