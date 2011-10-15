@@ -15,6 +15,7 @@ public class CashflowGenerator {
   @Inject CurveManager curveManager;
   @Inject CalendarManager calendarManager;
   @Inject TradeStore tradeStore;
+  @Inject RateManager rateManager;
 
   public List<Cashflow> generateCashflows(String id) {
     VanillaSwap swap = tradeStore.getTrade(id);
@@ -32,10 +33,16 @@ public class CashflowGenerator {
     List<LocalDate> fixingDates = calendarManager.getFixingDates(leg.getBusinessCentre(), paymentDates, leg.getFixingDateOffset());
     List<Cashflow> flows = new ArrayList<Cashflow>();
     for(int i = 0; i < paymentDates.size(); i++) {
-        LocalDate start = paymentDates.get(i);
-      if(start.isAfter(valuationDate)) {
+      LocalDate paymentDate = paymentDates.get(i);
+      LocalDate fixingDate = fixingDates.get(i);
+      if(fixingDate.isBefore(valuationDate) && paymentDate.isAfter(valuationDate)) {
+        //known floatig flow
+        double historicRate = rateManager.lookup(leg.getCurrency(), leg.getFloatingRateIndex(), leg.getPeriodMultiplier(), fixingDate);
+        double discountedAmount = calculateDiscountedAmount(valuationDate, paymentDates.get(i-1), paymentDates.get(i), leg, historicRate);
+        flows.add(new Cashflow(discountedAmount, paymentDate));
+      } else if(fixingDate.isAfter(valuationDate)) {
         Cashflow flow = new Cashflow();
-        flow.setDate(start);
+        flow.setDate(paymentDate);
         flows.add(flow);
       }
     }
@@ -49,16 +56,17 @@ public class CashflowGenerator {
     for(int i = 0; i < dates.size(); i++) {
       LocalDate start = dates.get(i);
       if(start.isAfter(valuationDate)) {
-        double dayCountFraction = calendarManager.getDayCountFraction(dates.get(i-1), dates.get(i), fixed.getDayCount());
-        double undiscountedAmount = fixed.getNotional() * fixed.getFixedRate() * dayCountFraction;
-        double discountFactor = curveManager.getDiscountFactor(start, valuationDate, fixed.getCurrency());
-        double discountedAmount = discountFactor * undiscountedAmount;
-        Cashflow flow = new Cashflow();
-        flow.setDate(start);
-        flow.setNpv(discountedAmount);
-        flows.add(flow);
+        double discountedAmount = calculateDiscountedAmount(valuationDate, dates.get(i-1), dates.get(i), fixed, fixed.getFixedRate());
+        flows.add(new Cashflow(discountedAmount, start));
       }
     }
     return flows;
+  }
+
+  private double calculateDiscountedAmount(LocalDate valuationDate, LocalDate periodStart, LocalDate periodEnd, SwapLeg leg, double rate) {
+    double dayCountFraction = calendarManager.getDayCountFraction(periodStart, periodEnd, leg.getDayCount());
+    double undiscountedAmount = leg.getNotional() * rate * dayCountFraction;
+    double discountFactor = curveManager.getDiscountFactor(periodEnd, valuationDate, leg.getCurrency());
+    return discountFactor * undiscountedAmount;
   }
 }
