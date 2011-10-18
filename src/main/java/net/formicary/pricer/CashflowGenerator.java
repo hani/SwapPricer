@@ -32,15 +32,16 @@ public class CashflowGenerator {
       leg.getEndDate(), leg.getBusinessDayConventions(), leg.getPeriodMultiplier());
     List<LocalDate> fixingDates = calendarManager.getFixingDates(leg.getBusinessCentre(), paymentDates, leg.getFixingDateOffset());
     List<Cashflow> flows = new ArrayList<Cashflow>();
-    for(int i = 0; i < paymentDates.size(); i++) {
+    for(int i = 1; i < paymentDates.size(); i++) {
       LocalDate paymentDate = paymentDates.get(i);
-      LocalDate fixingDate = fixingDates.get(i);
+      LocalDate fixingDate = fixingDates.get(i -1);
       if(fixingDate.isBefore(valuationDate) && paymentDate.isAfter(valuationDate)) {
         //known floatig flow
-        double historicRate = rateManager.lookup(leg.getCurrency(), leg.getFloatingRateIndex(), leg.getPeriodMultiplier(), fixingDate);
-        double discountedAmount = calculateDiscountedAmount(valuationDate, paymentDates.get(i-1), paymentDates.get(i), leg, historicRate);
+        double historicRate = rateManager.getDiscountFactor(leg.getCurrency(), leg.getPeriodMultiplier(), fixingDate, valuationDate);
+        double discountedAmount = calculateDiscountedAmount(valuationDate, paymentDates.get(i-1), paymentDate, leg, historicRate);
         flows.add(new Cashflow(discountedAmount, paymentDate));
       } else if(fixingDate.isAfter(valuationDate)) {
+        //future flows
         Cashflow flow = new Cashflow();
         flow.setDate(paymentDate);
         flows.add(flow);
@@ -53,7 +54,7 @@ public class CashflowGenerator {
     List<LocalDate> dates = calendarManager.getAdjustedDates(fixed.getBusinessCentre(), fixed.getStartDate(),
       fixed.getEndDate(), fixed.getBusinessDayConventions(), fixed.getPeriodMultiplier());
     List<Cashflow> flows = new ArrayList<Cashflow>();
-    for(int i = 0; i < dates.size(); i++) {
+    for(int i = 1; i < dates.size(); i++) {
       LocalDate start = dates.get(i);
       if(start.isAfter(valuationDate)) {
         double discountedAmount = calculateDiscountedAmount(valuationDate, dates.get(i-1), dates.get(i), fixed, fixed.getFixedRate());
