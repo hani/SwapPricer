@@ -6,6 +6,7 @@ import com.google.code.morphia.Datastore;
 import com.google.code.morphia.query.Query;
 import net.formicary.pricer.RateManager;
 import net.formicary.pricer.model.Index;
+import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
 /**
@@ -17,10 +18,9 @@ public class RateManagerImpl implements RateManager {
   @Inject Datastore ds;
 
   @Override
-  public double lookup(String currency, String indexName, String tenor, LocalDate date) {
+  public double getZeroRate(String currency, String tenor, LocalDate date) {
     Query<Index> query = ds.createQuery(Index.class);
     query.field("currency").equal(currency);
-    query.field("name").equal(indexName);
     query.field("tenorUnit").equal(tenor.substring(0, tenor.length() - 1));
     query.field("tenorPeriod").equal(tenor.substring(tenor.length() - 1));
     query.field("fixingDate").equal(date);
@@ -29,5 +29,12 @@ public class RateManagerImpl implements RateManager {
       throw new IllegalArgumentException("No rate for specified criteria");
     }
     return i.getRate();
+  }
+
+  @Override
+  public double getDiscountFactor(String currency, String tenorPeriod, LocalDate date, LocalDate valuationDate) {
+    double zero = getZeroRate(currency, tenorPeriod, date);
+    double days = Days.daysBetween(date, valuationDate).getDays();
+    return Math.exp(zero * -(days) / 365d);
   }
 }

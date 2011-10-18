@@ -24,12 +24,12 @@ public class RateTests {
   }
 
   public void lookupRate() {
-    double rate = manager.lookup("USD", "LIBOR", "1M", new LocalDate(2010, 4, 27));
+    double rate = manager.getZeroRate("USD", "1M", new LocalDate(2010, 4, 27));
     assertEquals(rate, 0.26672);
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)
   public void lookupNonExistentRate() {
-    manager.lookup("xxx", "LIBOR", "1M", new LocalDate(2010, 4, 27));
+    manager.getZeroRate("xxx", "1M", new LocalDate(2010, 4, 27));
   }
 }

@@ -8,5 +8,6 @@ import org.joda.time.LocalDate;
  *         Time: 5:28 PM
  */
 public interface RateManager {
-  double lookup(String currency, String indexName, String tenorPeriod, LocalDate date);
+  double getZeroRate(String currency, String tenorPeriod, LocalDate date);
+  double getDiscountFactor(String currency, String tenorPeriod, LocalDate date, LocalDate valuationDate);
 }
