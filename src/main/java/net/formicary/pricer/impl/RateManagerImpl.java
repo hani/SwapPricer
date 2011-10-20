@@ -26,7 +26,7 @@ public class RateManagerImpl implements RateManager {
     query.field("fixingDate").equal(date);
     Index i = query.get();
     if(i == null) {
-      throw new IllegalArgumentException("No rate for specified criteria");
+      throw new IllegalArgumentException("No rate found for " + currency + " " + tenor + " on " + date);
     }
     return i.getRate();
   }

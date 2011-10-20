@@ -31,15 +31,15 @@ public class CalendarTests {
   }
 
   public void weekend() {
-    assertEquals(manager.getAdjustedDate("USNY", new LocalDate(2011, 8, 13), BusinessDayConvention.FOLLOWING), new LocalDate(2011, 8, 15));
+    assertEquals(manager.getAdjustedDate(new LocalDate(2011, 8, 13), BusinessDayConvention.FOLLOWING, "USNY"), new LocalDate(2011, 8, 15));
   }
 
   public void holiday() {
-    assertEquals(manager.getAdjustedDate("GBLO", new LocalDate(2010, 12, 27), BusinessDayConvention.FOLLOWING), new LocalDate(2010, 12, 29));
+    assertEquals(manager.getAdjustedDate(new LocalDate(2010, 12, 27), BusinessDayConvention.FOLLOWING, "GBLO"), new LocalDate(2010, 12, 29));
   }
 
   public void notHoliday() {
-    assertEquals(manager.getAdjustedDate("GBLO", new LocalDate(2011, 8, 10), BusinessDayConvention.MODFOLLOWING), new LocalDate(2011, 8, 10));
+    assertEquals(manager.getAdjustedDate(new LocalDate(2011, 8, 10), BusinessDayConvention.MODFOLLOWING, "GBLO"), new LocalDate(2011, 8, 10));
   }
 
   public void dayCountFractionAct360() {
@@ -47,11 +47,15 @@ public class CalendarTests {
     assertTrue(f.startsWith("0.24166666"), f);
   }
 
+  public void multipleCalendars() {
+    assertEquals(manager.getAdjustedDate(new LocalDate(2011, 5, 30), BusinessDayConvention.PRECEDING, "GBLO", "USNY"), new LocalDate(2011, 5, 27));
+  }
+
   public void paymentDates() {
     LocalDate start = new LocalDate(2011, 2, 5);
     LocalDate end = new LocalDate(2012, 2, 5);
     BusinessDayConvention[] conventions = new BusinessDayConvention[]{BusinessDayConvention.MODFOLLOWING, BusinessDayConvention.MODFOLLOWING, BusinessDayConvention.MODFOLLOWING};
-    List<LocalDate> dates = manager.getAdjustedDates("GBLO", start, end, conventions, "3M");
+    List<LocalDate> dates = manager.getAdjustedDates(start, end, conventions, "3M", "GBLO");
     Iterator<LocalDate> i = dates.iterator();
     assertEquals(i.next(), new LocalDate(2011, 2, 7));
     assertEquals(i.next(), new LocalDate(2011, 5, 5));
@@ -68,6 +72,6 @@ public class CalendarTests {
 
   public void fixingDates() {
     List<LocalDate> dates = Arrays.asList(new LocalDate(2011, 2, 7));
-    assertEquals(manager.getFixingDates("GBLO", dates, -2).get(0), new LocalDate(2011, 2, 3));
+    assertEquals(manager.getFixingDates(dates, -2, "GBLO").get(0), new LocalDate(2011, 2, 3));
   }
 }

@@ -28,9 +28,8 @@ public class CashflowGenerator {
   }
 
   private List<Cashflow> generateFloatingFlows(LocalDate valuationDate, FloatingLeg leg) {
-    List<LocalDate> paymentDates = calendarManager.getAdjustedDates(leg.getBusinessCentre(), leg.getStartDate(),
-      leg.getEndDate(), leg.getBusinessDayConventions(), leg.getPeriodMultiplier());
-    List<LocalDate> fixingDates = calendarManager.getFixingDates(leg.getBusinessCentre(), paymentDates, leg.getFixingDateOffset());
+    List<LocalDate> paymentDates = calendarManager.getAdjustedDates(leg.getStartDate(), leg.getEndDate(), leg.getBusinessDayConventions(), leg.getPeriodMultiplier(), leg.getBusinessCentre());
+    List<LocalDate> fixingDates = calendarManager.getFixingDates(paymentDates, leg.getFixingDateOffset(), leg.getBusinessCentre());
     List<Cashflow> flows = new ArrayList<Cashflow>();
     for(int i = 1; i < paymentDates.size(); i++) {
       LocalDate paymentDate = paymentDates.get(i);
@@ -51,8 +50,7 @@ public class CashflowGenerator {
   }
 
   private List<Cashflow> generateFixedFlows(LocalDate valuationDate, FixedLeg fixed) {
-    List<LocalDate> dates = calendarManager.getAdjustedDates(fixed.getBusinessCentre(), fixed.getStartDate(),
-      fixed.getEndDate(), fixed.getBusinessDayConventions(), fixed.getPeriodMultiplier());
+    List<LocalDate> dates = calendarManager.getAdjustedDates(fixed.getStartDate(), fixed.getEndDate(), fixed.getBusinessDayConventions(), fixed.getPeriodMultiplier(), fixed.getBusinessCentre());
     List<Cashflow> flows = new ArrayList<Cashflow>();
     for(int i = 1; i < dates.size(); i++) {
       LocalDate start = dates.get(i);
