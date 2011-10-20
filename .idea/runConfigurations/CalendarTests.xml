@@ -7,7 +7,7 @@
     <option name="SUITE_NAME" value="" />
     <option name="PACKAGE_NAME" value="net.formicary.pricer" />
     <option name="MAIN_CLASS_NAME" value="net.formicary.pricer.CalendarTests" />
-    <option name="METHOD_NAME" />
+    <option name="METHOD_NAME" value="multipleCalendars" />
     <option name="GROUP_NAME" value="" />
     <option name="TEST_OBJECT" value="CLASS" />
     <option name="VM_PARAMETERS" value="" />

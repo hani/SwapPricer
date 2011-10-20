@@ -65,7 +65,8 @@ public class CashflowGenerator {
   private double calculateDiscountedAmount(LocalDate valuationDate, LocalDate periodStart, LocalDate periodEnd, SwapLeg leg, double rate) {
     double dayCountFraction = calendarManager.getDayCountFraction(periodStart, periodEnd, leg.getDayCount());
     double undiscountedAmount = leg.getNotional() * rate * dayCountFraction;
-    double discountFactor = curveManager.getDiscountFactor(periodEnd, valuationDate, leg.getCurrency());
+    String tenor = leg instanceof FixedLeg ? "OIS" : leg.getPeriodMultiplier();
+    double discountFactor = curveManager.getDiscountFactor(periodEnd, valuationDate, leg.getCurrency(), tenor);
     return discountFactor * undiscountedAmount;
   }
 }

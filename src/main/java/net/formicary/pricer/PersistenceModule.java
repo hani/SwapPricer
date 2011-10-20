@@ -23,10 +23,13 @@ import org.joda.time.format.DateTimeFormatter;
  *         Time: 8:02 AM
  */
 public class PersistenceModule extends AbstractModule {
+  static {
+    MorphiaLoggerFactory.registerLogger(SLF4JLogrImplFactory.class);
+  }
+
   @Override
   protected void configure() {
     try {
-      MorphiaLoggerFactory.registerLogger(SLF4JLogrImplFactory.class);
       Morphia morphia = new Morphia();
       morphia.getMapper().getConverters().addConverter(new LocalDateConverter());
       bind(Datastore.class).toInstance(morphia.createDatastore(new Mongo(), "swappricer"));

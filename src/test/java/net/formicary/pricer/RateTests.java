@@ -24,8 +24,8 @@ public class RateTests {
   }
 
   public void lookupRate() {
-    double rate = manager.getZeroRate("USD", "1M", new LocalDate(2010, 4, 27));
-    assertEquals(rate, 0.26672);
+    double rate = manager.getZeroRate("USD", "3M", new LocalDate(2011, 5, 3));
+    assertEquals(rate, 0.27225);
   }
 
   @Test(expectedExceptions = IllegalArgumentException.class)

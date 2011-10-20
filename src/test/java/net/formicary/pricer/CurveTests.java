@@ -38,7 +38,7 @@ public class CurveTests {
   }
 
   public void calculateDiscountFactor() {
-    double df = manager.getDiscountFactor(new LocalDate(2011, 8, 5), new LocalDate(2011, 5, 25), "USD");
+    double df = manager.getDiscountFactor(new LocalDate(2011, 8, 5), new LocalDate(2011, 5, 25), "USD", "OIS");
     assertTrue(Double.toString(df).startsWith("0.9998000"), Double.toString(df));
   }
 }

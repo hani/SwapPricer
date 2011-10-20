@@ -11,5 +11,5 @@ public interface CurveManager {
   public String getForwardCurve(String ccy, String tenor);
   public String getDiscountCurve(String cc, String tenor);
   double getInterpolatedForwardRate(LocalDate date, String ccy, String tenor);
-  double getDiscountFactor(LocalDate flowDate, LocalDate valuationDate, String ccy);
+  double getDiscountFactor(LocalDate flowDate, LocalDate valuationDate, String ccy, String tenor);
 }
