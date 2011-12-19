@@ -17,7 +17,7 @@ public class SwapLeg {
   private LocalDate endDate;
   private String periodMultiplier;
   private int rollConvention;
-  private int notional;
+  private double notional;
   private DayCount dayCount;
   private String[] businessCentre;
   private String currency;
@@ -106,11 +106,11 @@ public class SwapLeg {
     this.rollConvention = rollConvention;
   }
 
-  public int getNotional() {
+  public double getNotional() {
     return notional;
   }
 
-  public void setNotional(int notional) {
+  public void setNotional(double notional) {
     this.notional = notional;
   }
 
