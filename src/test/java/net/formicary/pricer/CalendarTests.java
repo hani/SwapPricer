@@ -1,9 +1,5 @@
 package net.formicary.pricer;
 
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import net.formicary.pricer.model.BusinessDayConvention;
@@ -12,7 +8,12 @@ import org.joda.time.LocalDate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author hani
