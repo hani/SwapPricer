@@ -62,4 +62,15 @@ public class CurvePillarPoint {
   public void setDiscountFactor(double discountFactor) {
     this.discountFactor = discountFactor;
   }
+
+  @Override
+  public String toString() {
+    return "CurvePillarPoint{" +
+        "maturityDate=" + maturityDate +
+        ", zeroRate=" + zeroRate +
+        ", discountFactor=" + discountFactor +
+        ", accrualFactor=" + accrualFactor +
+        ", curveName='" + curveName + '\'' +
+        '}';
+  }
 }

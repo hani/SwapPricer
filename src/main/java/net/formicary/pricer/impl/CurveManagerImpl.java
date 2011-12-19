@@ -79,18 +79,22 @@ public class CurveManagerImpl implements CurveManager {
   public double getDiscountFactor(LocalDate flowDate, LocalDate valuationDate, String ccy, String tenor) {
     //LCH uses OIS rate for futured fixed flows
     //we thus have a hack that says if tenor is not OIS (which we enforce for fixed flows) then use discount curve (for floats)
-    double interpolatedZeroRate = getInterpolatedRate(flowDate, ccy, tenor, "OIS".equals(tenor));
+    double interpolatedZeroRate = getInterpolatedRate(flowDate, ccy, tenor);
     double days = Days.daysBetween(valuationDate, flowDate).getDays();
     return Math.exp(interpolatedZeroRate * -(days) / 365d);
   }
 
   @Override
-  public double getInterpolatedRate(LocalDate date, String ccy, String tenor, boolean useForwardCurve) {
-    String curve = useForwardCurve ? getForwardCurve(ccy, tenor) : getDiscountCurve(ccy, tenor);
+  public double getInterpolatedRate(LocalDate date, String ccy, String tenor) {
+    String curve = getForwardCurve(ccy, tenor);
     List<CurvePillarPoint> points = curveData.get(curve);
     for(int i = 0; i < points.size(); i++) {
       if(points.get(i).getMaturityDate().isAfter(date)) {
         //we have our two dates, since we know the pillar list is sorted by ascending dates
+        if(i == 0) {
+          //its the first rate we have, so we just use that since there's nothing before to interpolate with
+          return points.get(i).getZeroRate();
+        }
         CurvePillarPoint start = points.get(i - 1);
         CurvePillarPoint end = points.get(i);
         double daysFromStartToNow = Days.daysBetween(start.getMaturityDate(), date).getDays();
