@@ -19,7 +19,7 @@ public class SwapLeg {
   private int rollConvention;
   private int notional;
   private DayCount dayCount;
-  private String businessCentre;
+  private String[] businessCentre;
   private String currency;
 
   public BusinessDayConvention[] getBusinessDayConventions() {
@@ -34,11 +34,11 @@ public class SwapLeg {
     this.periodBusinessDatConvention = periodBusinessDatConvention;
   }
 
-  public String getBusinessCentre() {
+  public String[] getBusinessCentre() {
     return businessCentre;
   }
 
-  public void setBusinessCentre(String businessCentre) {
+  public void setBusinessCentre(String... businessCentre) {
     this.businessCentre = businessCentre;
   }
 
