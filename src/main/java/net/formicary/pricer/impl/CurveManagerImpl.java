@@ -1,9 +1,5 @@
 package net.formicary.pricer.impl;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-
 import net.formicary.pricer.CurveManager;
 import net.formicary.pricer.model.CurvePillarPoint;
 import org.apache.commons.io.FileUtils;
@@ -12,6 +8,13 @@ import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author hani
@@ -75,14 +78,15 @@ public class CurveManagerImpl implements CurveManager {
   @Override
   public double getDiscountFactor(LocalDate flowDate, LocalDate valuationDate, String ccy, String tenor) {
     //LCH uses OIS rate for futured fixed flows
-    double interpolatedZeroRate = getInterpolatedForwardRate(flowDate, ccy, tenor);
+    //we thus have a hack that says if tenor is not OIS (which we enforce for fixed flows) then use discount curve (for floats)
+    double interpolatedZeroRate = getInterpolatedRate(flowDate, ccy, tenor, "OIS".equals(tenor));
     double days = Days.daysBetween(valuationDate, flowDate).getDays();
     return Math.exp(interpolatedZeroRate * -(days) / 365d);
   }
 
   @Override
-  public double getInterpolatedForwardRate(LocalDate date, String ccy, String tenor) {
-    String curve = getForwardCurve(ccy, tenor);
+  public double getInterpolatedRate(LocalDate date, String ccy, String tenor, boolean useForwardCurve) {
+    String curve = useForwardCurve ? getForwardCurve(ccy, tenor) : getDiscountCurve(ccy, tenor);
     List<CurvePillarPoint> points = curveData.get(curve);
     for(int i = 0; i < points.size(); i++) {
       if(points.get(i).getMaturityDate().isAfter(date)) {

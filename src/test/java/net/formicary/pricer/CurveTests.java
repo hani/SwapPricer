@@ -1,13 +1,14 @@
 package net.formicary.pricer;
 
-import java.io.IOException;
-
 import net.formicary.pricer.impl.CurveManagerImpl;
 import org.joda.time.LocalDate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.*;
+import java.io.IOException;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author hani
@@ -33,7 +34,7 @@ public class CurveTests {
   }
 
   public void calculateDiscountRate() {
-    double rate = manager.getInterpolatedForwardRate(new LocalDate(2011, 8, 5), "USD", "OIS");
+    double rate = manager.getInterpolatedRate(new LocalDate(2011, 8, 5), "USD", "OIS", true);
     assertTrue(Double.toString(rate).startsWith("0.00101388"));
   }
 

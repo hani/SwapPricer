@@ -1,7 +1,5 @@
 package net.formicary.pricer;
 
-import java.util.List;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import net.formicary.pricer.impl.SimpleTradeStore;
@@ -11,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.util.List;
 
 import static org.testng.Assert.assertEquals;
 
@@ -36,42 +36,42 @@ public class CashflowTests {
   public void generateFixedCashflows() {
     long now = System.currentTimeMillis();
     VanillaSwap swap = new VanillaSwap();
-    swap.setId("LCH00004300325");
-    swap.setValuationDate(new LocalDate(2011, 5, 27));
+    swap.setId("LCH00000997564");
+    swap.setValuationDate(new LocalDate(2011, 11, 4));
     store.addTrade(swap);
 
     FixedLeg fixed = new FixedLeg();
     swap.setFixedLeg(fixed);
-    fixed.setNotional(44025206);
-    fixed.setBusinessCentre("GBLO");
+    fixed.setNotional(44482393.66);
+    fixed.setBusinessCentre("DEFR", "EUTA");
     fixed.setDayCount(DayCount.THIRTY_360);
-    fixed.setCurrency("USD");
-    fixed.setFixedRate(0.02417610d);
+    fixed.setCurrency("EUR");
+    fixed.setFixedRate(0.053525);
     fixed.setStartBusinessDatConvention(BusinessDayConvention.NONE);
     fixed.setPeriodBusinessDatConvention(BusinessDayConvention.MODFOLLOWING);
     fixed.setEndBusinessDatConvention(BusinessDayConvention.MODFOLLOWING);
-    fixed.setPeriodMultiplier("6M");
-    fixed.setStartDate(new LocalDate(2009, 2, 5));
-    fixed.setEndDate(new LocalDate(2014, 2, 5));
+    fixed.setPeriodMultiplier("1Y");
+    fixed.setStartDate(new LocalDate(2004, 6, 5));
+    fixed.setEndDate(new LocalDate(2013, 6, 5));
 
     FloatingLeg floating = new FloatingLeg();
     swap.setFloatingLeg(floating);
-    floating.setNotional(44025206);
-    floating.setBusinessCentre("GBLO");
-    floating.setDayCount(DayCount.THIRTY_360);
-    floating.setCurrency("USD");
+    floating.setNotional(44482393.66);
+    floating.setBusinessCentre("EUTA");
+    floating.setDayCount(DayCount.ACT_360);
+    floating.setCurrency("EUR");
     floating.setStartBusinessDatConvention(BusinessDayConvention.NONE);
     floating.setPeriodBusinessDatConvention(BusinessDayConvention.MODFOLLOWING);
     floating.setEndBusinessDatConvention(BusinessDayConvention.MODFOLLOWING);
-    floating.setPeriodMultiplier("3M");
+    floating.setPeriodMultiplier("6M");
     floating.setFloatingRateIndex("USD-LIBOR-BBA");
     floating.setRollConvention(5);
     floating.setFixingRelativeToStart(true);
     floating.setFixingDateOffset(-2);
-    floating.setStartDate(new LocalDate(2009, 2, 5));
-    floating.setEndDate(new LocalDate(2014, 2, 5));
+    floating.setStartDate(new LocalDate(2004, 6, 5));
+    floating.setEndDate(new LocalDate(2013, 6, 5));
 
-    List<Cashflow> flows = generator.generateCashflows("LCH00004300325");
+    List<Cashflow> flows = generator.generateCashflows("LCH00000997564");
     log.info("Time to calculate flows: " + (System.currentTimeMillis() - now) + "ms");
     assertEquals(flows.size(), 6, flows.toString());
   }

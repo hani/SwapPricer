@@ -1,10 +1,12 @@
 package net.formicary.pricer;
 
-import java.util.*;
-import javax.inject.Inject;
-
 import net.formicary.pricer.model.*;
 import org.joda.time.LocalDate;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author hani
@@ -35,15 +37,14 @@ public class CashflowGenerator {
       LocalDate paymentDate = paymentDates.get(i);
       LocalDate fixingDate = fixingDates.get(i -1);
       if(fixingDate.isBefore(valuationDate) && paymentDate.isAfter(valuationDate)) {
-        //known floatig flow
-        double historicRate = rateManager.getDiscountFactor(leg.getCurrency(), leg.getPeriodMultiplier(), fixingDate, valuationDate);
-        double discountedAmount = calculateDiscountedAmount(valuationDate, paymentDates.get(i-1), paymentDate, leg, historicRate);
+        double rate = rateManager.getZeroRate(leg.getCurrency(), leg.getPeriodMultiplier(), fixingDate) / 100;
+        double discountedAmount = calculateDiscountedAmount(valuationDate, paymentDates.get(i-1), paymentDate, leg, rate);
         flows.add(new Cashflow(discountedAmount, paymentDate));
       } else if(fixingDate.isAfter(valuationDate)) {
-        //future flows
-        Cashflow flow = new Cashflow();
-        flow.setDate(paymentDate);
-        flows.add(flow);
+        //future flows, doesn't work yet
+        double discountFactor = curveManager.getDiscountFactor(fixingDate, valuationDate, leg.getCurrency(), leg.getPeriodMultiplier());
+        double discountedAmount = calculateDiscountedAmount(valuationDate, paymentDates.get(i - 1), paymentDate, leg, discountFactor);
+        flows.add(new Cashflow(discountedAmount, paymentDate));
       }
     }
     return flows;
@@ -54,6 +55,7 @@ public class CashflowGenerator {
     List<Cashflow> flows = new ArrayList<Cashflow>();
     for(int i = 1; i < dates.size(); i++) {
       LocalDate start = dates.get(i);
+      //TODO verify that LCH skips the payment thats due in between valuation date and next period start
       if(start.isAfter(valuationDate)) {
         double discountedAmount = calculateDiscountedAmount(valuationDate, dates.get(i-1), dates.get(i), fixed, fixed.getFixedRate());
         flows.add(new Cashflow(discountedAmount, start));
