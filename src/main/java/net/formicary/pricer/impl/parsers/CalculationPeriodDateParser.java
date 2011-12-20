@@ -19,7 +19,7 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
  *         Date: 12/20/11
  *         Time: 11:44 AM
  */
-public class CalculationPeriodDateParser implements NodeParser {
+public class CalculationPeriodDateParser implements NodeParser<CalculationPeriodDates> {
 
   enum Element {
     effectiveDate,

@@ -16,7 +16,7 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
  *         Date: 12/20/11
  *         Time: 1:00 PM
  */
-public class CalculationPeriodAmountParser implements NodeParser {
+public class CalculationPeriodAmountParser implements NodeParser<CalculationPeriodAmount> {
 
   enum Element {
     calculationPeriodAmount,
@@ -39,6 +39,8 @@ public class CalculationPeriodAmountParser implements NodeParser {
   public CalculationPeriodAmount parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
     CalculationPeriodAmount amount = new CalculationPeriodAmount();
 
+    double initialValue = 0;
+
     while (reader.hasNext()) {
       int event = reader.next();
       if (event == START_ELEMENT) {
@@ -53,7 +55,16 @@ public class CalculationPeriodAmountParser implements NodeParser {
             amount.setCurrency(reader.getElementText());
             break;
           case initialValue:
-            amount.setNotional(Double.valueOf(reader.getElementText()));
+            initialValue = Double.valueOf(reader.getElementText());
+            break;
+          case floatingRateIndex:
+            amount.setFloatingRateIndex(reader.getElementText());
+            break;
+          case periodMultiplier:
+            amount.setPeriodMultiplier(Integer.parseInt(reader.getElementText()));
+            break;
+          case period:
+            amount.setPeriod(reader.getElementText());
             break;
         }
       } else if (event == END_ELEMENT) {
@@ -61,6 +72,14 @@ public class CalculationPeriodAmountParser implements NodeParser {
         switch (element) {
           case calculationPeriodAmount:
             return amount;
+          case spreadSchedule:
+            amount.setSpreadSchedule(initialValue);
+            break;
+          case notionalStepSchedule:
+            amount.setNotional(initialValue);
+            break;
+          case fixedRateSchedule:
+            amount.setFixedRate(initialValue);
         }
       }
     }

@@ -2,9 +2,7 @@ package net.formicary.pricer.impl.parsers;
 
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
-import net.formicary.pricer.model.CalculationPeriodAmount;
-import net.formicary.pricer.model.CalculationPeriodDates;
-import net.formicary.pricer.model.SwapStream;
+import net.formicary.pricer.model.*;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -17,7 +15,7 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
  *         Date: 12/20/11
  *         Time: 1:23 PM
  */
-public class SwapStreamParser implements NodeParser {
+public class SwapStreamParser implements NodeParser<SwapStream> {
 
   enum Element {
     swapStream,
@@ -26,11 +24,12 @@ public class SwapStreamParser implements NodeParser {
     calculationPeriodStartDates,
     payerPartyReference,
     receiverPartyReference,
+    calculationPeriodDatesReference,
     calculationPeriodAmount
   }
 
   @Override
-  public Object parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
+  public SwapStream parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
     SwapStream stream = new SwapStream();
     while(reader.hasNext()) {
       int event = reader.next();
@@ -42,7 +41,13 @@ public class SwapStreamParser implements NodeParser {
             stream.setCalculationPeriodAmount((CalculationPeriodAmount)entity);
           } else if(entity instanceof CalculationPeriodDates) {
             stream.setCalculationPeriodDates((CalculationPeriodDates)entity);
+          } else if(entity instanceof PaymentDates) {
+            stream.setPaymentDates((PaymentDates)entity);
+          } else if(entity instanceof ResetDates) {
+            stream.setResetDates((ResetDates)entity);
           }
+        } else {
+          //System.out.println("NO PARSER FOR " + reader.getLocalName());
         }
 
       } else if(event == END_ELEMENT) {

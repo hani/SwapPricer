@@ -8,6 +8,6 @@ import javax.xml.stream.XMLStreamReader;
  *         Date: 12/20/11
  *         Time: 11:39 AM
  */
-public interface NodeParser {
-  public Object parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException;
+public interface NodeParser<T> {
+  T parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException;
 }

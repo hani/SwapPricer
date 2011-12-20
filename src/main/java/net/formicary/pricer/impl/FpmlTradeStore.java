@@ -1,9 +1,7 @@
 package net.formicary.pricer.impl;
 
 import net.formicary.pricer.TradeStore;
-import net.formicary.pricer.impl.parsers.CalculationPeriodAmountParser;
-import net.formicary.pricer.impl.parsers.CalculationPeriodDateParser;
-import net.formicary.pricer.impl.parsers.SwapStreamParser;
+import net.formicary.pricer.impl.parsers.*;
 import net.formicary.pricer.model.VanillaSwap;
 
 import javax.inject.Inject;
@@ -37,6 +35,8 @@ public class FpmlTradeStore implements TradeStore {
     factory = XMLInputFactory.newFactory();
     parsers.put("calculationPeriodDates", new CalculationPeriodDateParser());
     parsers.put("calculationPeriodAmount", new CalculationPeriodAmountParser());
+    parsers.put("resetDates", new ResetDatesParser());
+    parsers.put("paymentDates", new PaymentDatesParser());
     parsers.put("swapStream", new SwapStreamParser());
   }
 
