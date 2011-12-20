@@ -78,14 +78,29 @@ public class CurveManagerImpl implements CurveManager {
   @Override
   public double getDiscountFactor(LocalDate flowDate, LocalDate valuationDate, String ccy, String tenor) {
     //LCH uses OIS rate for futured fixed flows
-    double interpolatedZeroRate = getInterpolatedRate(flowDate, ccy, tenor);
+    double interpolatedZeroRate;
+    if("OIS".equals(tenor)) {
+      interpolatedZeroRate = getInterpolatedForwardRate(flowDate, ccy, tenor);
+    } else {
+      interpolatedZeroRate = getInterpolatedDiscountRate(flowDate, ccy, tenor);
+    }
     double days = Days.daysBetween(valuationDate, flowDate).getDays();
     return Math.exp(interpolatedZeroRate * -(days) / 365d);
   }
 
   @Override
-  public double getInterpolatedRate(LocalDate date, String ccy, String tenor) {
+  public double getInterpolatedForwardRate(LocalDate date, String ccy, String tenor) {
     String curve = getForwardCurve(ccy, tenor);
+    return getInterpolatedRate(date, ccy, curve);
+  }
+
+  @Override
+  public double getInterpolatedDiscountRate(LocalDate date, String ccy, String tenor) {
+    String curve = getDiscountCurve(ccy, tenor);
+    return getInterpolatedRate(date, ccy, curve);
+  }
+
+  public double getInterpolatedRate(LocalDate date, String ccy, String curve) {
     List<CurvePillarPoint> points = curveData.get(curve);
     for(int i = 0; i < points.size(); i++) {
       if(points.get(i).getMaturityDate().isAfter(date)) {
@@ -106,10 +121,10 @@ public class CurveManagerImpl implements CurveManager {
 
   @Override
   public double getImpliedForwardRate(LocalDate start, LocalDate end, LocalDate valuationDate, String ccy, String tenor) {
-    double startRate = getInterpolatedRate(start, ccy, tenor);
+    double startRate = getInterpolatedForwardRate(start, ccy, tenor);
     //get the start discount factor
     double startDf = Math.exp(startRate * -(Days.daysBetween(valuationDate, start).getDays()) / 365d);
-    double endRate = getInterpolatedRate(end, ccy, tenor);
+    double endRate = getInterpolatedForwardRate(end, ccy, tenor);
     double endDf = Math.exp(endRate * - (Days.daysBetween(valuationDate, end).getDays())/ 365d);
     double forwardRate = ((startDf/endDf) - 1) * (360d/Days.daysBetween(start, end).getDays());
     return forwardRate;
