@@ -44,7 +44,7 @@ public class CashflowTests {
     swap.setFixedLeg(fixed);
     fixed.setNotional(44482393.66);
     fixed.setBusinessCentre("DEFR", "EUTA");
-    fixed.setDayCount(DayCount.THIRTY_360);
+    fixed.setDayCountFraction(DayCountFraction.THIRTY_360);
     fixed.setCurrency("EUR");
     fixed.setFixedRate(0.053525);
     fixed.setStartBusinessDatConvention(BusinessDayConvention.NONE);
@@ -58,7 +58,7 @@ public class CashflowTests {
     swap.setFloatingLeg(floating);
     floating.setNotional(44482393.66);
     floating.setBusinessCentre("EUTA");
-    floating.setDayCount(DayCount.ACT_360);
+    floating.setDayCountFraction(DayCountFraction.ACT_360);
     floating.setCurrency("EUR");
     floating.setStartBusinessDatConvention(BusinessDayConvention.NONE);
     floating.setPeriodBusinessDatConvention(BusinessDayConvention.MODFOLLOWING);

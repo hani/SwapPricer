@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import net.formicary.pricer.model.BusinessDayConvention;
 import net.formicary.pricer.CalendarManager;
-import net.formicary.pricer.model.DayCount;
+import net.formicary.pricer.model.DayCountFraction;
 import net.objectlab.kit.datecalc.common.HolidayHandlerType;
 import net.objectlab.kit.datecalc.joda.LocalDateCalculator;
 import net.objectlab.kit.datecalc.joda.LocalDateKitCalculatorsFactory;
@@ -23,8 +23,8 @@ public class CalendarManagerImpl implements CalendarManager {
   private LocalDateKitCalculatorsFactory factory;
 
   @Override
-  public double getDayCountFraction(LocalDate start, LocalDate end, DayCount dayCount) {
-    switch(dayCount) {
+  public double getDayCountFraction(LocalDate start, LocalDate end, DayCountFraction dayCountFraction) {
+    switch(dayCountFraction) {
       case THIRTY_360:
         return ((360d * (end.getYear() - start.getYear())) + (30d * (end.getMonthOfYear() - start.getMonthOfYear())) + (end.getDayOfMonth() - start.getDayOfMonth())) / 360d;
       case ACT_360:
@@ -32,7 +32,7 @@ public class CalendarManagerImpl implements CalendarManager {
       case ACT_365:
         return Days.daysBetween(start, end).getDays() / 365d;
       default:
-        throw new UnsupportedOperationException("DayCount " + dayCount + " is not supported");
+        throw new UnsupportedOperationException("DayCountFraction " + dayCountFraction + " is not supported");
     }
   }
 

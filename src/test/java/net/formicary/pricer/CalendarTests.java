@@ -3,7 +3,7 @@ package net.formicary.pricer;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import net.formicary.pricer.model.BusinessDayConvention;
-import net.formicary.pricer.model.DayCount;
+import net.formicary.pricer.model.DayCountFraction;
 import org.joda.time.LocalDate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -44,7 +44,7 @@ public class CalendarTests {
   }
 
   public void dayCountFractionAct360() {
-    String f = Double.toString(manager.getDayCountFraction(new LocalDate(2011, 2, 7), new LocalDate(2011, 5, 5), DayCount.ACT_360));
+    String f = Double.toString(manager.getDayCountFraction(new LocalDate(2011, 2, 7), new LocalDate(2011, 5, 5), DayCountFraction.ACT_360));
     assertTrue(f.startsWith("0.24166666"), f);
   }
 
@@ -65,9 +65,9 @@ public class CalendarTests {
   }
 
   public void dayCountFractionThirty360() {
-    String f = Double.toString(manager.getDayCountFraction(new LocalDate(2011, 2, 7), new LocalDate(2011, 8, 5), DayCount.THIRTY_360));
+    String f = Double.toString(manager.getDayCountFraction(new LocalDate(2011, 2, 7), new LocalDate(2011, 8, 5), DayCountFraction.THIRTY_360));
     assertTrue(f.startsWith("0.49444444444444"), f);
-    double d = manager.getDayCountFraction(new LocalDate(2013, 2, 5), new LocalDate(2013, 8, 5), DayCount.THIRTY_360);
+    double d = manager.getDayCountFraction(new LocalDate(2013, 2, 5), new LocalDate(2013, 8, 5), DayCountFraction.THIRTY_360);
     assertEquals(d, 0.5d);
   }
 

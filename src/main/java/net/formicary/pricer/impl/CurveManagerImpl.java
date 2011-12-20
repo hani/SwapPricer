@@ -22,7 +22,8 @@ import java.util.Map;
  *         Time: 10:36 AM
  */
 public class CurveManagerImpl implements CurveManager {
-  public static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("dd/MM/yyyy");
+  //this is ok since we only use it when reading in the curve data, so no multithreaded access
+  private static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("dd/MM/yyyy");
   //a map of currency -> (tenor -> forward,discount) curves
   private Map<String, Map<String, String[]>> mapping = new HashMap<String, Map<String, String[]>>();
   //a map of curve -> list of pillar points

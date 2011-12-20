@@ -18,7 +18,7 @@ public class SwapLeg {
   private String periodMultiplier;
   private int rollConvention;
   private double notional;
-  private DayCount dayCount;
+  private DayCountFraction dayCountFraction;
   private String[] businessCentre;
   private String currency;
 
@@ -114,12 +114,12 @@ public class SwapLeg {
     this.notional = notional;
   }
 
-  public DayCount getDayCount() {
-    return dayCount;
+  public DayCountFraction getDayCountFraction() {
+    return dayCountFraction;
   }
 
-  public void setDayCount(DayCount dayCount) {
-    this.dayCount = dayCount;
+  public void setDayCountFraction(DayCountFraction dayCountFraction) {
+    this.dayCountFraction = dayCountFraction;
   }
 
   public String getCurrency() {
