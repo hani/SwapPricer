@@ -10,11 +10,14 @@ import java.util.List;
  */
 public class PaymentDates {
   private CalculationPeriodDates calculationPeriodDates;
-  private int periodMultiplier;
-  private String period;
+  private int paymentFrequencyPeriodMultiplier;
+  private String paymentFrequencyPeriod;
+  private int paymentDaysOffsetPeriodMultiplier;
+  private String paymentDaysOffsetPeriod;
   private BusinessDayConvention businessDayConvention;
   private List<String> businessCenters = new ArrayList<String>();
   private PayRelativeTo payRelativeTo;
+  private DayType dayType;
 
   public CalculationPeriodDates getCalculationPeriodDates() {
     return calculationPeriodDates;
@@ -24,20 +27,20 @@ public class PaymentDates {
     this.calculationPeriodDates = calculationPeriodDates;
   }
 
-  public int getPeriodMultiplier() {
-    return periodMultiplier;
+  public int getPaymentFrequencyPeriodMultiplier() {
+    return paymentFrequencyPeriodMultiplier;
   }
 
-  public void setPeriodMultiplier(int periodMultiplier) {
-    this.periodMultiplier = periodMultiplier;
+  public void setPaymentFrequencyPeriodMultiplier(int periodMultiplier) {
+    this.paymentFrequencyPeriodMultiplier = periodMultiplier;
   }
 
-  public String getPeriod() {
-    return period;
+  public String getPaymentFrequencyPeriod() {
+    return paymentFrequencyPeriod;
   }
 
-  public void setPeriod(String period) {
-    this.period = period;
+  public void setPaymentFrequencyPeriod(String paymentFrequencyPeriod) {
+    this.paymentFrequencyPeriod = paymentFrequencyPeriod;
   }
 
   public BusinessDayConvention getBusinessDayConvention() {
@@ -57,7 +60,7 @@ public class PaymentDates {
   }
 
   public String getPaymentFrequency() {
-    return periodMultiplier + period;
+    return paymentFrequencyPeriodMultiplier + paymentFrequencyPeriod;
   }
 
   public void setPayRelativeTo(PayRelativeTo payRelativeTo) {
@@ -66,5 +69,29 @@ public class PaymentDates {
 
   public PayRelativeTo getPayRelativeTo() {
     return payRelativeTo;
+  }
+
+  public int getPaymentDaysOffsetPeriodMultiplier() {
+    return paymentDaysOffsetPeriodMultiplier;
+  }
+
+  public void setPaymentDaysOffsetPeriodMultiplier(int paymentDaysOffsetPeriodMultiplier) {
+    this.paymentDaysOffsetPeriodMultiplier = paymentDaysOffsetPeriodMultiplier;
+  }
+
+  public String getPaymentDaysOffsetPeriod() {
+    return paymentDaysOffsetPeriod;
+  }
+
+  public void setPaymentDaysOffsetPeriod(String paymentDaysOffsetPeriod) {
+    this.paymentDaysOffsetPeriod = paymentDaysOffsetPeriod;
+  }
+
+  public DayType getDayType() {
+    return dayType;
+  }
+
+  public void setDayType(DayType dayType) {
+    this.dayType = dayType;
   }
 }

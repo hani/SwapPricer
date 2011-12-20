@@ -3,6 +3,7 @@ package net.formicary.pricer.impl.parsers;
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
 import net.formicary.pricer.model.CalculationPeriodAmount;
+import net.formicary.pricer.model.CompoundingMethod;
 import net.formicary.pricer.model.DayCountFraction;
 
 import javax.xml.stream.XMLStreamException;
@@ -32,7 +33,8 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
     period,
     spreadschedule,
     daycountfraction,
-    fixedrateschedule
+    fixedrateschedule,
+    compoundingmethod
   }
 
   @Override
@@ -65,6 +67,9 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
             break;
           case period:
             amount.setPeriod(reader.getElementText());
+            break;
+          case compoundingmethod:
+            amount.setCompoundingMethod(CompoundingMethod.valueOf(reader.getElementText()));
             break;
         }
       } else if (event == END_ELEMENT) {

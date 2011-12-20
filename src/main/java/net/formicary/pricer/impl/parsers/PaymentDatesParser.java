@@ -3,6 +3,7 @@ package net.formicary.pricer.impl.parsers;
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
 import net.formicary.pricer.model.BusinessDayConvention;
+import net.formicary.pricer.model.DayType;
 import net.formicary.pricer.model.PayRelativeTo;
 import net.formicary.pricer.model.PaymentDates;
 
@@ -29,22 +30,26 @@ public class PaymentDatesParser implements NodeParser<PaymentDates> {
     businessdayconvention,
     businesscentersreference,
     businesscenters,
-    businesscenter
+    businesscenter,
+    paymentdaysoffset,
+    daytype
   }
 
   @Override
   public PaymentDates parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
     PaymentDates dates = new PaymentDates();
+    int periodMultiplier = 0;
+    String period = null;
     while(reader.hasNext()) {
       int event = reader.next();
       if(event == START_ELEMENT) {
         Element element = Element.valueOf(reader.getLocalName().toLowerCase());
         switch(element) {
           case periodmultiplier:
-            dates.setPeriodMultiplier(Integer.parseInt(reader.getElementText()));
+            periodMultiplier = Integer.parseInt(reader.getElementText());
             break;
           case period :
-            dates.setPeriod(reader.getElementText());
+            period = reader.getElementText();
             break;
           case businessdayconvention:
             dates.setBusinessDayConvention(BusinessDayConvention.valueOf(reader.getElementText()));
@@ -62,10 +67,22 @@ public class PaymentDatesParser implements NodeParser<PaymentDates> {
             break;
           case payrelativeto:
             dates.setPayRelativeTo(PayRelativeTo.valueOf(reader.getElementText()));
+            break;
+          case daytype:
+            dates.setDayType(DayType.valueOf(reader.getElementText()));
+            break;
         }
       } else if(event == END_ELEMENT) {
         Element element = Element.valueOf(reader.getLocalName().toLowerCase());
         switch(element) {
+          case paymentfrequency:
+            dates.setPaymentFrequencyPeriodMultiplier(periodMultiplier);
+            dates.setPaymentFrequencyPeriod(period);
+            break;
+          case paymentdaysoffset:
+            dates.setPaymentDaysOffsetPeriodMultiplier(periodMultiplier);
+            dates.setPaymentDaysOffsetPeriod(period);
+            break;
           case paymentdates:
             return dates;
         }

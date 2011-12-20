@@ -81,7 +81,7 @@ public class CalculationPeriodDateParser implements NodeParser<CalculationPeriod
             dates.setPeriodMultiplier(Integer.parseInt(reader.getElementText()));
             break;
           case rollconvention:
-            dates.setRollConvention(Integer.parseInt(reader.getElementText()));
+            dates.setRollConvention(reader.getElementText());
             break;
           case businessdayconvention:
             BusinessDayConvention convention = BusinessDayConvention.valueOf(reader.getElementText());

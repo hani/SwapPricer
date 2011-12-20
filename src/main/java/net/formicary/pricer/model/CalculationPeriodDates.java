@@ -18,7 +18,7 @@ public class CalculationPeriodDates {
   private List<String> periodBusinessCenters = new ArrayList<String>();
   private int periodMultiplier;
   private String period;
-  private int rollConvention;
+  private String rollConvention;
   private LocalDate firstRegularPeriodStartDate;
 
   public PeriodDate getEffectiveDate() {
@@ -69,11 +69,11 @@ public class CalculationPeriodDates {
     this.period = period;
   }
 
-  public int getRollConvention() {
+  public String getRollConvention() {
     return rollConvention;
   }
 
-  public void setRollConvention(int i) {
+  public void setRollConvention(String i) {
     this.rollConvention = i;
   }
 

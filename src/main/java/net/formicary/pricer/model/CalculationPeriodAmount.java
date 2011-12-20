@@ -14,6 +14,7 @@ public class CalculationPeriodAmount {
   private String floatingRateIndex;
   private int periodMultiplier;
   private String period;
+  private CompoundingMethod compoundingMethod;
 
   public double getNotional() {
     return notional;
@@ -77,5 +78,13 @@ public class CalculationPeriodAmount {
 
   public String getPeriod() {
     return period;
+  }
+
+  public CompoundingMethod getCompoundingMethod() {
+    return compoundingMethod;
+  }
+
+  public void setCompoundingMethod(CompoundingMethod compoundingMethod) {
+    this.compoundingMethod = compoundingMethod;
   }
 }
