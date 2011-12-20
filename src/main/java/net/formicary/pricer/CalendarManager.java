@@ -3,7 +3,7 @@ package net.formicary.pricer;
 import java.util.List;
 
 import net.formicary.pricer.model.BusinessDayConvention;
-import net.formicary.pricer.model.DayCount;
+import net.formicary.pricer.model.DayCountFraction;
 import org.joda.time.LocalDate;
 
 /**
@@ -18,7 +18,7 @@ public interface CalendarManager {
    * by the calculation period convention, and finally the termination date convention
    */
   List<LocalDate> getAdjustedDates(LocalDate start, LocalDate end, BusinessDayConvention[] conventions, String multiplier, String... businessCentre);
-  double getDayCountFraction(LocalDate start, LocalDate end, DayCount dayCount);
+  double getDayCountFraction(LocalDate start, LocalDate end, DayCountFraction dayCountFraction);
 
   List<LocalDate> adjustDates(List<LocalDate> dates, BusinessDayConvention conventions[], String... businessCentre);
 
