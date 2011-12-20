@@ -34,17 +34,18 @@ public class CashflowGenerator {
     List<LocalDate> fixingDates = calendarManager.getFixingDates(paymentDates, leg.getFixingDateOffset(), leg.getBusinessCentre());
     List<Cashflow> flows = new ArrayList<Cashflow>();
     for(int i = 1; i < paymentDates.size(); i++) {
-      LocalDate paymentDate = paymentDates.get(i);
+      LocalDate periodEndDate = paymentDates.get(i);
+      LocalDate periodStartDate = paymentDates.get(i - 1);
       LocalDate fixingDate = fixingDates.get(i -1);
-      if(fixingDate.isBefore(valuationDate) && paymentDate.isAfter(valuationDate)) {
+      if(fixingDate.isBefore(valuationDate) && periodEndDate.isAfter(valuationDate)) {
         double rate = rateManager.getZeroRate(leg.getCurrency(), leg.getPeriodMultiplier(), fixingDate) / 100;
-        double discountedAmount = calculateDiscountedAmount(valuationDate, paymentDates.get(i-1), paymentDate, leg, rate);
-        flows.add(new Cashflow(discountedAmount, paymentDate));
+        double discountedAmount = calculateDiscountedAmount(valuationDate, periodStartDate, periodEndDate, leg, rate);
+        flows.add(new Cashflow(discountedAmount, periodEndDate));
       } else if(fixingDate.isAfter(valuationDate)) {
         //future flows, doesn't work yet
-        double discountFactor = curveManager.getDiscountFactor(fixingDate, valuationDate, leg.getCurrency(), leg.getPeriodMultiplier());
-        double discountedAmount = calculateDiscountedAmount(valuationDate, paymentDates.get(i - 1), paymentDate, leg, discountFactor);
-        flows.add(new Cashflow(discountedAmount, paymentDate));
+        double impliedForwardRate = curveManager.getImpliedForwardRate(periodStartDate, periodEndDate, valuationDate, leg.getCurrency(), leg.getPeriodMultiplier());
+        double discountedAmount = calculateDiscountedAmount(valuationDate, paymentDates.get(i - 1), periodEndDate, leg, impliedForwardRate);
+        flows.add(new Cashflow(discountedAmount, periodEndDate));
       }
     }
     return flows;

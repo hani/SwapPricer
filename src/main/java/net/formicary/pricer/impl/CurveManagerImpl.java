@@ -78,7 +78,6 @@ public class CurveManagerImpl implements CurveManager {
   @Override
   public double getDiscountFactor(LocalDate flowDate, LocalDate valuationDate, String ccy, String tenor) {
     //LCH uses OIS rate for futured fixed flows
-    //we thus have a hack that says if tenor is not OIS (which we enforce for fixed flows) then use discount curve (for floats)
     double interpolatedZeroRate = getInterpolatedRate(flowDate, ccy, tenor);
     double days = Days.daysBetween(valuationDate, flowDate).getDays();
     return Math.exp(interpolatedZeroRate * -(days) / 365d);
@@ -103,6 +102,17 @@ public class CurveManagerImpl implements CurveManager {
       }
     }
     throw new IllegalArgumentException("No rate data found for date " + date + " currency " + ccy);
+  }
+
+  @Override
+  public double getImpliedForwardRate(LocalDate start, LocalDate end, LocalDate valuationDate, String ccy, String tenor) {
+    double startRate = getInterpolatedRate(start, ccy, tenor);
+    //get the start discount factor
+    double startDf = Math.exp(startRate * -(Days.daysBetween(valuationDate, start).getDays()) / 365d);
+    double endRate = getInterpolatedRate(end, ccy, tenor);
+    double endDf = Math.exp(endRate * - (Days.daysBetween(valuationDate, end).getDays())/ 365d);
+    double forwardRate = ((startDf/endDf) - 1) * (360d/Days.daysBetween(start, end).getDays());
+    return forwardRate;
   }
 
   @Override
