@@ -52,9 +52,10 @@ public class PaymentDatesParser implements NodeParser<PaymentDates> {
           case calculationPeriodDatesReference:
             dates.setCalculationPeriodDates(ctx.getCalculationPeriodDates().get(reader.getAttributeValue(null, "href")));
             break;
-          case calculationPeriodDates:
-          case businessCenters:
           case businessCenter:
+            dates.getBusinessCenters().add(reader.getElementText());
+            break;
+          case calculationPeriodDates:
             throw new RuntimeException("Not implemented: " + element.name());
           case businessCentersReference:
             dates.setBusinessCenters(ctx.getBusinessCenters().get(reader.getAttributeValue(null, "href")));

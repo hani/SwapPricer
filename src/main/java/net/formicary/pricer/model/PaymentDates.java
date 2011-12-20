@@ -1,5 +1,6 @@
 package net.formicary.pricer.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,7 +13,7 @@ public class PaymentDates {
   private int periodMultiplier;
   private String period;
   private BusinessDayConvention businessDayConvention;
-  private List<String> businessCenters;
+  private List<String> businessCenters = new ArrayList<String>();
   private PayRelativeTo payRelativeTo;
 
   public CalculationPeriodDates getCalculationPeriodDates() {
