@@ -92,6 +92,17 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.codehaus.woodstox/woodstox-core-asl/c12498cf18507aa6433a94eb7d3e77d5/jars/woodstox-core-asl-4.1.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.codehaus.woodstox/woodstox-core-asl/c12498cf18507aa6433a94eb7d3e77d5/sources/woodstox-core-asl-4.1.2-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/commons-io/commons-io/c12498cf18507aa6433a94eb7d3e77d5/jars/commons-io-2.0.1.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -152,6 +163,28 @@
         <JAVADOC />
         <SOURCES>
           <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.sonatype.sisu.inject/cglib/c12498cf18507aa6433a94eb7d3e77d5/sources/cglib-2.2.1-v20090111-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/javax.xml.stream/stax-api/c12498cf18507aa6433a94eb7d3e77d5/jars/stax-api-1.0-2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/javax.xml.stream/stax-api/c12498cf18507aa6433a94eb7d3e77d5/sources/stax-api-1.0-2-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.codehaus.woodstox/stax2-api/c12498cf18507aa6433a94eb7d3e77d5/jars/stax2-api-3.1.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.codehaus.woodstox/stax2-api/c12498cf18507aa6433a94eb7d3e77d5/sources/stax2-api-3.1.1-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

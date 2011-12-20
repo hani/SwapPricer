@@ -20,6 +20,7 @@ dependencies {
   compile 'net.objectlab.kit:datecalc-joda:1.2.0'
   compile 'com.google.inject:guice:3.0'
   compile 'joda-time:joda-time:2.0'
+  compile 'org.codehaus.woodstox:woodstox-core-asl:4.1.2'
   compile 'commons-io:commons-io:2.0.1'
   compile 'org.slf4j:slf4j-api:1.6.4'
   runtime 'ch.qos.logback:logback-classic:1.0.0'
