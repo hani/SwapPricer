@@ -38,4 +38,13 @@ public class PeriodDate {
   public void setBusinessCenters(List<String> businessCenters) {
     this.businessCenters = businessCenters;
   }
+
+  @Override
+  public String toString() {
+    return "PeriodDate{" +
+        "unadjusted=" + unadjusted +
+        ", convention=" + convention +
+        ", businessCenters=" + businessCenters +
+        '}';
+  }
 }

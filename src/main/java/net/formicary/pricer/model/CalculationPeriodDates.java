@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class CalculationPeriodDates {
   private PeriodDate effectiveDate;
-  private PeriodDate termiinationDate;
+  private PeriodDate terminationDate;
 
   private BusinessDayConvention periodConvention;
   private List<String> periodBusinessCenters;
@@ -25,12 +25,12 @@ public class CalculationPeriodDates {
     this.effectiveDate = effectiveDate;
   }
 
-  public PeriodDate getTermiinationDate() {
-    return termiinationDate;
+  public PeriodDate getTerminationDate() {
+    return terminationDate;
   }
 
-  public void setTermiinationDate(PeriodDate termiinationDate) {
-    this.termiinationDate = termiinationDate;
+  public void setTerminationDate(PeriodDate terminationDate) {
+    this.terminationDate = terminationDate;
   }
 
   public BusinessDayConvention getPeriodConvention() {

@@ -59,7 +59,7 @@ public class CalculationPeriodDateParser implements NodeParser<CalculationPeriod
             break;
           case terminationDate:
             currentDate = new PeriodDate();
-            dates.setTermiinationDate(currentDate);
+            dates.setTerminationDate(currentDate);
             centers = currentDate.getBusinessCenters();
             break;
           case calculationPeriodDatesAdjustments:
