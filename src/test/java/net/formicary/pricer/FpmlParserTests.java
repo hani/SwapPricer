@@ -4,6 +4,7 @@ import net.formicary.pricer.impl.FpmlTradeStore;
 import net.formicary.pricer.model.Swap;
 import org.cdmckay.coffeedom.input.SAXBuilder;
 import org.cdmckay.coffeedom.xpath.XPath;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -26,11 +27,20 @@ public class FpmlParserTests {
   private SAXBuilder builder = new SAXBuilder();
   private XPath swapPath = XPath.newInstance("/*[name()='FpML']/*[name()='trade']/*[name()='swap']");
   private XPath unadjustedDate = XPath.newInstance("*[name()='swapstream'][1]/*[name()='calculationperioddates']/*[name()='effectivedate']/*[name()='unadjusteddate']/text()");
+  private long now;
+  private int count;
 
   @BeforeClass
   public void init() {
     store = new FpmlTradeStore();
     store.setFpmlDir("src/test/resources/fpml");
+    now = System.currentTimeMillis();
+  }
+
+  @AfterClass
+  public void logTime() {
+    long timeTaken = System.currentTimeMillis() - now;
+    System.out.println("Time taken: " + timeTaken + "ms for " + count + " files. Average: " + (timeTaken / count) + "ms");
   }
 
   @Test(dataProvider = "fpml")
@@ -53,6 +63,7 @@ public class FpmlParserTests {
         return name.startsWith("LCH") && name.endsWith(".xml");
       }
     }));
+    count = files.size();
     Object[][] data = new Object[files.size()][];
     int i = 0;
     for (String s : files) {
