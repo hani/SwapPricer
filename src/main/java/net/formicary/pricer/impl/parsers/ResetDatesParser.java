@@ -20,21 +20,21 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
  */
 public class ResetDatesParser implements NodeParser<ResetDates> {
   enum Element {
-    resetDates,
-    resetFrequency,
-    calculationPeriodDatesReference,
-    calculationPeriodDates,
-    resetRelativeTo,
-    fixingDates,
-    periodMultiplier,
+    resetdates,
+    resetfrequency,
+    calculationperioddatesreference,
+    calculationperioddates,
+    resetrelativeto,
+    fixingdates,
+    periodmultiplier,
     period,
-    resetDatesAdjustments,
-    dayType,
-    businessDayConvention,
-    businessCentersReference,
-    businessCenters,
-    businessCenter,
-    dateRelativeTo
+    resetdatesadjustments,
+    daytype,
+    businessdayconvention,
+    businesscentersreference,
+    businesscenters,
+    businesscenter,
+    daterelativeto
   }
 
   @Override
@@ -45,45 +45,45 @@ public class ResetDatesParser implements NodeParser<ResetDates> {
     while(reader.hasNext()) {
       int event = reader.next();
       if(event == START_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName());
+        Element element = Element.valueOf(reader.getLocalName().toLowerCase());
         switch(element) {
-          case calculationPeriodDatesReference:
+          case calculationperioddatesreference:
             dates.setCalculationPeriodDates(ctx.getCalculationPeriodDates().get(reader.getAttributeValue(null, "href")));
             break;
-          case resetRelativeTo:
+          case resetrelativeto:
             dates.setResetRelativeTo(ResetRelativeTo.valueOf(reader.getElementText()));
             break;
-          case calculationPeriodDates:
+          case calculationperioddates:
             throw new RuntimeException("Not implemented: " + element.name());
-          case businessDayConvention:
+          case businessdayconvention:
             dates.setBusinessDayConvention(BusinessDayConvention.valueOf(reader.getElementText()));
             break;
           case period :
             period = reader.getElementText();
             break;
-          case periodMultiplier:
+          case periodmultiplier:
             multiplier = Integer.parseInt(reader.getElementText());
             break;
-          case businessCenter:
+          case businesscenter:
             dates.getBusinessCenters().add(reader.getElementText());
             break;
-          case businessCentersReference:
+          case businesscentersreference:
             dates.setBusinessCenters(ctx.getBusinessCenters().get(reader.getAttributeValue(null, "href")));
             break;
-          case dayType:
+          case daytype:
             dates.setDayType(DayType.valueOf(reader.getElementText()));
             break;
         }
       } else if(event == END_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName());
+        Element element = Element.valueOf(reader.getLocalName().toLowerCase());
         switch(element) {
-          case resetDates:
+          case resetdates:
             return dates;
-          case fixingDates:
+          case fixingdates:
             dates.setFixingMultiplier(multiplier);
             dates.setFixingPeriod(period);
             break;
-          case resetFrequency:
+          case resetfrequency:
             dates.setResetMultiplier(multiplier);
             dates.setResetPeriod(period);
             break;

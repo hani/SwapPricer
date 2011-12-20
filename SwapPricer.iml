@@ -224,6 +224,39 @@
     <orderEntry type="module-library" scope="TEST">
       <library>
         <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.cdmckay.coffeedom/coffeedom/c12498cf18507aa6433a94eb7d3e77d5/jars/coffeedom-1.0.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.cdmckay.coffeedom/coffeedom/c12498cf18507aa6433a94eb7d3e77d5/sources/coffeedom-1.0.0-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" scope="TEST">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/xerces/xercesImpl/c12498cf18507aa6433a94eb7d3e77d5/jars/xercesImpl-2.10.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/xerces/xercesImpl/c12498cf18507aa6433a94eb7d3e77d5/sources/xercesImpl-2.10.0-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" scope="TEST">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/jaxen/jaxen/c12498cf18507aa6433a94eb7d3e77d5/jars/jaxen-1.1.3.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/jaxen/jaxen/c12498cf18507aa6433a94eb7d3e77d5/sources/jaxen-1.1.3-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" scope="TEST">
+      <library>
+        <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/junit/junit/c12498cf18507aa6433a94eb7d3e77d5/jars/junit-3.8.1.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -260,6 +293,17 @@
         <JAVADOC />
         <SOURCES>
           <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.yaml/snakeyaml/c12498cf18507aa6433a94eb7d3e77d5/sources/snakeyaml-1.6-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" scope="TEST">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/xml-apis/xml-apis/c12498cf18507aa6433a94eb7d3e77d5/jars/xml-apis-1.4.01.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/xml-apis/xml-apis/c12498cf18507aa6433a94eb7d3e77d5/sources/xml-apis-1.4.01-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

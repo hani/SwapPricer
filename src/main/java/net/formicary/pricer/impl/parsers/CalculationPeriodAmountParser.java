@@ -19,20 +19,20 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 public class CalculationPeriodAmountParser implements NodeParser<CalculationPeriodAmount> {
 
   enum Element {
-    calculationPeriodAmount,
+    calculationperiodamount,
     calculation,
-    notionalSchedule,
-    notionalStepSchedule,
-    initialValue,
+    notionalschedule,
+    notionalstepschedule,
+    initialvalue,
     currency,
-    floatingRateCalculation,
-    floatingRateIndex,
-    indexTenor,
-    periodMultiplier,
+    floatingratecalculation,
+    floatingrateindex,
+    indextenor,
+    periodmultiplier,
     period,
-    spreadSchedule,
-    dayCountFraction,
-    fixedRateSchedule
+    spreadschedule,
+    daycountfraction,
+    fixedrateschedule
   }
 
   @Override
@@ -44,9 +44,9 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
     while (reader.hasNext()) {
       int event = reader.next();
       if (event == START_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName());
+        Element element = Element.valueOf(reader.getLocalName().toLowerCase());
         switch (element) {
-          case dayCountFraction:
+          case daycountfraction:
             String text = reader.getElementText().replace('/', '_');
             text = text.replace("30", "THIRTY");
             amount.setDayCountFraction(DayCountFraction.valueOf(text));
@@ -54,13 +54,13 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
           case currency:
             amount.setCurrency(reader.getElementText());
             break;
-          case initialValue:
+          case initialvalue:
             initialValue = Double.valueOf(reader.getElementText());
             break;
-          case floatingRateIndex:
+          case floatingrateindex:
             amount.setFloatingRateIndex(reader.getElementText());
             break;
-          case periodMultiplier:
+          case periodmultiplier:
             amount.setPeriodMultiplier(Integer.parseInt(reader.getElementText()));
             break;
           case period:
@@ -68,17 +68,17 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
             break;
         }
       } else if (event == END_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName());
+        Element element = Element.valueOf(reader.getLocalName().toLowerCase());
         switch (element) {
-          case calculationPeriodAmount:
+          case calculationperiodamount:
             return amount;
-          case spreadSchedule:
+          case spreadschedule:
             amount.setSpreadSchedule(initialValue);
             break;
-          case notionalStepSchedule:
+          case notionalstepschedule:
             amount.setNotional(initialValue);
             break;
-          case fixedRateSchedule:
+          case fixedrateschedule:
             amount.setFixedRate(initialValue);
         }
       }

@@ -1,8 +1,7 @@
 package net.formicary.pricer.impl;
 
-import net.formicary.pricer.TradeStore;
 import net.formicary.pricer.impl.parsers.*;
-import net.formicary.pricer.model.VanillaSwap;
+import net.formicary.pricer.model.Swap;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -33,11 +32,11 @@ public class FpmlTradeStore /*implements TradeStore */{
 
   public FpmlTradeStore() {
     factory = XMLInputFactory.newFactory();
-    parsers.put("calculationPeriodDates", new CalculationPeriodDateParser());
-    parsers.put("calculationPeriodAmount", new CalculationPeriodAmountParser());
-    parsers.put("resetDates", new ResetDatesParser());
-    parsers.put("paymentDates", new PaymentDatesParser());
-    parsers.put("swapStream", new SwapStreamParser());
+    parsers.put("calculationperioddates", new CalculationPeriodDateParser());
+    parsers.put("calculationperiodamount", new CalculationPeriodAmountParser());
+    parsers.put("resetdates", new ResetDatesParser());
+    parsers.put("paymentdates", new PaymentDatesParser());
+    parsers.put("swapstream", new SwapStreamParser());
   }
 
   public String getFpmlDir() {
@@ -48,10 +47,9 @@ public class FpmlTradeStore /*implements TradeStore */{
     this.fpmlDir = fpmlDir;
   }
 
-  @Override
-  public VanillaSwap getTrade(String id) {
+  public Swap getTrade(String id) {
     try {
-      VanillaSwap swap = readFpml(new File(fpmlDir, id + ".xml"));
+      Swap swap = readFpml(new File(fpmlDir, id + ".xml"));
       swap.setId(id);
       return swap;
     } catch (Exception e) {
@@ -59,19 +57,21 @@ public class FpmlTradeStore /*implements TradeStore */{
     }
   }
 
-  public VanillaSwap readFpml(File f) throws XMLStreamException, IOException {
-    VanillaSwap swap = new VanillaSwap();
+  public Swap readFpml(File f) throws XMLStreamException, IOException {
+    Swap swap = new Swap();
     FpmlContext ctx = new FpmlContext();
     ctx.setParsers(parsers);
     XMLStreamReader reader = factory.createXMLStreamReader(new FileInputStream(f));
     for (int event = reader.next(); event != END_DOCUMENT; event = reader.next()) {
       if (event == START_ELEMENT) {
-        NodeParser parser = parsers.get(reader.getLocalName());
+        NodeParser parser = parsers.get(reader.getLocalName().toLowerCase());
         if(parser != null) {
           parser.parse(reader, ctx);
         }
       }
     }
+    swap.setStream1(ctx.getStream1());
+    swap.setStream2(ctx.getStream2());
     return swap;
   }
 

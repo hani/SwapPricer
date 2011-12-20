@@ -18,18 +18,18 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
  */
 public class PaymentDatesParser implements NodeParser<PaymentDates> {
   enum Element {
-    paymentDates,
-    calculationPeriodDates,
-    calculationPeriodDatesReference,
-    paymentFrequency,
-    periodMultiplier,
+    paymentdates,
+    calculationperioddates,
+    calculationperioddatesreference,
+    paymentfrequency,
+    periodmultiplier,
     period,
-    payRelativeTo,
-    paymentDatesAdjustments,
-    businessDayConvention,
-    businessCentersReference,
-    businessCenters,
-    businessCenter
+    payrelativeto,
+    paymentdatesadjustments,
+    businessdayconvention,
+    businesscentersreference,
+    businesscenters,
+    businesscenter
   }
 
   @Override
@@ -38,35 +38,35 @@ public class PaymentDatesParser implements NodeParser<PaymentDates> {
     while(reader.hasNext()) {
       int event = reader.next();
       if(event == START_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName());
+        Element element = Element.valueOf(reader.getLocalName().toLowerCase());
         switch(element) {
-          case periodMultiplier:
+          case periodmultiplier:
             dates.setPeriodMultiplier(Integer.parseInt(reader.getElementText()));
             break;
           case period :
             dates.setPeriod(reader.getElementText());
             break;
-          case businessDayConvention:
+          case businessdayconvention:
             dates.setBusinessDayConvention(BusinessDayConvention.valueOf(reader.getElementText()));
             break;
-          case calculationPeriodDatesReference:
+          case calculationperioddatesreference:
             dates.setCalculationPeriodDates(ctx.getCalculationPeriodDates().get(reader.getAttributeValue(null, "href")));
             break;
-          case businessCenter:
+          case businesscenter:
             dates.getBusinessCenters().add(reader.getElementText());
             break;
-          case calculationPeriodDates:
+          case calculationperioddates:
             throw new RuntimeException("Not implemented: " + element.name());
-          case businessCentersReference:
+          case businesscentersreference:
             dates.setBusinessCenters(ctx.getBusinessCenters().get(reader.getAttributeValue(null, "href")));
             break;
-          case payRelativeTo:
+          case payrelativeto:
             dates.setPayRelativeTo(PayRelativeTo.valueOf(reader.getElementText()));
         }
       } else if(event == END_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName());
+        Element element = Element.valueOf(reader.getLocalName().toLowerCase());
         switch(element) {
-          case paymentDates:
+          case paymentdates:
             return dates;
         }
       }

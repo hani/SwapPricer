@@ -44,7 +44,7 @@ public class PeriodDate {
     return "PeriodDate{" +
         "unadjusted=" + unadjusted +
         ", convention=" + convention +
-        ", businessCenters=" + businessCenters +
+        ", businesscenters=" + businessCenters +
         '}';
   }
 }

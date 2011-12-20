@@ -1,5 +1,8 @@
 package net.formicary.pricer.model;
 
+import org.joda.time.LocalDate;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,10 +15,11 @@ public class CalculationPeriodDates {
   private PeriodDate terminationDate;
 
   private BusinessDayConvention periodConvention;
-  private List<String> periodBusinessCenters;
+  private List<String> periodBusinessCenters = new ArrayList<String>();
   private int periodMultiplier;
   private String period;
   private int rollConvention;
+  private LocalDate firstRegularPeriodStartDate;
 
   public PeriodDate getEffectiveDate() {
     return effectiveDate;
@@ -71,5 +75,13 @@ public class CalculationPeriodDates {
 
   public void setRollConvention(int i) {
     this.rollConvention = i;
+  }
+
+  public LocalDate getFirstRegularPeriodStartDate() {
+    return firstRegularPeriodStartDate;
+  }
+
+  public void setFirstRegularPeriodStartDate(LocalDate firstRegularPeriodStartDate) {
+    this.firstRegularPeriodStartDate = firstRegularPeriodStartDate;
   }
 }

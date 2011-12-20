@@ -1,0 +1,43 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="FpmlParserTests" type="TestNG" factoryName="TestNG">
+    <extension name="coverage" enabled="true" merge="false" sample_coverage="true" runner="idea" />
+    <module name="SwapPricer" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+    <option name="ALTERNATIVE_JRE_PATH" value="" />
+    <option name="SUITE_NAME" value="" />
+    <option name="PACKAGE_NAME" value="net.formicary.pricer" />
+    <option name="MAIN_CLASS_NAME" value="net.formicary.pricer.FpmlParserTests" />
+    <option name="METHOD_NAME" value="multipleCalendars" />
+    <option name="GROUP_NAME" value="" />
+    <option name="TEST_OBJECT" value="CLASS" />
+    <option name="VM_PARAMETERS" value="" />
+    <option name="PARAMETERS" value="" />
+    <option name="WORKING_DIRECTORY" value="" />
+    <option name="OUTPUT_DIRECTORY" value="" />
+    <option name="ANNOTATION_TYPE" />
+    <option name="ENV_VARIABLES" />
+    <option name="PASS_PARENT_ENVS" value="true" />
+    <option name="TEST_SEARCH_SCOPE">
+      <value defaultName="moduleWithDependencies" />
+    </option>
+    <option name="USE_DEFAULT_REPORTERS" value="false" />
+    <option name="PROPERTIES_FILE" value="" />
+    <envs />
+    <properties />
+    <listeners />
+    <RunnerSettings RunnerId="Debug">
+      <option name="DEBUG_PORT" value="2413" />
+      <option name="TRANSPORT" value="0" />
+      <option name="LOCAL" value="true" />
+    </RunnerSettings>
+    <RunnerSettings RunnerId="JProfiler">
+      <option name="WINDOW" value="false" />
+      <option name="JVMPI" value="false" />
+      <option name="INTERPRETED" value="false" />
+    </RunnerSettings>
+    <RunnerSettings RunnerId="Run" />
+    <ConfigurationWrapper RunnerId="Debug" />
+    <ConfigurationWrapper RunnerId="Run" />
+    <method />
+  </configuration>
+</component>
