@@ -24,7 +24,7 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
  *         Time: 9:25 PM
  */
 @Singleton
-public class FpmlTradeStore implements TradeStore {
+public class FpmlTradeStore /*implements TradeStore */{
 
   private Map<String, NodeParser> parsers = new HashMap<String, NodeParser>();
   private final XMLInputFactory factory;
