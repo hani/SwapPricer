@@ -83,6 +83,7 @@ public class FpmlTradeStore /*implements TradeStore */{
     for(int i = 0; i < 1000; i++) {
       store.getTrade("LCH00004300325");
     }
-    System.out.println("Time to read 1000 trades: " + (System.currentTimeMillis() - now) + "ms");
+    long timeTaken = System.currentTimeMillis() - now;
+    System.out.println("Time to read 1000 trades: " + timeTaken + "ms average:" + (timeTaken / 1000) + "ms");
   }
 }

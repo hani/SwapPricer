@@ -15,6 +15,7 @@ repositories {
     }
     url 'https://nexus.formicary.net/nexus/content/groups/formicary/'
   }
+  maven {url 'http://morphia.googlecode.com/svn/mavenrepo/'}
 }
 
 dependencies {
@@ -27,6 +28,7 @@ dependencies {
   compile 'joda-time:joda-time:2.0'
   compile 'org.codehaus.woodstox:woodstox-core-asl:4.1.2'
   compile 'commons-io:commons-io:2.0.1'
+  compile 'org.fpml:confirmation-extension:5.0.3wd3'
   compile 'org.slf4j:slf4j-api:1.6.4'
   runtime 'ch.qos.logback:logback-classic:1.0.0'
   testCompile 'org.testng:testng:6.2'

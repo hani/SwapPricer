@@ -15,6 +15,28 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.google.code.morphia/morphia/fc705acf7dc255094392cc85c9af00fb/jars/morphia-0.99.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.google.code.morphia/morphia/fc705acf7dc255094392cc85c9af00fb/sources/morphia-0.99-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.google.code.morphia/morphia-logging-slf4j/fc705acf7dc255094392cc85c9af00fb/jars/morphia-logging-slf4j-0.99.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.google.code.morphia/morphia-logging-slf4j/fc705acf7dc255094392cc85c9af00fb/sources/morphia-logging-slf4j-0.99-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.mongodb/mongo-java-driver/842ad5fe00a5d766a2f1d58c1662c721/jars/mongo-java-driver-2.7.2.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -86,6 +108,17 @@
         <JAVADOC />
         <SOURCES>
           <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/commons-io/commons-io/842ad5fe00a5d766a2f1d58c1662c721/sources/commons-io-2.0.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.fpml/confirmation-extension/842ad5fe00a5d766a2f1d58c1662c721/jars/confirmation-extension-5.0.3wd3.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.fpml/confirmation-extension/842ad5fe00a5d766a2f1d58c1662c721/sources/confirmation-extension-5.0.3wd3-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -164,24 +197,6 @@
         <SOURCES>
           <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.codehaus.woodstox/stax2-api/842ad5fe00a5d766a2f1d58c1662c721/sources/stax2-api-3.1.1-sources.jar!/" />
         </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/unresolved dependency - com.google.code.morphia#morphia;0.99" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="file://$MODULE_DIR$/unresolved dependency - com.google.code.morphia#morphia-logging-slf4j;0.99" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="" scope="RUNTIME">
