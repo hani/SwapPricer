@@ -15,260 +15,256 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.google.code.morphia/morphia/89331c8a58961e0a511bff7c04f8f9e3/jars/morphia-0.99.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.mongodb/mongo-java-driver/842ad5fe00a5d766a2f1d58c1662c721/jars/mongo-java-driver-2.7.2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.google.code.morphia/morphia/89331c8a58961e0a511bff7c04f8f9e3/sources/morphia-0.99-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.mongodb/mongo-java-driver/842ad5fe00a5d766a2f1d58c1662c721/sources/mongo-java-driver-2.7.2-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.google.code.morphia/morphia-logging-slf4j/89331c8a58961e0a511bff7c04f8f9e3/jars/morphia-logging-slf4j-0.99.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/net.objectlab.kit/datecalc-common/842ad5fe00a5d766a2f1d58c1662c721/bundles/datecalc-common-1.2.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.google.code.morphia/morphia-logging-slf4j/89331c8a58961e0a511bff7c04f8f9e3/sources/morphia-logging-slf4j-0.99-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/net.objectlab.kit/datecalc-common/842ad5fe00a5d766a2f1d58c1662c721/sources/datecalc-common-1.2.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.mongodb/mongo-java-driver/c12498cf18507aa6433a94eb7d3e77d5/jars/mongo-java-driver-2.7.2.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/net.objectlab.kit/datecalc-joda/842ad5fe00a5d766a2f1d58c1662c721/bundles/datecalc-joda-1.2.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.mongodb/mongo-java-driver/c12498cf18507aa6433a94eb7d3e77d5/sources/mongo-java-driver-2.7.2-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/net.objectlab.kit/datecalc-joda/842ad5fe00a5d766a2f1d58c1662c721/sources/datecalc-joda-1.2.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/net.objectlab.kit/datecalc-common/c12498cf18507aa6433a94eb7d3e77d5/bundles/datecalc-common-1.2.0.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.google.inject/guice/842ad5fe00a5d766a2f1d58c1662c721/jars/guice-3.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/net.objectlab.kit/datecalc-common/c12498cf18507aa6433a94eb7d3e77d5/sources/datecalc-common-1.2.0-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.google.inject/guice/842ad5fe00a5d766a2f1d58c1662c721/sources/guice-3.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/net.objectlab.kit/datecalc-joda/c12498cf18507aa6433a94eb7d3e77d5/bundles/datecalc-joda-1.2.0.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/joda-time/joda-time/842ad5fe00a5d766a2f1d58c1662c721/jars/joda-time-2.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/net.objectlab.kit/datecalc-joda/c12498cf18507aa6433a94eb7d3e77d5/sources/datecalc-joda-1.2.0-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/joda-time/joda-time/842ad5fe00a5d766a2f1d58c1662c721/sources/joda-time-2.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.google.inject/guice/c12498cf18507aa6433a94eb7d3e77d5/jars/guice-3.0.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.codehaus.woodstox/woodstox-core-asl/842ad5fe00a5d766a2f1d58c1662c721/jars/woodstox-core-asl-4.1.2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.google.inject/guice/c12498cf18507aa6433a94eb7d3e77d5/sources/guice-3.0-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.codehaus.woodstox/woodstox-core-asl/842ad5fe00a5d766a2f1d58c1662c721/sources/woodstox-core-asl-4.1.2-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/joda-time/joda-time/c12498cf18507aa6433a94eb7d3e77d5/jars/joda-time-2.0.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/commons-io/commons-io/842ad5fe00a5d766a2f1d58c1662c721/jars/commons-io-2.0.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/joda-time/joda-time/c12498cf18507aa6433a94eb7d3e77d5/sources/joda-time-2.0-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/commons-io/commons-io/842ad5fe00a5d766a2f1d58c1662c721/sources/commons-io-2.0.1-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.codehaus.woodstox/woodstox-core-asl/c12498cf18507aa6433a94eb7d3e77d5/jars/woodstox-core-asl-4.1.2.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.slf4j/slf4j-api/842ad5fe00a5d766a2f1d58c1662c721/jars/slf4j-api-1.6.4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.codehaus.woodstox/woodstox-core-asl/c12498cf18507aa6433a94eb7d3e77d5/sources/woodstox-core-asl-4.1.2-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.slf4j/slf4j-api/842ad5fe00a5d766a2f1d58c1662c721/sources/slf4j-api-1.6.4-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/commons-io/commons-io/c12498cf18507aa6433a94eb7d3e77d5/jars/commons-io-2.0.1.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/javax.inject/javax.inject/842ad5fe00a5d766a2f1d58c1662c721/jars/javax.inject-1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/commons-io/commons-io/c12498cf18507aa6433a94eb7d3e77d5/sources/commons-io-2.0.1-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/javax.inject/javax.inject/842ad5fe00a5d766a2f1d58c1662c721/sources/javax.inject-1-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.slf4j/slf4j-api/c12498cf18507aa6433a94eb7d3e77d5/jars/slf4j-api-1.6.4.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/aopalliance/aopalliance/842ad5fe00a5d766a2f1d58c1662c721/jars/aopalliance-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.slf4j/slf4j-api/c12498cf18507aa6433a94eb7d3e77d5/sources/slf4j-api-1.6.4-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/aopalliance/aopalliance/842ad5fe00a5d766a2f1d58c1662c721/sources/aopalliance-1.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/javax.inject/javax.inject/c12498cf18507aa6433a94eb7d3e77d5/jars/javax.inject-1.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/asm/asm/842ad5fe00a5d766a2f1d58c1662c721/jars/asm-3.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/javax.inject/javax.inject/c12498cf18507aa6433a94eb7d3e77d5/sources/javax.inject-1-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/asm/asm/842ad5fe00a5d766a2f1d58c1662c721/sources/asm-3.1-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/aopalliance/aopalliance/c12498cf18507aa6433a94eb7d3e77d5/jars/aopalliance-1.0.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.sonatype.sisu.inject/cglib/842ad5fe00a5d766a2f1d58c1662c721/jars/cglib-2.2.1-v20090111.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/aopalliance/aopalliance/c12498cf18507aa6433a94eb7d3e77d5/sources/aopalliance-1.0-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.sonatype.sisu.inject/cglib/842ad5fe00a5d766a2f1d58c1662c721/sources/cglib-2.2.1-v20090111-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/asm/asm/c12498cf18507aa6433a94eb7d3e77d5/jars/asm-3.1.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/javax.xml.stream/stax-api/842ad5fe00a5d766a2f1d58c1662c721/jars/stax-api-1.0-2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/asm/asm/c12498cf18507aa6433a94eb7d3e77d5/sources/asm-3.1-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/javax.xml.stream/stax-api/842ad5fe00a5d766a2f1d58c1662c721/sources/stax-api-1.0-2-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.sonatype.sisu.inject/cglib/c12498cf18507aa6433a94eb7d3e77d5/jars/cglib-2.2.1-v20090111.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.codehaus.woodstox/stax2-api/842ad5fe00a5d766a2f1d58c1662c721/jars/stax2-api-3.1.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.sonatype.sisu.inject/cglib/c12498cf18507aa6433a94eb7d3e77d5/sources/cglib-2.2.1-v20090111-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.codehaus.woodstox/stax2-api/842ad5fe00a5d766a2f1d58c1662c721/sources/stax2-api-3.1.1-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/javax.xml.stream/stax-api/c12498cf18507aa6433a94eb7d3e77d5/jars/stax-api-1.0-2.jar!/" />
+          <root url="file://$MODULE_DIR$/unresolved dependency - com.google.code.morphia#morphia;0.99" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/javax.xml.stream/stax-api/c12498cf18507aa6433a94eb7d3e77d5/sources/stax-api-1.0-2-sources.jar!/" />
-        </SOURCES>
+        <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.codehaus.woodstox/stax2-api/c12498cf18507aa6433a94eb7d3e77d5/jars/stax2-api-3.1.1.jar!/" />
+          <root url="file://$MODULE_DIR$/unresolved dependency - com.google.code.morphia#morphia-logging-slf4j;0.99" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="" scope="RUNTIME">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/ch.qos.logback/logback-classic/842ad5fe00a5d766a2f1d58c1662c721/jars/logback-classic-1.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.codehaus.woodstox/stax2-api/c12498cf18507aa6433a94eb7d3e77d5/sources/stax2-api-3.1.1-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/ch.qos.logback/logback-classic/842ad5fe00a5d766a2f1d58c1662c721/sources/logback-classic-1.0.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="" scope="RUNTIME">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/ch.qos.logback/logback-classic/c12498cf18507aa6433a94eb7d3e77d5/jars/logback-classic-1.0.0.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/ch.qos.logback/logback-core/842ad5fe00a5d766a2f1d58c1662c721/jars/logback-core-1.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/ch.qos.logback/logback-classic/c12498cf18507aa6433a94eb7d3e77d5/sources/logback-classic-1.0.0-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="" scope="RUNTIME">
-      <library>
-        <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/ch.qos.logback/logback-core/c12498cf18507aa6433a94eb7d3e77d5/jars/logback-core-1.0.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/ch.qos.logback/logback-core/c12498cf18507aa6433a94eb7d3e77d5/sources/logback-core-1.0.0-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/ch.qos.logback/logback-core/842ad5fe00a5d766a2f1d58c1662c721/sources/logback-core-1.0.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.testng/testng/c12498cf18507aa6433a94eb7d3e77d5/jars/testng-6.2.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.testng/testng/842ad5fe00a5d766a2f1d58c1662c721/jars/testng-6.2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.testng/testng/c12498cf18507aa6433a94eb7d3e77d5/sources/testng-6.2-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.testng/testng/842ad5fe00a5d766a2f1d58c1662c721/sources/testng-6.2-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.cdmckay.coffeedom/coffeedom/c12498cf18507aa6433a94eb7d3e77d5/jars/coffeedom-1.0.0.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.cdmckay.coffeedom/coffeedom/842ad5fe00a5d766a2f1d58c1662c721/jars/coffeedom-1.0.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.cdmckay.coffeedom/coffeedom/c12498cf18507aa6433a94eb7d3e77d5/sources/coffeedom-1.0.0-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.cdmckay.coffeedom/coffeedom/842ad5fe00a5d766a2f1d58c1662c721/sources/coffeedom-1.0.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/xerces/xercesImpl/c12498cf18507aa6433a94eb7d3e77d5/jars/xercesImpl-2.10.0.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/xerces/xercesImpl/842ad5fe00a5d766a2f1d58c1662c721/jars/xercesImpl-2.10.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/xerces/xercesImpl/c12498cf18507aa6433a94eb7d3e77d5/sources/xercesImpl-2.10.0-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/xerces/xercesImpl/842ad5fe00a5d766a2f1d58c1662c721/sources/xercesImpl-2.10.0-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/jaxen/jaxen/c12498cf18507aa6433a94eb7d3e77d5/jars/jaxen-1.1.3.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/jaxen/jaxen/842ad5fe00a5d766a2f1d58c1662c721/jars/jaxen-1.1.3.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/jaxen/jaxen/c12498cf18507aa6433a94eb7d3e77d5/sources/jaxen-1.1.3-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/jaxen/jaxen/842ad5fe00a5d766a2f1d58c1662c721/sources/jaxen-1.1.3-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/junit/junit/c12498cf18507aa6433a94eb7d3e77d5/jars/junit-3.8.1.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/junit/junit/842ad5fe00a5d766a2f1d58c1662c721/jars/junit-3.8.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/junit/junit/c12498cf18507aa6433a94eb7d3e77d5/sources/junit-3.8.1-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/junit/junit/842ad5fe00a5d766a2f1d58c1662c721/sources/junit-3.8.1-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.beanshell/bsh/c12498cf18507aa6433a94eb7d3e77d5/jars/bsh-2.0b4.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.beanshell/bsh/842ad5fe00a5d766a2f1d58c1662c721/jars/bsh-2.0b4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -277,33 +273,33 @@
     <orderEntry type="module-library" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.beust/jcommander/c12498cf18507aa6433a94eb7d3e77d5/jars/jcommander-1.12.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.beust/jcommander/842ad5fe00a5d766a2f1d58c1662c721/jars/jcommander-1.12.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.beust/jcommander/c12498cf18507aa6433a94eb7d3e77d5/sources/jcommander-1.12-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.beust/jcommander/842ad5fe00a5d766a2f1d58c1662c721/sources/jcommander-1.12-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.yaml/snakeyaml/c12498cf18507aa6433a94eb7d3e77d5/jars/snakeyaml-1.6.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.yaml/snakeyaml/842ad5fe00a5d766a2f1d58c1662c721/jars/snakeyaml-1.6.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.yaml/snakeyaml/c12498cf18507aa6433a94eb7d3e77d5/sources/snakeyaml-1.6-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.yaml/snakeyaml/842ad5fe00a5d766a2f1d58c1662c721/sources/snakeyaml-1.6-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" scope="TEST">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/xml-apis/xml-apis/c12498cf18507aa6433a94eb7d3e77d5/jars/xml-apis-1.4.01.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/xml-apis/xml-apis/842ad5fe00a5d766a2f1d58c1662c721/jars/xml-apis-1.4.01.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/xml-apis/xml-apis/c12498cf18507aa6433a94eb7d3e77d5/sources/xml-apis-1.4.01-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/xml-apis/xml-apis/842ad5fe00a5d766a2f1d58c1662c721/sources/xml-apis-1.4.01-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
