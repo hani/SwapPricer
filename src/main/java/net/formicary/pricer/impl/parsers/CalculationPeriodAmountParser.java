@@ -2,12 +2,14 @@ package net.formicary.pricer.impl.parsers;
 
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
-import net.formicary.pricer.model.CalculationPeriodAmount;
-import net.formicary.pricer.model.CompoundingMethod;
-import net.formicary.pricer.model.DayCountFraction;
+import org.fpml.spec503wd3.*;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
@@ -20,74 +22,100 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 public class CalculationPeriodAmountParser implements NodeParser<CalculationPeriodAmount> {
 
   enum Element {
-    calculationperiodamount,
+    calculationPeriodAmount,
     calculation,
-    notionalschedule,
-    notionalstepschedule,
-    initialvalue,
+    notionalSchedule,
+    notionalStepSchedule,
+    initialValue,
     currency,
-    floatingratecalculation,
-    floatingrateindex,
-    indextenor,
-    periodmultiplier,
+    floatingRateCalculation,
+    floatingRateIndex,
+    indexTenor,
+    periodMultiplier,
     period,
-    spreadschedule,
-    daycountfraction,
-    fixedrateschedule,
-    compoundingmethod
+    spreadSchedule,
+    dayCountFraction,
+    fixedRateSchedule,
+    compoundingMethod
   }
 
   @Override
   public CalculationPeriodAmount parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
-    CalculationPeriodAmount amount = new CalculationPeriodAmount();
+    CalculationPeriodAmount cpa = new CalculationPeriodAmount();
+    Calculation calculation = new Calculation();
+    Notional notional = new Notional();
+    calculation.setNotionalSchedule(notional);
+    cpa.setCalculation(calculation);
+    AmountSchedule amount = new AmountSchedule();
+    notional.setNotionalStepSchedule(amount);
 
-    double initialValue = 0;
+    String initialValue = "0";
 
     while (reader.hasNext()) {
       int event = reader.next();
       if (event == START_ELEMENT) {
         Element element = Element.valueOf(reader.getLocalName().toLowerCase());
         switch (element) {
-          case daycountfraction:
-            String text = reader.getElementText().replace('/', '_');
-            text = text.replace("30", "THIRTY");
-            amount.setDayCountFraction(DayCountFraction.valueOf(text));
+          case dayCountFraction:
+            DayCountFraction dayCountFraction = new DayCountFraction();
+            dayCountFraction.setValue(reader.getElementText());
+            calculation.setDayCountFraction(dayCountFraction);
             break;
           case currency:
-            amount.setCurrency(reader.getElementText());
+            Currency currency = new Currency();
+            currency.setValue(reader.getElementText());
+            amount.setCurrency(currency);
             break;
-          case initialvalue:
-            initialValue = Double.valueOf(reader.getElementText());
+          case initialValue:
+            initialValue = reader.getElementText();
             break;
-          case floatingrateindex:
-            amount.setFloatingRateIndex(reader.getElementText());
+          case floatingRateIndex:
+            FloatingRateCalculation c = getFloatingCalculation(calculation);
+            FloatingRateIndex i = new FloatingRateIndex();
+            i.setValue(reader.getElementText());
+            c.setFloatingRateIndex(i);
             break;
-          case periodmultiplier:
-            amount.setPeriodMultiplier(Integer.parseInt(reader.getElementText()));
+          case periodMultiplier:
+            getFloatingCalculation(calculation).getIndexTenor().setPeriodMultiplier(new BigInteger(reader.getElementText()));
             break;
           case period:
-            amount.setPeriod(reader.getElementText());
+            getFloatingCalculation(calculation).getIndexTenor().setPeriod(PeriodEnum.valueOf(reader.getElementText()));
             break;
-          case compoundingmethod:
-            amount.setCompoundingMethod(CompoundingMethod.valueOf(reader.getElementText()));
+          case compoundingMethod:
+            calculation.setCompoundingMethod(CompoundingMethodEnum.valueOf(reader.getElementText()));
             break;
         }
       } else if (event == END_ELEMENT) {
         Element element = Element.valueOf(reader.getLocalName().toLowerCase());
         switch (element) {
-          case calculationperiodamount:
-            return amount;
-          case spreadschedule:
-            amount.setSpreadSchedule(initialValue);
+          case calculationPeriodAmount:
+            return cpa;
+          case spreadSchedule:
+            //TODO where do we stuff this?
             break;
-          case notionalstepschedule:
-            amount.setNotional(initialValue);
+          case notionalStepSchedule:
+            amount.setInitialValue(new BigDecimal(initialValue));
             break;
-          case fixedrateschedule:
-            amount.setFixedRate(initialValue);
+          case fixedRateSchedule:
+            Schedule fr = new Schedule();
+            fr.setInitialValue(new BigDecimal(initialValue));
+            calculation.setFixedRateSchedule(fr);
+            break;
         }
       }
     }
-    return amount;
+    return cpa;
+  }
+
+  private FloatingRateCalculation getFloatingCalculation(Calculation calculation) {
+    JAXBElement<FloatingRateCalculation> fc = (JAXBElement<FloatingRateCalculation>) calculation.getRateCalculation();
+    if(fc != null) {
+      return fc.getValue();
+    }
+    FloatingRateCalculation floating = new FloatingRateCalculation();
+    floating.setIndexTenor(new Interval());
+    ObjectFactory f = new ObjectFactory();
+    calculation.setRateCalculation((f.createFloatingRateCalculation(floating)));
+    return floating;
   }
 }

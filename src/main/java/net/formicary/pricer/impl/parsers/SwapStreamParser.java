@@ -2,7 +2,7 @@ package net.formicary.pricer.impl.parsers;
 
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
-import net.formicary.pricer.model.*;
+import org.fpml.spec503wd3.*;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
@@ -15,7 +15,7 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
  *         Date: 12/20/11
  *         Time: 1:23 PM
  */
-public class SwapStreamParser implements NodeParser<SwapStream> {
+public class SwapStreamParser implements NodeParser<InterestRateStream> {
 
   enum Element {
     swapstream,
@@ -29,8 +29,8 @@ public class SwapStreamParser implements NodeParser<SwapStream> {
   }
 
   @Override
-  public SwapStream parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
-    SwapStream stream = new SwapStream();
+  public InterestRateStream parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
+    InterestRateStream stream = new InterestRateStream();
     while(reader.hasNext()) {
       int event = reader.next();
       if(event == START_ELEMENT) {

@@ -2,13 +2,11 @@ package net.formicary.pricer.impl.parsers;
 
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
-import net.formicary.pricer.model.BusinessDayConvention;
-import net.formicary.pricer.model.DayType;
-import net.formicary.pricer.model.PayRelativeTo;
-import net.formicary.pricer.model.PaymentDates;
+import org.fpml.spec503wd3.*;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import java.math.BigInteger;
 
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
@@ -19,71 +17,83 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
  */
 public class PaymentDatesParser implements NodeParser<PaymentDates> {
   enum Element {
-    paymentdates,
-    calculationperioddates,
-    calculationperioddatesreference,
-    paymentfrequency,
-    periodmultiplier,
+    paymentDates,
+    calculationPeriodDates,
+    calculationPeriodDatesReference,
+    paymentFrequency,
+    periodMultiplier,
     period,
-    payrelativeto,
-    paymentdatesadjustments,
-    businessdayconvention,
-    businesscentersreference,
-    businesscenters,
-    businesscenter,
-    paymentdaysoffset,
-    daytype
+    payRelativeTo,
+    paymentDatesAdjustments,
+    businessDayConvention,
+    businessCentersReference,
+    businessCenters,
+    businessCenter,
+    paymentDaysOffset,
+    dayType
   }
 
   @Override
   public PaymentDates parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
     PaymentDates dates = new PaymentDates();
-    int periodMultiplier = 0;
+    BusinessDayAdjustments adjustments = new BusinessDayAdjustments();
+    dates.setPaymentDatesAdjustments(adjustments);
+    adjustments.setBusinessCenters(new BusinessCenters());
+    dates.setPaymentDaysOffset(new RelativeDateOffset());
+    BigInteger periodMultiplier = null;
     String period = null;
     while(reader.hasNext()) {
       int event = reader.next();
       if(event == START_ELEMENT) {
         Element element = Element.valueOf(reader.getLocalName().toLowerCase());
         switch(element) {
-          case periodmultiplier:
-            periodMultiplier = Integer.parseInt(reader.getElementText());
+          case periodMultiplier:
+            periodMultiplier = new BigInteger(reader.getElementText());
             break;
           case period :
             period = reader.getElementText();
             break;
-          case businessdayconvention:
-            dates.setBusinessDayConvention(BusinessDayConvention.valueOf(reader.getElementText()));
+          case businessDayConvention:
+            adjustments.setBusinessDayConvention(BusinessDayConventionEnum.valueOf(reader.getElementText()));
             break;
-          case calculationperioddatesreference:
-            dates.setCalculationPeriodDates(ctx.getCalculationPeriodDates().get(reader.getAttributeValue(null, "href")));
+          case calculationPeriodDatesReference:
+            CalculationPeriodDates d = ctx.getCalculationPeriodDates().get(reader.getAttributeValue(null, "href"));
+            CalculationPeriodDatesReference ref = new CalculationPeriodDatesReference();
+            ref.setHref(d);
+            dates.setCalculationPeriodDatesReference(ref);
             break;
-          case businesscenter:
-            dates.getBusinessCenters().add(reader.getElementText());
+          case businessCenter:
+            BusinessCenter bc = new BusinessCenter();
+            bc.setId(reader.getElementText());
+            bc.setValue(bc.getId());
+            adjustments.getBusinessCenters().getBusinessCenter().add(bc);
             break;
-          case calculationperioddates:
+          case calculationPeriodDates:
             throw new RuntimeException("Not implemented: " + element.name());
-          case businesscentersreference:
-            dates.setBusinessCenters(ctx.getBusinessCenters().get(reader.getAttributeValue(null, "href")));
+          case businessCentersReference:
+            adjustments.setBusinessCenters(ctx.getBusinessCenters().get(reader.getAttributeValue(null, "href")));
             break;
-          case payrelativeto:
-            dates.setPayRelativeTo(PayRelativeTo.valueOf(reader.getElementText()));
+          case payRelativeTo:
+            dates.setPayRelativeTo(PayRelativeToEnum.valueOf(reader.getElementText()));
             break;
-          case daytype:
-            dates.setDayType(DayType.valueOf(reader.getElementText()));
+          case dayType:
+            dates.getPaymentDaysOffset().setDayType(DayTypeEnum.valueOf(reader.getElementText()));
             break;
         }
       } else if(event == END_ELEMENT) {
         Element element = Element.valueOf(reader.getLocalName().toLowerCase());
         switch(element) {
-          case paymentfrequency:
-            dates.setPaymentFrequencyPeriodMultiplier(periodMultiplier);
-            dates.setPaymentFrequencyPeriod(period);
+          case paymentFrequency:
+            Interval i1 = new Interval();
+            i1.setPeriod(PeriodEnum.valueOf(period));
+            i1.setPeriodMultiplier(periodMultiplier);
+            dates.setPaymentFrequency(i1);
             break;
-          case paymentdaysoffset:
-            dates.setPaymentDaysOffsetPeriodMultiplier(periodMultiplier);
-            dates.setPaymentDaysOffsetPeriod(period);
+          case paymentDaysOffset:
+            dates.getPaymentDaysOffset().setPeriod(PeriodEnum.valueOf(period));
+            dates.getPaymentDaysOffset().setPeriodMultiplier(periodMultiplier);
             break;
-          case paymentdates:
+          case paymentDates:
             return dates;
         }
       }

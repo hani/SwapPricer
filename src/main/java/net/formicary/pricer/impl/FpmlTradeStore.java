@@ -33,10 +33,10 @@ public class FpmlTradeStore implements TradeStore {
 
   public FpmlTradeStore() {
     factory = XMLInputFactory.newFactory();
-    parsers.put("calculationperioddates", new CalculationPeriodDateParser());
-    parsers.put("calculationperiodamount", new CalculationPeriodAmountParser());
-    parsers.put("resetdates", new ResetDatesParser());
-    parsers.put("paymentdates", new PaymentDatesParser());
+    parsers.put("calculationPeriodDates", new CalculationPeriodDateParser());
+    parsers.put("calculationPeriodAmount", new CalculationPeriodAmountParser());
+    parsers.put("resetDates", new ResetDatesParser());
+    parsers.put("paymentDates", new PaymentDatesParser());
     parsers.put("swapstream", new SwapStreamParser());
     parsers.put("stubcalculationperiodamount", new StubParser());
   }

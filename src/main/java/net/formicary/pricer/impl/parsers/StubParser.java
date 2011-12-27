@@ -2,7 +2,7 @@ package net.formicary.pricer.impl.parsers;
 
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
-import net.formicary.pricer.model.Stub;
+import org.fpml.spec503wd3.Stub;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;

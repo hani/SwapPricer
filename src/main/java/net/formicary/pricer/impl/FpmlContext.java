@@ -1,10 +1,10 @@
 package net.formicary.pricer.impl;
 
-import net.formicary.pricer.model.CalculationPeriodDates;
-import net.formicary.pricer.model.SwapStream;
+import org.fpml.spec503wd3.BusinessCenters;
+import org.fpml.spec503wd3.CalculationPeriodDates;
+import org.fpml.spec503wd3.InterestRateStream;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,33 +13,33 @@ import java.util.Map;
  *         Time: 12:54 PM
  */
 public class FpmlContext {
-  private Map<String, List<String>> businessCenters = new HashMap<String, List<String>>();
+  private Map<String, BusinessCenters> businessCenters = new HashMap<String, BusinessCenters>();
   private Map<String, CalculationPeriodDates> calculationPeriodDates = new HashMap<String, CalculationPeriodDates>();
   private Map<String, NodeParser> parsers;
-  private SwapStream stream1;
-  private SwapStream stream2;
+  private InterestRateStream stream1;
+  private InterestRateStream stream2;
 
-  public SwapStream getStream1() {
+  public InterestRateStream getStream1() {
     return stream1;
   }
 
-  public void setStream1(SwapStream stream1) {
+  public void setStream1(InterestRateStream stream1) {
     this.stream1 = stream1;
   }
 
-  public SwapStream getStream2() {
+  public InterestRateStream getStream2() {
     return stream2;
   }
 
-  public void setStream2(SwapStream stream2) {
+  public void setStream2(InterestRateStream stream2) {
     this.stream2 = stream2;
   }
 
-  public Map<String, List<String>> getBusinessCenters() {
+  public Map<String, BusinessCenters> getBusinessCenters() {
     return businessCenters;
   }
 
-  public void setBusinessCenters(Map<String, List<String>> businessCenters) {
+  public void setBusinessCenters(Map<String, BusinessCenters> businessCenters) {
     this.businessCenters = businessCenters;
   }
 
