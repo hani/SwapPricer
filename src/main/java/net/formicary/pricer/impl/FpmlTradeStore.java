@@ -37,8 +37,8 @@ public class FpmlTradeStore implements TradeStore {
     parsers.put("calculationPeriodAmount", new CalculationPeriodAmountParser());
     parsers.put("resetDates", new ResetDatesParser());
     parsers.put("paymentDates", new PaymentDatesParser());
-    parsers.put("swapstream", new SwapStreamParser());
-    parsers.put("stubcalculationperiodamount", new StubParser());
+    parsers.put("swapStream", new SwapStreamParser());
+    parsers.put("stubCalculationPeriodAmount", new StubParser());
   }
 
   public String getFpmlDir() {

@@ -18,14 +18,14 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 public class SwapStreamParser implements NodeParser<InterestRateStream> {
 
   enum Element {
-    swapstream,
-    paymentdates,
-    resetdates,
-    calculationperiodstartdates,
-    payerpartyreference,
-    receiverpartyreference,
-    calculationperioddatesreference,
-    calculationperiodamount
+    swapStream,
+    paymentDates,
+    resetDates,
+    calculationPeriodStartDates,
+    payerPartyReference,
+    receiverPartyReference,
+    calculationPeriodDatesReference,
+    calculationPeriodAmount
   }
 
   @Override
@@ -53,7 +53,7 @@ public class SwapStreamParser implements NodeParser<InterestRateStream> {
       } else if(event == END_ELEMENT) {
         Element element = Element.valueOf(reader.getLocalName().toLowerCase());
         switch(element) {
-          case swapstream:
+          case swapStream:
             if(ctx.getStream1() == null) {
               ctx.setStream1(stream);
             } else {
