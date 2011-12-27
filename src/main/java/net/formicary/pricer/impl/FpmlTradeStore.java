@@ -72,8 +72,8 @@ public class FpmlTradeStore implements TradeStore {
         }
       }
     }
-//    swap.setStream1(ctx.getStream1());
-//    swap.setStream2(ctx.getStream2());
+    swap.getSwapStream().add(ctx.getStream1());
+    swap.getSwapStream().add(ctx.getStream2());
     return swap;
   }
 
