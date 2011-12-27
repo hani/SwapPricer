@@ -7,6 +7,7 @@ import org.fpml.spec503wd3.*;
 import org.joda.time.LocalDate;
 
 import javax.inject.Inject;
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +34,7 @@ public class CashflowGenerator {
   }
 
   private List<Cashflow> generateFloatingFlows(LocalDate valuationDate, InterestRateStream leg) {
-    LocalDate startDate =  DateUtil.getDate(leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate());
+    LocalDate startDate = getStartDate(leg);
     LocalDate endDate = DateUtil.getDate(leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
     BusinessDayConventionEnum[] conventions = FpMLUtil.getBusinessDayConventions(leg);
     AmountSchedule notional = leg.getCalculationPeriodAmount().getCalculation().getNotionalSchedule().getNotionalStepSchedule();
@@ -61,7 +62,7 @@ public class CashflowGenerator {
   }
 
   private List<Cashflow> generateFixedFlows(LocalDate valuationDate, InterestRateStream leg) {
-    LocalDate startDate =  DateUtil.getDate(leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate());
+    LocalDate startDate = getStartDate(leg);
     LocalDate endDate = DateUtil.getDate(leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
     BusinessDayConventionEnum[] conventions = FpMLUtil.getBusinessDayConventions(leg);
     List<LocalDate> dates = calendarManager.getAdjustedDates(startDate, endDate, conventions, leg.getPaymentDates().getPaymentFrequency(), FpMLUtil.getBusinessCenters(leg));
@@ -76,6 +77,13 @@ public class CashflowGenerator {
       }
     }
     return flows;
+  }
+
+  private LocalDate getStartDate(InterestRateStream leg) {
+    XMLGregorianCalendar cal = leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate();
+    //if we don't have an explicit start date, use the effective date
+    if(cal == null) cal = leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue();
+    return DateUtil.getDate(cal);
   }
 
   private double calculateDiscountedAmount(LocalDate valuationDate, LocalDate periodStart, LocalDate periodEnd, InterestRateStream leg, double rate) {
