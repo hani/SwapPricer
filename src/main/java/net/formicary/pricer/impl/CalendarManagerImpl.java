@@ -99,6 +99,11 @@ public class CalendarManagerImpl implements CalendarManager {
   @Override
   public List<LocalDate> getDatesInRange(LocalDate start, LocalDate end, Interval interval) {
     List<LocalDate> unadjustedDates = new ArrayList<LocalDate>();
+    if(interval.getPeriod() == PeriodEnum.T) {
+      unadjustedDates.add(start);
+      unadjustedDates.add(end);
+      return unadjustedDates;
+    }
     LocalDate current = new LocalDate(start);
     ReadablePeriod period = getPeriod(interval);
     while(current.isBefore(end) || current.equals(end)) {
@@ -137,6 +142,7 @@ public class CalendarManagerImpl implements CalendarManager {
 
   private ReadablePeriod getPeriod(Interval interval) {
     int multiplier = interval.getPeriodMultiplier().intValue();
+    //T is handled in getDatesInRange
     switch (interval.getPeriod()) {
       case D:
         return Days.days(multiplier);
@@ -146,8 +152,6 @@ public class CalendarManagerImpl implements CalendarManager {
         return Months.months(multiplier);
       case Y:
         return Years.years(multiplier);
-      case T:
-        throw new UnsupportedOperationException("Period T is not supported yet");
     }
     return null;
   }
