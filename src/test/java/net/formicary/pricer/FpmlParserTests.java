@@ -12,7 +12,6 @@ import org.cdmckay.coffeedom.input.SAXBuilder;
 import org.cdmckay.coffeedom.xpath.XPath;
 import org.fpml.spec503wd3.IdentifiedDate;
 import org.fpml.spec503wd3.Swap;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -34,12 +33,7 @@ import static org.testng.Assert.assertEquals;
 public class FpmlParserTests {
   private FpmlTradeStore store;
   private SAXBuilder builder = new SAXBuilder();
-  private static final XPath stream1Path = XPath.newInstance("/c:FpML/c:trade/c:swap/c:swapStream[1]");
-  private static final XPath unadjustedDate = XPath.newInstance("c:calculationPeriodDates/c:effectiveDate/c:unadjustedDate/text()");
-  private static final XPath notional = XPath.newInstance("c:calculationPeriodAmount/c:calculation/c:notionalSchedule/c:notionalStepSchedule/c:initialValue/text()");
   private JexlEngine engine = new JexlEngine();
-  private long now;
-  private int count;
 
   private Map<String, Pair> expressions = new HashMap<String, Pair>();
 
@@ -74,13 +68,6 @@ public class FpmlParserTests {
 
     store = new FpmlTradeStore();
     store.setFpmlDir("src/test/resources/fpml");
-    now = System.currentTimeMillis();
-  }
-
-  @AfterClass
-  public void logTime() {
-    long timeTaken = System.currentTimeMillis() - now;
-    System.out.println("Time taken: " + timeTaken + "ms for " + count + " files. Average: " + (timeTaken / count) + "ms");
   }
 
   @Test(dataProvider = "fpml")
@@ -116,7 +103,6 @@ public class FpmlParserTests {
         return name.startsWith("LCH") && name.endsWith(".xml");
       }
     }));
-    count = files.size();
     Object[][] data = new Object[files.size()][];
     int i = 0;
     for (String s : files) {
