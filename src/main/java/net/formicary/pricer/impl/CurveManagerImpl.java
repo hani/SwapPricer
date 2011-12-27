@@ -9,6 +9,8 @@ import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +25,7 @@ import java.util.Map;
  *         Time: 10:36 AM
  */
 public class CurveManagerImpl implements CurveManager {
+  private static final Logger log = LoggerFactory.getLogger(CurveManagerImpl.class);
   //this is ok since we only use it when reading in the curve data, so no multithreaded access
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("dd/MM/yyyy");
   //a map of currency -> (tenor -> forward,discount) curves
@@ -139,11 +142,21 @@ public class CurveManagerImpl implements CurveManager {
 
   @Override
   public String getDiscountCurve(String ccy, String tenor) {
-    return mapping.get(ccy).get(tenor)[1];
+    String[] values = mapping.get(ccy).get(tenor);
+    if(values == null) {
+      log.warn("No mapping found for {} tenor {}, using 'Other'", ccy, tenor);
+      values = mapping.get(ccy).get("other");
+    }
+    return values[1];
   }
 
   @Override
   public String getForwardCurve(String ccy, String tenor) {
-    return mapping.get(ccy).get(tenor)[0];
+    String[] values = mapping.get(ccy).get(tenor);
+    if(values == null) {
+      log.warn("No mapping found for {} tenor {}, using 'Other'", ccy, tenor);
+      values = mapping.get(ccy).get("other");
+    }
+    return values[0];
   }
 }

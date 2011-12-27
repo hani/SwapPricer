@@ -5,6 +5,7 @@ import com.google.code.morphia.query.Query;
 import net.formicary.pricer.RateManager;
 import net.formicary.pricer.model.Index;
 import org.fpml.spec503wd3.Interval;
+import org.fpml.spec503wd3.PeriodEnum;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
@@ -22,9 +23,16 @@ public class RateManagerImpl implements RateManager {
   public double getZeroRate(String currency, Interval interval, LocalDate date) {
     Query<Index> query = ds.createQuery(Index.class);
     query.field("currency").equal(currency);
-    query.field("tenorPeriod").equal(interval.getPeriod().value());
-    query.field("tenorUnit").equal(interval.getPeriodMultiplier().toString());
+    //hack, LCH rates are given to us in 12M vs 1Y
+    if(interval.getPeriod() == PeriodEnum.Y && interval.getPeriodMultiplier().intValue() == 1) {
+      query.field("tenorPeriod").equal("M");
+      query.field("tenorUnit").equal("12");
+    } else {
+      query.field("tenorPeriod").equal(interval.getPeriod().value());
+      query.field("tenorUnit").equal(interval.getPeriodMultiplier().toString());
+    }
     query.field("fixingDate").equal(date);
+    //TODO shouldn't hardcode
     query.field("name").equal("LIBOR");
     Index index = query.get();
     if(index == null) {
