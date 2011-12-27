@@ -1,8 +1,12 @@
 package net.formicary.pricer;
 
 import net.formicary.pricer.impl.FpmlTradeStore;
+import org.apache.commons.jexl2.Expression;
+import org.apache.commons.jexl2.JexlContext;
+import org.apache.commons.jexl2.JexlEngine;
+import org.apache.commons.jexl2.ObjectContext;
 import org.cdmckay.coffeedom.Document;
-import org.cdmckay.coffeedom.Element;
+import org.cdmckay.coffeedom.Namespace;
 import org.cdmckay.coffeedom.Text;
 import org.cdmckay.coffeedom.input.SAXBuilder;
 import org.cdmckay.coffeedom.xpath.XPath;
@@ -17,9 +21,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.testng.Assert.assertEquals;
 
@@ -32,13 +34,44 @@ import static org.testng.Assert.assertEquals;
 public class FpmlParserTests {
   private FpmlTradeStore store;
   private SAXBuilder builder = new SAXBuilder();
-  private XPath stream1Path = XPath.newInstance("/*[name()='FpML']/*[name()='trade']/*[name()='swap']/*[name()='swapStream'][1]");
-  private XPath unadjustedDate = XPath.newInstance("*[name()='calculationPeriodDates']/*[name()='effectiveDate']/*[name()='unadjustedDate']/text()");
+  private static final XPath stream1Path = XPath.newInstance("/c:FpML/c:trade/c:swap/c:swapStream[1]");
+  private static final XPath unadjustedDate = XPath.newInstance("c:calculationPeriodDates/c:effectiveDate/c:unadjustedDate/text()");
+  private static final XPath notional = XPath.newInstance("c:calculationPeriodAmount/c:calculation/c:notionalSchedule/c:notionalStepSchedule/c:initialValue/text()");
+  private JexlEngine engine = new JexlEngine();
   private long now;
   private int count;
 
+  private Map<String, Pair> expressions = new HashMap<String, Pair>();
+
+  class Pair {
+    String objPath;
+    XPath xpath;
+  }
+
   @BeforeClass
-  public void init() {
+  public void init() throws IOException {
+    Namespace ns = Namespace.getNamespace("c", "http://www.fpml.org/FpML-5/confirmation");
+    Properties props = new Properties();
+    props.load(getClass().getResourceAsStream("parser.properties"));
+    for (Map.Entry<Object, Object> item : props.entrySet()) {
+      String key = (String)item.getKey();
+      String value = (String)item.getValue();
+      int dot = key.indexOf('.');
+      String name = key.substring(0, dot);
+      Pair p = expressions.get(name);
+      if(p == null) {
+        p = new Pair();
+        expressions.put(name, p);
+      }
+      String type = key.substring(dot + 1, key.length());
+      if(type.equals("xpath")) {
+        p.xpath = XPath.newInstance(value);
+        p.xpath.addNamespace(ns);
+      } else if(type.equals("objPath")) {
+        p.objPath = value;
+      }
+    }
+
     store = new FpmlTradeStore();
     store.setFpmlDir("src/test/resources/fpml");
     now = System.currentTimeMillis();
@@ -54,15 +87,23 @@ public class FpmlParserTests {
   public void checkFields(String id) throws IOException {
     File file = new File(store.getFpmlDir(), id + ".xml");
     Swap swap = store.getTrade(id);
+    JexlContext jc = new ObjectContext<Swap>(engine, swap);
     Document doc = builder.build(file);
-    Element streamEl = (Element) stream1Path.selectSingleNode(doc);
-    Text date = (Text)unadjustedDate.selectSingleNode(streamEl);
-    assertEquals(toString(swap.getSwapStream().get(0).getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate()), date.getTextTrim());
+    for (Map.Entry<String, Pair> entry : expressions.entrySet()) {
+      Text el = (Text)entry.getValue().xpath.selectSingleNode(doc);
+      Expression e = engine.createExpression(entry.getValue().objPath);
+      Object obj = e.evaluate(jc);
+      assertEquals(toString(obj), el == null ? null : el.getText(), "Mismatch in evaluating " + entry.getKey());
+    }
   }
 
-  private static String toString(IdentifiedDate date) {
-    XMLGregorianCalendar cal = date.getValue();
-    return cal.toString();
+  private static String toString(Object o) {
+    if(o == null) return null;
+    if(o instanceof IdentifiedDate) {
+      XMLGregorianCalendar cal = ((IdentifiedDate)o).getValue();
+      return cal.toString();
+    }
+    return o.toString();
   }
 
   @DataProvider(name = "fpml")
