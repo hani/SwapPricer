@@ -8,12 +8,15 @@ import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import javax.xml.bind.JAXBException;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-
-import static org.testng.Assert.assertEquals;
 
 /**
  * @author hani
@@ -25,7 +28,7 @@ public class CashflowTests {
 
   private CashflowGenerator generator;
   private FpmlJAXBTradeStore store;
-  private Logger log = LoggerFactory.getLogger(CashflowTests.class);
+  private static final Logger log = LoggerFactory.getLogger(CashflowTests.class);
 
   @BeforeClass
   public void init() throws JAXBException {
@@ -35,11 +38,38 @@ public class CashflowTests {
     generator = injector.getInstance(CashflowGenerator.class);
   }
 
-  public void generateFixedCashflows() {
+  @Test(dataProvider = "trades")
+  public void generateFixedCashflows(String id) {
     long now = System.currentTimeMillis();
 
-    List<Cashflow> flows = generator.generateCashflows(new LocalDate(2011, 11, 4), "LCH00000997564");
-    log.info("Time to calculate flows: " + (System.currentTimeMillis() - now) + "ms");
-    assertEquals(flows.size(), 6, flows.toString());
+    List<Cashflow> flows = generator.generateCashflows(new LocalDate(2011, 11, 4), id);
+    log.info("Flows for {}: {}", id, flows);
+    log.info("Time to calculate flows: {}ms: ", System.currentTimeMillis() - now);
+    //assertEquals(flows.size(), 6, flows.toString());
+  }
+
+  @DataProvider(name = "trades")
+  public Object[][] allTrades() {
+    File file = new File(store.getFpmlDir());
+    List<String> files = new ArrayList<String>();
+    Collections.addAll(files, file.list(new FilenameFilter() {
+      @Override
+      public boolean accept(File dir, String name) {
+        return name.startsWith("LCH") && name.endsWith(".xml");
+      }
+    }));
+    Object[][] data = new Object[files.size()][];
+    int i = 0;
+    for (String s : files) {
+      data[i++] = new Object[]{s.substring(0, s.lastIndexOf('.'))};
+    }
+    return data;
+  }
+
+  @DataProvider(name = "singletrade")
+  public Object[][] singleTrade() {
+    Object[][] data = new Object[1][];
+    data[0] = new Object[]{"LCH00000513426"};
+    return data;
   }
 }
