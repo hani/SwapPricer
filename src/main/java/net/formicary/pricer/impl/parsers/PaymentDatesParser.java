@@ -45,7 +45,7 @@ public class PaymentDatesParser implements NodeParser<PaymentDates> {
     while(reader.hasNext()) {
       int event = reader.next();
       if(event == START_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName().toLowerCase());
+        Element element = Element.valueOf(reader.getLocalName());
         switch(element) {
           case periodMultiplier:
             periodMultiplier = new BigInteger(reader.getElementText());
@@ -74,14 +74,14 @@ public class PaymentDatesParser implements NodeParser<PaymentDates> {
             adjustments.setBusinessCenters(ctx.getBusinessCenters().get(reader.getAttributeValue(null, "href")));
             break;
           case payRelativeTo:
-            dates.setPayRelativeTo(PayRelativeToEnum.valueOf(reader.getElementText()));
+            dates.setPayRelativeTo(PayRelativeToEnum.fromValue(reader.getElementText()));
             break;
           case dayType:
-            dates.getPaymentDaysOffset().setDayType(DayTypeEnum.valueOf(reader.getElementText()));
+            dates.getPaymentDaysOffset().setDayType(DayTypeEnum.fromValue(reader.getElementText()));
             break;
         }
       } else if(event == END_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName().toLowerCase());
+        Element element = Element.valueOf(reader.getLocalName());
         switch(element) {
           case paymentFrequency:
             Interval i1 = new Interval();

@@ -17,13 +17,13 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
  */
 public class StubParser implements NodeParser<Stub> {
   enum Element {
-    stubcalculationperiodamount,
-    calculationperioddatesreference,
-    initialstub,
-    floatingrate,
-    floatingrateindex,
-    indextenor,
-    periodmultiplier,
+    stubCalculationPeriodAmount,
+    calculationPeriodDatesReference,
+    initialStub,
+    floatingRate,
+    floatingRateIndex,
+    indexTenor,
+    periodMultiplier,
     period
   }
 
@@ -33,11 +33,11 @@ public class StubParser implements NodeParser<Stub> {
     while (reader.hasNext()) {
       int event = reader.next();
       if (event == START_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName().toLowerCase());
+        Element element = Element.valueOf(reader.getLocalName());
       } else if (event == END_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName().toLowerCase());
+        Element element = Element.valueOf(reader.getLocalName());
         switch (element) {
-          case stubcalculationperiodamount:
+          case stubCalculationPeriodAmount:
             return stub;
         }
       }

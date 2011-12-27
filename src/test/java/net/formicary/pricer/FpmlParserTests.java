@@ -1,20 +1,27 @@
 package net.formicary.pricer;
 
 import net.formicary.pricer.impl.FpmlTradeStore;
+import org.cdmckay.coffeedom.Document;
+import org.cdmckay.coffeedom.Element;
+import org.cdmckay.coffeedom.Text;
 import org.cdmckay.coffeedom.input.SAXBuilder;
 import org.cdmckay.coffeedom.xpath.XPath;
+import org.fpml.spec503wd3.IdentifiedDate;
 import org.fpml.spec503wd3.Swap;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static org.testng.Assert.assertEquals;
 
 /**
  * @author hsuleiman
@@ -25,8 +32,8 @@ import java.util.List;
 public class FpmlParserTests {
   private FpmlTradeStore store;
   private SAXBuilder builder = new SAXBuilder();
-  private XPath swapPath = XPath.newInstance("/*[name()='FpML']/*[name()='trade']/*[name()='swap']");
-  private XPath unadjustedDate = XPath.newInstance("*[name()='swapStream'][1]/*[name()='calculationPeriodDates']/*[name()='effectiveDate']/*[name()='unadjustedDate']/text()");
+  private XPath stream1Path = XPath.newInstance("/*[name()='FpML']/*[name()='trade']/*[name()='swap']/*[name()='swapStream'][1]");
+  private XPath unadjustedDate = XPath.newInstance("*[name()='calculationPeriodDates']/*[name()='effectiveDate']/*[name()='unadjustedDate']/text()");
   private long now;
   private int count;
 
@@ -47,10 +54,15 @@ public class FpmlParserTests {
   public void checkFields(String id) throws IOException {
     File file = new File(store.getFpmlDir(), id + ".xml");
     Swap swap = store.getTrade(id);
-//    Document doc = builder.build(file);
-//    Element swapEl = (Element)swapPath.selectSingleNode(doc);
-//    Text date = (Text)unadjustedDate.selectSingleNode(swapEl);
-//    assertEquals(swap.getStream1().getCalculationPeriodDates().getEffectiveDate().getUnadjusted().toString(), date.getTextTrim());
+    Document doc = builder.build(file);
+    Element streamEl = (Element) stream1Path.selectSingleNode(doc);
+    Text date = (Text)unadjustedDate.selectSingleNode(streamEl);
+    assertEquals(toString(swap.getSwapStream().get(0).getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate()), date.getTextTrim());
+  }
+
+  private static String toString(IdentifiedDate date) {
+    XMLGregorianCalendar cal = date.getValue();
+    return cal.toString();
   }
 
   @DataProvider(name = "fpml")

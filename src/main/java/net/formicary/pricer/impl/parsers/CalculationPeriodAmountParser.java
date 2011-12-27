@@ -54,7 +54,7 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
     while (reader.hasNext()) {
       int event = reader.next();
       if (event == START_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName().toLowerCase());
+        Element element = Element.valueOf(reader.getLocalName());
         switch (element) {
           case dayCountFraction:
             DayCountFraction dayCountFraction = new DayCountFraction();
@@ -82,11 +82,11 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
             getFloatingCalculation(calculation).getIndexTenor().setPeriod(PeriodEnum.valueOf(reader.getElementText()));
             break;
           case compoundingMethod:
-            calculation.setCompoundingMethod(CompoundingMethodEnum.valueOf(reader.getElementText()));
+            calculation.setCompoundingMethod(CompoundingMethodEnum.fromValue(reader.getElementText()));
             break;
         }
       } else if (event == END_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName().toLowerCase());
+        Element element = Element.valueOf(reader.getLocalName());
         switch (element) {
           case calculationPeriodAmount:
             return cpa;

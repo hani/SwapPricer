@@ -66,7 +66,7 @@ public class FpmlTradeStore implements TradeStore {
     XMLStreamReader reader = factory.createXMLStreamReader(new FileInputStream(f));
     for (int event = reader.next(); event != END_DOCUMENT; event = reader.next()) {
       if (event == START_ELEMENT) {
-        NodeParser parser = parsers.get(reader.getLocalName().toLowerCase());
+        NodeParser parser = parsers.get(reader.getLocalName());
         if(parser != null) {
           parser.parse(reader, ctx);
         }

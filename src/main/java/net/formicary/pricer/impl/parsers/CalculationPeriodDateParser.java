@@ -46,7 +46,7 @@ public class CalculationPeriodDateParser implements NodeParser<CalculationPeriod
     while(reader.hasNext()) {
       int event = reader.next();
       if (event == START_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName().toLowerCase());
+        Element element = Element.valueOf(reader.getLocalName());
         String myId = reader.getAttributeValue(null, "id");
         if(myId != null) {
           ctx.getCalculationPeriodDates().put(myId, dates);
@@ -91,12 +91,20 @@ public class CalculationPeriodDateParser implements NodeParser<CalculationPeriod
             if(currentDate != null) {
               currentDate.getDateAdjustments().setBusinessDayConvention(convention);
             } else {
+              if(dates.getCalculationPeriodDatesAdjustments() == null) {
+                dates.setCalculationPeriodDatesAdjustments(new BusinessDayAdjustments());
+              }
               dates.getCalculationPeriodDatesAdjustments().setBusinessDayConvention(convention);
             }
             break;
           case businessCenters:
+            centers = new BusinessCenters();
+            if(currentDate == null) {
+              dates.getCalculationPeriodDatesAdjustments().setBusinessCenters(centers);
+            } else {
+              currentDate.getDateAdjustments().setBusinessCenters(centers);
+            }
             String id = reader.getAttributeValue(null, "id");
-            centers = currentDate == null ? dates.getCalculationPeriodDatesAdjustments().getBusinessCenters() : currentDate.getDateAdjustments().getBusinessCenters();
             if(id != null) {
               ctx.getBusinessCenters().put(id, centers);
             }
@@ -112,7 +120,7 @@ public class CalculationPeriodDateParser implements NodeParser<CalculationPeriod
             break;
         }
       } else if(event == END_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName().toLowerCase());
+        Element element = Element.valueOf(reader.getLocalName());
         switch(element) {
           case calculationPeriodDates:
             //we're done

@@ -34,7 +34,7 @@ public class SwapStreamParser implements NodeParser<InterestRateStream> {
     while(reader.hasNext()) {
       int event = reader.next();
       if(event == START_ELEMENT) {
-        NodeParser parser = ctx.getParsers().get(reader.getLocalName().toLowerCase());
+        NodeParser parser = ctx.getParsers().get(reader.getLocalName());
         if(parser != null) {
           Object entity = parser.parse(reader, ctx);
           if(entity instanceof CalculationPeriodAmount) {
@@ -51,7 +51,7 @@ public class SwapStreamParser implements NodeParser<InterestRateStream> {
         }
 
       } else if(event == END_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName().toLowerCase());
+        Element element = Element.valueOf(reader.getLocalName());
         switch(element) {
           case swapStream:
             if(ctx.getStream1() == null) {

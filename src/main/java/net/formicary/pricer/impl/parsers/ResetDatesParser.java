@@ -49,7 +49,7 @@ public class ResetDatesParser implements NodeParser<ResetDates> {
     while(reader.hasNext()) {
       int event = reader.next();
       if(event == START_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName().toLowerCase());
+        Element element = Element.valueOf(reader.getLocalName());
         switch(element) {
           case calculationPeriodDatesReference:
             CalculationPeriodDates item = ctx.getCalculationPeriodDates().get(reader.getAttributeValue(null, "href"));
@@ -58,7 +58,7 @@ public class ResetDatesParser implements NodeParser<ResetDates> {
             dates.setCalculationPeriodDatesReference(ref);
             break;
           case resetRelativeTo:
-            dates.setResetRelativeTo(ResetRelativeToEnum.valueOf(reader.getElementText()));
+            dates.setResetRelativeTo(ResetRelativeToEnum.fromValue(reader.getElementText()));
             break;
           case calculationPeriodDates:
             throw new RuntimeException("Not implemented: " + element.name());
@@ -82,11 +82,11 @@ public class ResetDatesParser implements NodeParser<ResetDates> {
             adjustments.setBusinessCenters(bcs);
             break;
           case dayType:
-            dates.getFixingDates().setDayType(DayTypeEnum.valueOf(reader.getElementText()));
+            dates.getFixingDates().setDayType(DayTypeEnum.fromValue(reader.getElementText()));
             break;
         }
       } else if(event == END_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName().toLowerCase());
+        Element element = Element.valueOf(reader.getLocalName());
         switch(element) {
           case resetDates:
             return dates;
