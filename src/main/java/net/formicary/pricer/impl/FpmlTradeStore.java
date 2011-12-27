@@ -1,7 +1,8 @@
 package net.formicary.pricer.impl;
 
+import net.formicary.pricer.TradeStore;
 import net.formicary.pricer.impl.parsers.*;
-import net.formicary.pricer.model.Swap;
+import org.fpml.spec503wd3.Swap;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -23,7 +24,7 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
  *         Time: 9:25 PM
  */
 @Singleton
-public class FpmlTradeStore /*implements TradeStore */{
+public class FpmlTradeStore implements TradeStore {
 
   private Map<String, NodeParser> parsers = new HashMap<String, NodeParser>();
   private final XMLInputFactory factory;
@@ -71,8 +72,8 @@ public class FpmlTradeStore /*implements TradeStore */{
         }
       }
     }
-    swap.setStream1(ctx.getStream1());
-    swap.setStream2(ctx.getStream2());
+//    swap.setStream1(ctx.getStream1());
+//    swap.setStream2(ctx.getStream2());
     return swap;
   }
 

@@ -1,18 +1,19 @@
 package net.formicary.pricer;
 
-import java.io.IOException;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
-import net.formicary.pricer.impl.*;
+import net.formicary.pricer.impl.CalendarManagerImpl;
+import net.formicary.pricer.impl.CurveManagerImpl;
+import net.formicary.pricer.impl.FpmlJAXBTradeStore;
 import net.formicary.pricer.loader.HolidayLoader;
 import net.objectlab.kit.datecalc.joda.LocalDateKitCalculatorsFactory;
 import org.fpml.spec503wd3.DataDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
 
 import static com.google.inject.Scopes.SINGLETON;
 
@@ -37,7 +38,7 @@ public class PricerModule extends AbstractModule {
     }).in(SINGLETON);
     bind(CalendarManager.class).to(CalendarManagerImpl.class);
     bind(CurveManager.class).to(CurveManagerImpl.class);
-    bind(TradeStore.class).to(SimpleTradeStore.class);
+    bind(TradeStore.class).to(FpmlJAXBTradeStore.class);
     LocalDateKitCalculatorsFactory calculatorsFactory = LocalDateKitCalculatorsFactory.getDefaultInstance();
     try {
       HolidayLoader loader = new HolidayLoader(calculatorsFactory);

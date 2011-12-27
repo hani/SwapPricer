@@ -1,12 +1,11 @@
 package net.formicary.pricer.impl;
 
-import java.util.HashMap;
-import java.util.Map;
+import net.formicary.pricer.TradeStore;
+import org.fpml.spec503wd3.Swap;
 
 import javax.inject.Singleton;
-
-import net.formicary.pricer.TradeStore;
-import net.formicary.pricer.model.VanillaSwap;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author hani
@@ -15,14 +14,14 @@ import net.formicary.pricer.model.VanillaSwap;
  */
 @Singleton
 public class SimpleTradeStore implements TradeStore {
-  private Map<String, VanillaSwap> map = new HashMap<String, VanillaSwap>();
+  private Map<String, Swap> map = new HashMap<String, Swap>();
 
   @Override
-  public VanillaSwap getTrade(String id) {
+  public Swap getTrade(String id) {
     return map.get(id);
   }
 
-  public void addTrade(VanillaSwap trade) {
+  public void addTrade(Swap trade) {
     map.put(trade.getId(), trade);
   }
 }

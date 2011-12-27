@@ -1,15 +1,18 @@
 package net.formicary.pricer.impl;
 
-import java.io.File;
-import java.io.IOException;
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.xml.bind.*;
-import javax.xml.stream.XMLStreamException;
-
+import net.formicary.pricer.TradeStore;
 import org.fpml.spec503wd3.DataDocument;
 import org.fpml.spec503wd3.Swap;
 import org.fpml.spec503wd3.Trade;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author hani
@@ -17,7 +20,7 @@ import org.fpml.spec503wd3.Trade;
  *         Time: 9:25 PM
  */
 @Singleton
-public class FpmlJAXBTradeStore /*implements TradeStore */{
+public class FpmlJAXBTradeStore implements TradeStore {
 
   @Inject
   private String fpmlDir;

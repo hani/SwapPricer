@@ -1,6 +1,6 @@
 package net.formicary.pricer;
 
-import net.formicary.pricer.model.VanillaSwap;
+import org.fpml.spec503wd3.Swap;
 
 /**
  * @author hani
@@ -8,5 +8,5 @@ import net.formicary.pricer.model.VanillaSwap;
  *         Time: 9:24 PM
  */
 public interface TradeStore {
-  VanillaSwap getTrade(String id);
+  Swap getTrade(String id);
 }

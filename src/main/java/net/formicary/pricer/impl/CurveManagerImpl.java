@@ -4,6 +4,7 @@ import net.formicary.pricer.CurveManager;
 import net.formicary.pricer.model.CurvePillarPoint;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.fpml.spec503wd3.Interval;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -77,13 +78,14 @@ public class CurveManagerImpl implements CurveManager {
   }
 
   @Override
-  public double getDiscountFactor(LocalDate flowDate, LocalDate valuationDate, String ccy, String tenor) {
+  public double getDiscountFactor(LocalDate flowDate, LocalDate valuationDate, String ccy, Interval tenor, boolean isFixed) {
     //LCH uses OIS rate for futured fixed flows
     double interpolatedZeroRate;
-    if("OIS".equals(tenor)) {
-      interpolatedZeroRate = getInterpolatedForwardRate(flowDate, ccy, tenor);
+    if(isFixed) {
+      interpolatedZeroRate = getInterpolatedForwardRate(flowDate, ccy, "OIS");
     } else {
-      interpolatedZeroRate = getInterpolatedDiscountRate(flowDate, ccy, tenor);
+      String val = tenor.getPeriodMultiplier() + tenor.getPeriod().value();
+      interpolatedZeroRate = getInterpolatedDiscountRate(flowDate, ccy, val);
     }
     double days = Days.daysBetween(valuationDate, flowDate).getDays();
     return Math.exp(interpolatedZeroRate * -(days) / 365d);
@@ -103,6 +105,9 @@ public class CurveManagerImpl implements CurveManager {
 
   public double getInterpolatedRate(LocalDate date, String ccy, String curve) {
     List<CurvePillarPoint> points = curveData.get(curve);
+    if(points == null) {
+      throw new IllegalArgumentException("No curve points found for curve " + curve + " currency " + ccy + " on valuation date " + date);
+    }
     for(int i = 0; i < points.size(); i++) {
       if(points.get(i).getMaturityDate().isAfter(date)) {
         //we have our two dates, since we know the pillar list is sorted by ascending dates
@@ -121,11 +126,12 @@ public class CurveManagerImpl implements CurveManager {
   }
 
   @Override
-  public double getImpliedForwardRate(LocalDate start, LocalDate end, LocalDate valuationDate, String ccy, String tenor) {
-    double startRate = getInterpolatedForwardRate(start, ccy, tenor);
+  public double getImpliedForwardRate(LocalDate start, LocalDate end, LocalDate valuationDate, String ccy, Interval tenor) {
+    String val = tenor.getPeriodMultiplier() + tenor.getPeriod().value();
+    double startRate = getInterpolatedForwardRate(start, ccy, val);
     //get the start discount factor
     double startDf = Math.exp(startRate * -(Days.daysBetween(valuationDate, start).getDays()) / 365d);
-    double endRate = getInterpolatedForwardRate(end, ccy, tenor);
+    double endRate = getInterpolatedForwardRate(end, ccy, val);
     double endDf = Math.exp(endRate * - (Days.daysBetween(valuationDate, end).getDays())/ 365d);
     double forwardRate = ((startDf/endDf) - 1) * (360d/Days.daysBetween(start, end).getDays());
     return forwardRate;

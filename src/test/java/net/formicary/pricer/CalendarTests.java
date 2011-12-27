@@ -2,16 +2,18 @@ package net.formicary.pricer;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import net.formicary.pricer.model.BusinessDayConvention;
 import net.formicary.pricer.model.DayCountFraction;
+import org.fpml.spec503wd3.*;
 import org.joda.time.LocalDate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.fpml.spec503wd3.BusinessDayConventionEnum.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -25,6 +27,17 @@ public class CalendarTests {
 
   private CalendarManager manager;
 
+  private BusinessCenters getCenters(String... vals) {
+    BusinessCenters c = new BusinessCenters();
+    for (String val : vals) {
+      BusinessCenter center = new BusinessCenter();
+      center.setId(val);
+      center.setValue(val);
+      c.getBusinessCenter().add(center);
+    }
+    return c;
+  }
+
   @BeforeClass
   public void init() {
     Injector injector = Guice.createInjector(new PricerModule());
@@ -32,15 +45,15 @@ public class CalendarTests {
   }
 
   public void weekend() {
-    assertEquals(manager.getAdjustedDate(new LocalDate(2011, 8, 13), BusinessDayConvention.FOLLOWING, "USNY"), new LocalDate(2011, 8, 15));
+    assertEquals(manager.getAdjustedDate(new LocalDate(2011, 8, 13), FOLLOWING, getCenters("USNY")), new LocalDate(2011, 8, 15));
   }
 
   public void holiday() {
-    assertEquals(manager.getAdjustedDate(new LocalDate(2010, 12, 27), BusinessDayConvention.FOLLOWING, "GBLO"), new LocalDate(2010, 12, 29));
+    assertEquals(manager.getAdjustedDate(new LocalDate(2010, 12, 27), FOLLOWING, getCenters("GBLO")), new LocalDate(2010, 12, 29));
   }
 
   public void notHoliday() {
-    assertEquals(manager.getAdjustedDate(new LocalDate(2011, 8, 10), BusinessDayConvention.MODFOLLOWING, "GBLO"), new LocalDate(2011, 8, 10));
+    assertEquals(manager.getAdjustedDate(new LocalDate(2011, 8, 10), MODFOLLOWING, getCenters("GBLO")), new LocalDate(2011, 8, 10));
   }
 
   public void dayCountFractionAct360() {
@@ -49,14 +62,18 @@ public class CalendarTests {
   }
 
   public void multipleCalendars() {
-    assertEquals(manager.getAdjustedDate(new LocalDate(2011, 5, 30), BusinessDayConvention.PRECEDING, "GBLO", "USNY"), new LocalDate(2011, 5, 27));
+    assertEquals(manager.getAdjustedDate(new LocalDate(2011, 5, 30), PRECEDING, getCenters("GBLO", "USNY")), new LocalDate(2011, 5, 27));
   }
 
   public void paymentDates() {
     LocalDate start = new LocalDate(2011, 2, 5);
     LocalDate end = new LocalDate(2012, 2, 5);
-    BusinessDayConvention[] conventions = new BusinessDayConvention[]{BusinessDayConvention.MODFOLLOWING, BusinessDayConvention.MODFOLLOWING, BusinessDayConvention.MODFOLLOWING};
-    List<LocalDate> dates = manager.getAdjustedDates(start, end, conventions, "3M", "GBLO");
+    BusinessDayConventionEnum[] conventions = new BusinessDayConventionEnum[]{MODFOLLOWING, MODFOLLOWING, MODFOLLOWING};
+    Interval interval = new Interval();
+    interval.setPeriod(PeriodEnum.M);
+    interval.setPeriodMultiplier(new BigInteger("3"));
+    BusinessCenters[] centers = new BusinessCenters[]{getCenters("GBLO"), getCenters("GBLO"), getCenters("GBLO")};
+    List<LocalDate> dates = manager.getAdjustedDates(start, end, conventions, interval, centers);
     Iterator<LocalDate> i = dates.iterator();
     assertEquals(i.next(), new LocalDate(2011, 2, 7));
     assertEquals(i.next(), new LocalDate(2011, 5, 5));
@@ -73,6 +90,10 @@ public class CalendarTests {
 
   public void fixingDates() {
     List<LocalDate> dates = Arrays.asList(new LocalDate(2011, 2, 7));
-    assertEquals(manager.getFixingDates(dates, -2, "GBLO").get(0), new LocalDate(2011, 2, 3));
+    RelativeDateOffset offset = new RelativeDateOffset();
+    offset.setBusinessCenters(getCenters("GBLO"));
+    offset.setPeriod(PeriodEnum.D);
+    offset.setPeriodMultiplier(new BigInteger("-2"));
+    assertEquals(manager.getFixingDates(dates, offset).get(0), new LocalDate(2011, 2, 3));
   }
 }

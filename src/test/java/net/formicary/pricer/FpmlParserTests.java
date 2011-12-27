@@ -1,9 +1,9 @@
 package net.formicary.pricer;
 
 import net.formicary.pricer.impl.FpmlTradeStore;
-import net.formicary.pricer.model.Swap;
 import org.cdmckay.coffeedom.input.SAXBuilder;
 import org.cdmckay.coffeedom.xpath.XPath;
+import org.fpml.spec503wd3.Swap;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -26,7 +26,7 @@ public class FpmlParserTests {
   private FpmlTradeStore store;
   private SAXBuilder builder = new SAXBuilder();
   private XPath swapPath = XPath.newInstance("/*[name()='FpML']/*[name()='trade']/*[name()='swap']");
-  private XPath unadjustedDate = XPath.newInstance("*[name()='swapstream'][1]/*[name()='calculationperioddates']/*[name()='effectivedate']/*[name()='unadjusteddate']/text()");
+  private XPath unadjustedDate = XPath.newInstance("*[name()='swapStream'][1]/*[name()='calculationPeriodDates']/*[name()='effectiveDate']/*[name()='unadjustedDate']/text()");
   private long now;
   private int count;
 
