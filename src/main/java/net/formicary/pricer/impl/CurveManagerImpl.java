@@ -106,7 +106,7 @@ public class CurveManagerImpl implements CurveManager {
   public double getInterpolatedRate(LocalDate date, String ccy, String curve) {
     List<CurvePillarPoint> points = curveData.get(curve);
     if(points == null) {
-      throw new IllegalArgumentException("No curve points found for curve " + curve + " currency " + ccy + " on valuation date " + date);
+      throw new IllegalArgumentException("No curve points found for curve " + curve + " currency " + ccy + " on date " + date);
     }
     for(int i = 0; i < points.size(); i++) {
       if(points.get(i).getMaturityDate().isAfter(date)) {
