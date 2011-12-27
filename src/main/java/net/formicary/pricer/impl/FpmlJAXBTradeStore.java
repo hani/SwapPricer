@@ -7,8 +7,8 @@ import javax.inject.Singleton;
 import javax.xml.bind.*;
 import javax.xml.stream.XMLStreamException;
 
-import net.formicary.pricer.model.Swap;
 import org.fpml.spec503wd3.DataDocument;
+import org.fpml.spec503wd3.Swap;
 import org.fpml.spec503wd3.Trade;
 
 /**
@@ -37,9 +37,10 @@ public class FpmlJAXBTradeStore /*implements TradeStore */{
     this.fpmlDir = fpmlDir;
   }
 
-  public Trade getTrade(String id) {
+  public Swap getTrade(String id) {
     try {
-      Trade swap = readFpml(new File(fpmlDir, id + ".xml"));
+      Trade trade = readFpml(new File(fpmlDir, id + ".xml"));
+      Swap swap = (Swap)trade.getProduct().getValue();
       //swap.setId(id);
       return swap;
     } catch (Exception e) {
@@ -57,7 +58,7 @@ public class FpmlJAXBTradeStore /*implements TradeStore */{
     store.setFpmlDir("src/test/resources/fpml");
     long now = System.currentTimeMillis();
     for(int i = 0; i < 1000; i++) {
-      store.getTrade("LCH00000997564");
+      store.getTrade("LCH00000894736");
     }
     long timeTaken = System.currentTimeMillis() - now;
     System.out.println("Time to read 1000 trades: " + timeTaken + "ms average:" + (timeTaken / 1000) + "ms");
