@@ -1,6 +1,7 @@
 package net.formicary.pricer;
 
 import net.formicary.pricer.model.Cashflow;
+import net.formicary.pricer.model.FlowType;
 import net.formicary.pricer.util.DateUtil;
 import net.formicary.pricer.util.FpMLUtil;
 import org.fpml.spec503wd3.*;
@@ -50,12 +51,18 @@ public class CashflowGenerator {
       if(fixingDate.isBefore(valuationDate) && periodEndDate.isAfter(valuationDate)) {
         double rate = rateManager.getZeroRate(currency, interval, fixingDate) / 100;
         double discountedAmount = calculateDiscountedAmount(valuationDate, periodStartDate, periodEndDate, leg, rate);
-        flows.add(new Cashflow(discountedAmount, periodEndDate));
+        Cashflow flow = new Cashflow(discountedAmount, periodEndDate);
+        flow.setRate(rate);
+        flow.setType(FlowType.FLT);
+        flows.add(flow);
       } else if(fixingDate.isAfter(valuationDate)) {
         //future flows, doesn't work yet
         double impliedForwardRate = curveManager.getImpliedForwardRate(periodStartDate, periodEndDate, valuationDate, currency, interval);
         double discountedAmount = calculateDiscountedAmount(valuationDate, paymentDates.get(i - 1), periodEndDate, leg, impliedForwardRate);
-        flows.add(new Cashflow(discountedAmount, periodEndDate));
+        Cashflow flow = new Cashflow(discountedAmount, periodEndDate);
+        flow.setRate(impliedForwardRate);
+        flow.setType(FlowType.FLT);
+        flows.add(flow);
       }
     }
     return flows;
@@ -73,7 +80,10 @@ public class CashflowGenerator {
       if(start.isAfter(valuationDate)) {
         BigDecimal rate = leg.getCalculationPeriodAmount().getCalculation().getFixedRateSchedule().getInitialValue();
         double discountedAmount = calculateDiscountedAmount(valuationDate, dates.get(i - 1), dates.get(i), leg, rate.doubleValue());
-        flows.add(new Cashflow(discountedAmount, start));
+        Cashflow flow = new Cashflow(discountedAmount, start);
+        flow.setRate(rate.doubleValue());
+        flow.setType(FlowType.FIX);
+        flows.add(flow);
       }
     }
     return flows;

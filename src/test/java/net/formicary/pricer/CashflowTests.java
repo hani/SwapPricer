@@ -44,7 +44,7 @@ public class CashflowTests {
 
     List<Cashflow> flows = generator.generateCashflows(new LocalDate(2011, 11, 4), id);
     log.info("Flows for {}: {}", id, flows);
-    log.info("Time to calculate flows: {}ms: ", System.currentTimeMillis() - now);
+    log.info("Time to calculate flows for trade {}: {}ms", id, System.currentTimeMillis() - now);
     //assertEquals(flows.size(), 6, flows.toString());
   }
 
@@ -69,7 +69,7 @@ public class CashflowTests {
   @DataProvider(name = "singletrade")
   public Object[][] singleTrade() {
     Object[][] data = new Object[1][];
-    data[0] = new Object[]{"LCH00000513426"};
+    data[0] = new Object[]{"LCH00000923966-OIS"};
     return data;
   }
 }
