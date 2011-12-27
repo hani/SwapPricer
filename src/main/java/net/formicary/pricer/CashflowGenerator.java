@@ -33,7 +33,7 @@ public class CashflowGenerator {
   }
 
   private List<Cashflow> generateFloatingFlows(LocalDate valuationDate, InterestRateStream leg) {
-    LocalDate startDate =  DateUtil.getDate(leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
+    LocalDate startDate =  DateUtil.getDate(leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate());
     LocalDate endDate = DateUtil.getDate(leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
     BusinessDayConventionEnum[] conventions = FpMLUtil.getBusinessDayConventions(leg);
     AmountSchedule notional = leg.getCalculationPeriodAmount().getCalculation().getNotionalSchedule().getNotionalStepSchedule();
@@ -61,7 +61,7 @@ public class CashflowGenerator {
   }
 
   private List<Cashflow> generateFixedFlows(LocalDate valuationDate, InterestRateStream leg) {
-    LocalDate startDate =  DateUtil.getDate(leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
+    LocalDate startDate =  DateUtil.getDate(leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate());
     LocalDate endDate = DateUtil.getDate(leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
     BusinessDayConventionEnum[] conventions = FpMLUtil.getBusinessDayConventions(leg);
     List<LocalDate> dates = calendarManager.getAdjustedDates(startDate, endDate, conventions, leg.getPaymentDates().getPaymentFrequency(), FpMLUtil.getBusinessCenters(leg));
