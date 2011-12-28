@@ -14,10 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author hani
@@ -32,8 +29,6 @@ public class CurveManagerImpl implements CurveManager {
   private Map<String, Map<String, String[]>> mapping = new HashMap<String, Map<String, String[]>>();
   //a map of curve -> list of pillar points
   private Map<String, List<CurvePillarPoint>> curveData = new HashMap<String, List<CurvePillarPoint>>();
-  private int invocationCount;
-  private int dateComparisons;
 
   public CurveManagerImpl() throws IOException {
     loadCurveMapping("/curvemapping.csv");
@@ -51,6 +46,10 @@ public class CurveManagerImpl implements CurveManager {
         curveData.put(p.getCurveName(), points);
       }
       points.add(p);
+    }
+    //just to be safe, in case LCH changes stuff in the report
+    for (List<CurvePillarPoint> points : curveData.values()) {
+      Collections.sort(points);
     }
   }
 
@@ -113,27 +112,24 @@ public class CurveManagerImpl implements CurveManager {
     if(points == null) {
       throw new IllegalArgumentException("No curve points found for curve " + curve + " currency " + ccy + " on date " + date);
     }
-    invocationCount++;
-    for(int i = 0; i < points.size(); i++) {
-      CurvePillarPoint end = points.get(i);
-      //todo future enhancement, since we know the list is sorted, we can probably find a better algorithm
-      //to find the two pillar points rather than a linear search. This code is called a *lot* so that sort of optimisation
-      //becomes worthwhile (called 385188 times for 240 trades currently).
-      dateComparisons++;
-      if(end.getMaturityDate().isAfter(date)) {
-        //we have our two dates, since we know the pillar list is sorted by ascending dates
-        if(i == 0) {
-          //its the first rate we have, so we just use that since there's nothing before to interpolate with
-          return end.getZeroRate();
-        }
-        CurvePillarPoint start = points.get(i - 1);
-        double daysFromStartToNow = Days.daysBetween(start.getMaturityDate(), date).getDays();
-        double totalDays = Days.daysBetween(start.getMaturityDate(), end.getMaturityDate()).getDays();
-        //linear interpolation, nothing fancy
-        return start.getZeroRate() + daysFromStartToNow * (end.getZeroRate() - start.getZeroRate()) / totalDays;
-      }
+    //if we're here, then we definitely have to interpolate, and so the search will always return a negative
+    int index = Collections.binarySearch(points, new CurvePillarPoint(curve, date));
+    if(index > -1) {
+      //we have an exact match, no need to interpolate, right?
+      return points.get(index).getZeroRate();
+    } else if(index == -1) {
+      //it's right before the first element, so we just use that rate
+      return points.get(0).getZeroRate();
+    } else {
+      //we definitely need to interpolate, it's a negative index thats somewhere between two pillar points
+      int endIndex = -(index + 1);
+      CurvePillarPoint end = points.get(endIndex);
+      CurvePillarPoint start = points.get(endIndex - 1);
+      double daysFromStartToNow = Days.daysBetween(start.getMaturityDate(), date).getDays();
+      double totalDays = Days.daysBetween(start.getMaturityDate(), end.getMaturityDate()).getDays();
+      //linear interpolation, nothing fancy
+      return start.getZeroRate() + daysFromStartToNow * (end.getZeroRate() - start.getZeroRate()) / totalDays;
     }
-    throw new IllegalArgumentException("No rate data found for date " + date + " currency " + ccy);
   }
 
   @Override
