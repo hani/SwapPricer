@@ -47,19 +47,23 @@ public class CashflowGenerator {
     List<LocalDate> paymentDates = calendarManager.getAdjustedDates(startDate, endDate, conventions, interval, FpMLUtil.getBusinessCenters(leg));
     List<LocalDate> fixingDates = calendarManager.getFixingDates(paymentDates, leg.getResetDates().getFixingDates());
     List<Cashflow> flows = new ArrayList<Cashflow>();
+    //todo LCH skips the payment thats 3 days after valuation date
+    LocalDate cutoff = valuationDate.plusDays(3);
     for(int i = 1; i < paymentDates.size(); i++) {
       LocalDate periodEndDate = paymentDates.get(i);
       LocalDate periodStartDate = paymentDates.get(i - 1);
       LocalDate fixingDate = fixingDates.get(i -1);
-      if(fixingDate.isBefore(valuationDate) && periodEndDate.isAfter(valuationDate)) {
-        String index = getFloatingIndexName(calculation);
-        double rate = rateManager.getZeroRate(index, currency, interval, fixingDate) / 100;
-        Cashflow flow = getCashflow(valuationDate, periodStartDate, periodEndDate, leg, rate);
-        flows.add(flow);
-      } else if(fixingDate.isAfter(valuationDate)) {
-        double impliedForwardRate = curveManager.getImpliedForwardRate(periodStartDate, periodEndDate, valuationDate, currency, interval);
-        Cashflow flow = getCashflow(valuationDate, paymentDates.get(i - 1), periodEndDate, leg, impliedForwardRate);
-        flows.add(flow);
+      if(periodEndDate.isAfter(cutoff)) {
+        if(fixingDate.isBefore(valuationDate)) {
+          String index = getFloatingIndexName(calculation);
+          double rate = rateManager.getZeroRate(index, currency, interval, fixingDate) / 100;
+          Cashflow flow = getCashflow(valuationDate, periodStartDate, periodEndDate, leg, rate);
+          flows.add(flow);
+        } else {
+          double impliedForwardRate = curveManager.getImpliedForwardRate(periodStartDate, periodEndDate, valuationDate, currency, interval);
+          Cashflow flow = getCashflow(valuationDate, paymentDates.get(i - 1), periodEndDate, leg, impliedForwardRate);
+          flows.add(flow);
+        }
       }
     }
     return flows;
@@ -81,10 +85,11 @@ public class CashflowGenerator {
     CalculationPeriodFrequency interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
     List<LocalDate> dates = calendarManager.getAdjustedDates(startDate, endDate, conventions, interval, FpMLUtil.getBusinessCenters(leg));
     List<Cashflow> flows = new ArrayList<Cashflow>();
+    //TODO verify that LCH skips the payment thats 3 days after valuation date
+    LocalDate cutoff = valuationDate.plusDays(3);
     for(int i = 1; i < dates.size(); i++) {
       LocalDate paymentDate = dates.get(i);
-      //TODO verify that LCH skips the payment thats due in between valuation date and next period start
-      if(paymentDate.isAfter(valuationDate)) {
+      if(paymentDate.isAfter(cutoff)) {
         BigDecimal rate = leg.getCalculationPeriodAmount().getCalculation().getFixedRateSchedule().getInitialValue();
         Cashflow flow = getCashflow(valuationDate, dates.get(i - 1), paymentDate, leg, rate.doubleValue());
         flows.add(flow);
