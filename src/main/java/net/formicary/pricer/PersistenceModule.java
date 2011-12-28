@@ -1,7 +1,5 @@
 package net.formicary.pricer;
 
-import java.net.UnknownHostException;
-
 import com.google.code.morphia.Datastore;
 import com.google.code.morphia.Morphia;
 import com.google.code.morphia.converters.SimpleValueConverter;
@@ -12,10 +10,13 @@ import com.google.code.morphia.mapping.MappedField;
 import com.google.code.morphia.mapping.MappingException;
 import com.google.inject.AbstractModule;
 import com.mongodb.Mongo;
+import net.formicary.pricer.impl.FpmlJAXBTradeStore;
 import net.formicary.pricer.impl.RateManagerImpl;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+
+import java.net.UnknownHostException;
 
 /**
  * @author hani
@@ -37,6 +38,7 @@ public class PersistenceModule extends AbstractModule {
       addError(e);
     }
     bind(RateManager.class).to(RateManagerImpl.class);
+    bind(TradeStore.class).to(FpmlJAXBTradeStore.class);
   }
 
   public class LocalDateConverter  extends TypeConverter implements SimpleValueConverter {

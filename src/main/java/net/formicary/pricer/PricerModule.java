@@ -38,7 +38,6 @@ public class PricerModule extends AbstractModule {
     }).in(SINGLETON);
     bind(CalendarManager.class).to(CalendarManagerImpl.class);
     bind(CurveManager.class).to(CurveManagerImpl.class);
-    bind(TradeStore.class).to(FpmlJAXBTradeStore.class);
     LocalDateKitCalculatorsFactory calculatorsFactory = LocalDateKitCalculatorsFactory.getDefaultInstance();
     try {
       HolidayLoader loader = new HolidayLoader(calculatorsFactory);

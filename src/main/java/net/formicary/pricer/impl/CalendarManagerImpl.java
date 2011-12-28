@@ -105,6 +105,19 @@ public class CalendarManagerImpl implements CalendarManager {
       return unadjustedDates;
     }
     LocalDate current = new LocalDate(start);
+    if(interval instanceof CalculationPeriodFrequency) {
+      CalculationPeriodFrequency f = (CalculationPeriodFrequency)interval;
+      if(f.getRollConvention().equals("IMM")) {
+
+      } else if(f.getRollConvention().equals("EOM")) {
+        while(current.isBefore(end) || current.equals(end)) {
+          unadjustedDates.add(current);
+          current = current.plusMonths(1);
+          current = current.property(DateTimeFieldType.dayOfMonth()).withMaximumValue();
+        }
+        return unadjustedDates;
+      }
+    }
     ReadablePeriod period = getPeriod(interval);
     while(current.isBefore(end) || current.equals(end)) {
       unadjustedDates.add(current);

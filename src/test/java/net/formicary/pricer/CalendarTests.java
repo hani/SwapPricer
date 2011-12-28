@@ -48,6 +48,18 @@ public class CalendarTests {
     assertEquals(manager.getAdjustedDate(new LocalDate(2011, 8, 13), FOLLOWING, getCenters("USNY")), new LocalDate(2011, 8, 15));
   }
 
+  public void eomRollConvention() {
+    CalculationPeriodFrequency f = new CalculationPeriodFrequency();
+    f.setRollConvention("EOM");
+    f.setPeriod(PeriodEnum.M);
+    f.setPeriodMultiplier(new BigInteger("1"));
+    List<LocalDate> dates = manager.getDatesInRange(new LocalDate(2011, 1, 31), new LocalDate(2011, 12, 31), f);
+    assertEquals(dates.size(), 12);
+    assertEquals(dates.get(1), new LocalDate(2011, 2, 28));
+    assertEquals(dates.get(2), new LocalDate(2011, 3, 31));
+    assertEquals(dates.get(3), new LocalDate(2011, 4, 30));
+  }
+
   public void holiday() {
     assertEquals(manager.getAdjustedDate(new LocalDate(2010, 12, 27), FOLLOWING, getCenters("GBLO")), new LocalDate(2010, 12, 29));
   }
