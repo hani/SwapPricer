@@ -1,7 +1,9 @@
 package net.formicary.pricer;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.name.Names;
 import net.formicary.pricer.impl.FpmlJAXBTradeStore;
 import net.formicary.pricer.model.Cashflow;
 import org.joda.time.LocalDate;
@@ -32,9 +34,13 @@ public class CashflowTests {
 
   @BeforeClass
   public void init() throws JAXBException {
-    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule());
+    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule(), new AbstractModule() {
+      @Override
+      protected void configure() {
+        bind(String.class).annotatedWith(Names.named("fpmlDir")).toInstance("src/test/resources/fpml");
+      }
+    });
     store = injector.getInstance(FpmlJAXBTradeStore.class);
-    store.setFpmlDir("src/test/resources/fpml");
     generator = injector.getInstance(CashflowGenerator.class);
   }
 
