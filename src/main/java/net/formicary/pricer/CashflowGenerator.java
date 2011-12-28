@@ -40,7 +40,8 @@ public class CashflowGenerator {
     LocalDate startDate = getStartDate(leg);
     LocalDate endDate = DateUtil.getDate(leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
     BusinessDayConventionEnum[] conventions = FpMLUtil.getBusinessDayConventions(leg);
-    AmountSchedule notional = leg.getCalculationPeriodAmount().getCalculation().getNotionalSchedule().getNotionalStepSchedule();
+    Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
+    AmountSchedule notional = calculation.getNotionalSchedule().getNotionalStepSchedule();
     String currency = notional.getCurrency().getValue();
     Interval interval = leg.getPaymentDates().getPaymentFrequency();
     List<LocalDate> paymentDates = calendarManager.getAdjustedDates(startDate, endDate, conventions, interval, FpMLUtil.getBusinessCenters(leg));
@@ -51,7 +52,10 @@ public class CashflowGenerator {
       LocalDate periodStartDate = paymentDates.get(i - 1);
       LocalDate fixingDate = fixingDates.get(i -1);
       if(fixingDate.isBefore(valuationDate) && periodEndDate.isAfter(valuationDate)) {
-        double rate = rateManager.getZeroRate(currency, interval, fixingDate) / 100;
+        FloatingRateCalculation floatingCalc = (FloatingRateCalculation) calculation.getRateCalculation().getValue();
+        String index = floatingCalc.getFloatingRateIndex().getValue();
+        index = index.substring(index.indexOf('-') + 1, index.lastIndexOf('-'));
+        double rate = rateManager.getZeroRate(index, currency, interval, fixingDate) / 100;
         Cashflow flow = getCashflow(valuationDate, periodStartDate, periodEndDate, leg, rate);
         flows.add(flow);
       } else if(fixingDate.isAfter(valuationDate)) {

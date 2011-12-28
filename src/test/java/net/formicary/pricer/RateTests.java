@@ -31,7 +31,7 @@ public class RateTests {
     Interval interval = new Interval();
     interval.setPeriod(PeriodEnum.M);
     interval.setPeriodMultiplier(new BigInteger("3"));
-    double rate = manager.getZeroRate("USD", interval, new LocalDate(2011, 5, 3));
+    double rate = manager.getZeroRate("LIBOR", "USD", interval, new LocalDate(2011, 5, 3));
     assertEquals(rate, 0.27225);
   }
 
@@ -40,6 +40,6 @@ public class RateTests {
     Interval interval = new Interval();
     interval.setPeriod(PeriodEnum.M);
     interval.setPeriodMultiplier(new BigInteger("1"));
-    manager.getZeroRate("xxx", interval, new LocalDate(2010, 4, 27));
+    manager.getZeroRate("LIBOR", "xxx", interval, new LocalDate(2010, 4, 27));
   }
 }

@@ -20,7 +20,7 @@ public class RateManagerImpl implements RateManager {
   @Inject Datastore ds;
 
   @Override
-  public double getZeroRate(String currency, Interval interval, LocalDate date) {
+  public double getZeroRate(String indexName, String currency, Interval interval, LocalDate date) {
     Query<Index> query = ds.createQuery(Index.class);
     query.field("currency").equal(currency);
     //hack, LCH rates are given to us in 12M vs 1Y
@@ -33,7 +33,7 @@ public class RateManagerImpl implements RateManager {
     }
     query.field("fixingDate").equal(date);
     //TODO shouldn't hardcode
-    query.field("name").equal("LIBOR");
+    query.field("name").equal(indexName);
     Index index = query.get();
     if(index == null) {
       throw new IllegalArgumentException("No rate found for " + currency + " " + interval.getPeriodMultiplier() + interval.getPeriod() + " on " + date);
@@ -43,7 +43,7 @@ public class RateManagerImpl implements RateManager {
 
   @Override
   public double getDiscountFactor(String currency, Interval interval, LocalDate date, LocalDate valuationDate) {
-    double zero = getZeroRate(currency, interval, date) / 100;
+    double zero = getZeroRate("LIBOR", currency, interval, date) / 100;
     double days = Days.daysBetween(date, valuationDate).getDays();
     return Math.exp(zero * -(days) / 365d);
   }

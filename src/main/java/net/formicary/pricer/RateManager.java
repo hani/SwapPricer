@@ -9,6 +9,6 @@ import org.joda.time.LocalDate;
  *         Time: 5:28 PM
  */
 public interface RateManager {
-  double getZeroRate(String currency, Interval interval, LocalDate date);
+  double getZeroRate(String indexName, String currency, Interval interval, LocalDate date);
   double getDiscountFactor(String currency, Interval interval, LocalDate date, LocalDate valuationDate);
 }
