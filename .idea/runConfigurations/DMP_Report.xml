@@ -18,6 +18,7 @@
       <option name="INTERPRETED" value="false" />
     </RunnerSettings>
     <RunnerSettings RunnerId="Run" />
+    <ConfigurationWrapper RunnerId="JProfiler" />
     <ConfigurationWrapper RunnerId="Run" />
     <method />
   </configuration>
