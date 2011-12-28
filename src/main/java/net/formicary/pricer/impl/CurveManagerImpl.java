@@ -32,6 +32,8 @@ public class CurveManagerImpl implements CurveManager {
   private Map<String, Map<String, String[]>> mapping = new HashMap<String, Map<String, String[]>>();
   //a map of curve -> list of pillar points
   private Map<String, List<CurvePillarPoint>> curveData = new HashMap<String, List<CurvePillarPoint>>();
+  private int invocationCount;
+  private int dateComparisons;
 
   public CurveManagerImpl() throws IOException {
     loadCurveMapping("/curvemapping.csv");
@@ -111,15 +113,20 @@ public class CurveManagerImpl implements CurveManager {
     if(points == null) {
       throw new IllegalArgumentException("No curve points found for curve " + curve + " currency " + ccy + " on date " + date);
     }
+    invocationCount++;
     for(int i = 0; i < points.size(); i++) {
-      if(points.get(i).getMaturityDate().isAfter(date)) {
+      CurvePillarPoint end = points.get(i);
+      //todo future enhancement, since we know the list is sorted, we can probably find a better algorithm
+      //to find the two pillar points rather than a linear search. This code is called a *lot* so that sort of optimisation
+      //becomes worthwhile (called 385188 times for 240 trades currently).
+      dateComparisons++;
+      if(end.getMaturityDate().isAfter(date)) {
         //we have our two dates, since we know the pillar list is sorted by ascending dates
         if(i == 0) {
           //its the first rate we have, so we just use that since there's nothing before to interpolate with
-          return points.get(i).getZeroRate();
+          return end.getZeroRate();
         }
         CurvePillarPoint start = points.get(i - 1);
-        CurvePillarPoint end = points.get(i);
         double daysFromStartToNow = Days.daysBetween(start.getMaturityDate(), date).getDays();
         double totalDays = Days.daysBetween(start.getMaturityDate(), end.getMaturityDate()).getDays();
         //linear interpolation, nothing fancy
