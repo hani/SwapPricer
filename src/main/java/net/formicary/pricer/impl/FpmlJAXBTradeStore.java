@@ -6,6 +6,7 @@ import org.fpml.spec503wd3.Swap;
 import org.fpml.spec503wd3.Trade;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -36,7 +37,8 @@ public class FpmlJAXBTradeStore implements TradeStore {
     return fpmlDir;
   }
 
-  public void setFpmlDir(String fpmlDir) {
+  @Inject
+  public void setFpmlDir(@Named("fpmlDir")String fpmlDir) {
     this.fpmlDir = fpmlDir;
   }
 

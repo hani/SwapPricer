@@ -144,7 +144,6 @@ public class CurveManagerImpl implements CurveManager {
   public String getDiscountCurve(String ccy, String tenor) {
     String[] values = mapping.get(ccy).get(tenor);
     if(values == null) {
-      log.warn("No mapping found for {} tenor {}, using 'Other'", ccy, tenor);
       values = mapping.get(ccy).get("other");
     }
     return values[1];
@@ -154,7 +153,6 @@ public class CurveManagerImpl implements CurveManager {
   public String getForwardCurve(String ccy, String tenor) {
     String[] values = mapping.get(ccy).get(tenor);
     if(values == null) {
-      log.warn("No mapping found for {} tenor {}, using 'Other'", ccy, tenor);
       values = mapping.get(ccy).get("other");
     }
     return values[0];
