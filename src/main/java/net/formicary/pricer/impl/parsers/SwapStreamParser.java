@@ -54,11 +54,7 @@ public class SwapStreamParser implements NodeParser<InterestRateStream> {
         Element element = Element.valueOf(reader.getLocalName());
         switch(element) {
           case swapStream:
-            if(ctx.getStream1() == null) {
-              ctx.setStream1(stream);
-            } else {
-              ctx.setStream2(stream);
-            }
+            ctx.getStreams().add(stream);
             return stream;
         }
       }

@@ -39,6 +39,7 @@ public class FpmlTradeStore implements TradeStore {
     parsers.put("paymentDates", new PaymentDatesParser());
     parsers.put("swapStream", new SwapStreamParser());
     parsers.put("stubCalculationPeriodAmount", new StubParser());
+    parsers.put("party", new PartyParser());
   }
 
   public String getFpmlDir() {
@@ -73,8 +74,7 @@ public class FpmlTradeStore implements TradeStore {
         }
       }
     }
-    swap.getSwapStream().add(ctx.getStream1());
-    swap.getSwapStream().add(ctx.getStream2());
+    swap.getSwapStream().addAll(ctx.getStreams());
     return swap;
   }
 

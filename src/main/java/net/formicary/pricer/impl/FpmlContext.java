@@ -3,8 +3,11 @@ package net.formicary.pricer.impl;
 import org.fpml.spec503wd3.BusinessCenters;
 import org.fpml.spec503wd3.CalculationPeriodDates;
 import org.fpml.spec503wd3.InterestRateStream;
+import org.fpml.spec503wd3.Party;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,23 +19,23 @@ public class FpmlContext {
   private Map<String, BusinessCenters> businessCenters = new HashMap<String, BusinessCenters>();
   private Map<String, CalculationPeriodDates> calculationPeriodDates = new HashMap<String, CalculationPeriodDates>();
   private Map<String, NodeParser> parsers;
-  private InterestRateStream stream1;
-  private InterestRateStream stream2;
+  private List<InterestRateStream> streams = new ArrayList<InterestRateStream>();
+  private Map<String, Party> parties = new HashMap<String, Party>();
 
-  public InterestRateStream getStream1() {
-    return stream1;
+  public Map<String, Party> getParties() {
+    return parties;
   }
 
-  public void setStream1(InterestRateStream stream1) {
-    this.stream1 = stream1;
+  public void setParties(Map<String, Party> parties) {
+    this.parties = parties;
   }
 
-  public InterestRateStream getStream2() {
-    return stream2;
+  public List<InterestRateStream> getStreams() {
+    return streams;
   }
 
-  public void setStream2(InterestRateStream stream2) {
-    this.stream2 = stream2;
+  public void setStreams(List<InterestRateStream> streams) {
+    this.streams = streams;
   }
 
   public Map<String, BusinessCenters> getBusinessCenters() {
