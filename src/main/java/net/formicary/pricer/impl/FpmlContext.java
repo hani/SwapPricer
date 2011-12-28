@@ -1,5 +1,6 @@
 package net.formicary.pricer.impl;
 
+import net.formicary.pricer.HrefListener;
 import org.fpml.spec503wd3.BusinessCenters;
 import org.fpml.spec503wd3.CalculationPeriodDates;
 import org.fpml.spec503wd3.InterestRateStream;
@@ -20,14 +21,32 @@ public class FpmlContext {
   private Map<String, CalculationPeriodDates> calculationPeriodDates = new HashMap<String, CalculationPeriodDates>();
   private Map<String, NodeParser> parsers;
   private List<InterestRateStream> streams = new ArrayList<InterestRateStream>();
-  private Map<String, Party> parties = new HashMap<String, Party>();
+  private Map<String, List<HrefListener>> listeners = new HashMap<String, List<HrefListener>>();
+  private Map<String, Object> addedNodes = new HashMap<String, Object>();
 
-  public Map<String, Party> getParties() {
-    return parties;
+  public void registerObject(String id, Object node) {
+    List<HrefListener> list = listeners.get(id);
+    if(list == null) {
+      return;
+    }
+    for (HrefListener hrefListener : list) {
+      hrefListener.nodeAdded(id, node);
+    }
+    addedNodes.put(id, node);
   }
 
-  public void setParties(Map<String, Party> parties) {
-    this.parties = parties;
+  public void addHrefListener(String href, HrefListener listener) {
+    List<HrefListener> list = listeners.get(href);
+    if(list == null) {
+      list = new ArrayList<HrefListener>();
+      listeners.put(href, list);
+    }
+    list.add(listener);
+    //fire past nodes
+    Object old = addedNodes.get(href);
+    if(old != null) {
+      listener.nodeAdded(href, old);
+    }
   }
 
   public List<InterestRateStream> getStreams() {

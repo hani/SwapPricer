@@ -41,8 +41,9 @@ public class PartyParser implements NodeParser<Party> {
         Element element = Element.valueOf(reader.getLocalName());
         switch (element) {
           case party:
-            if(party.getId() != null)
-              ctx.getParties().put(party.getId(), party);
+            if(party.getId() != null) {
+              ctx.registerObject(party.getId(), party);
+            }
             return party;
         }
       }
