@@ -63,7 +63,7 @@ public class CalendarManagerImpl implements CalendarManager {
 
   private boolean isNonWorkingDay(LocalDate date, BusinessCenters businessCenters) {
     for(BusinessCenter s : businessCenters.getBusinessCenter()) {
-      LocalDateCalculator calc = factory.getDateCalculator(s.getId(), null);
+      LocalDateCalculator calc = factory.getDateCalculator(s.getValue(), null);
         if(calc.isNonWorkingDay(date)) {
           return true;
         }
@@ -78,7 +78,7 @@ public class CalendarManagerImpl implements CalendarManager {
     }
     List<LocalDate> unadjustedDates = getDatesInRange(start, end, interval);
     unadjustedDates.set(0, getAdjustedDate(unadjustedDates.get(0), conventions[0], businessCentres[0]));
-    for(int i = 0; i < unadjustedDates.size() - 1; i++) {
+    for(int i = 1; i < unadjustedDates.size() - 1; i++) {
       unadjustedDates.set(i, getAdjustedDate(unadjustedDates.get(i), conventions[1], businessCentres[1]));
     }
     unadjustedDates.set(unadjustedDates.size() - 1, getAdjustedDate(unadjustedDates.get(unadjustedDates.size() - 1), conventions[2], businessCentres[2]));
@@ -144,7 +144,7 @@ public class CalendarManagerImpl implements CalendarManager {
     }
     LocalDate adjusted = date;
     for(BusinessCenter s : businessCenters.getBusinessCenter()) {
-      LocalDateCalculator calc = factory.getDateCalculator(s.getId(), getHolidayHandlerType(convention));
+      LocalDateCalculator calc = factory.getDateCalculator(s.getValue(), getHolidayHandlerType(convention));
       calc.setStartDate(adjusted);
       adjusted = calc.getCurrentBusinessDate();
     }
