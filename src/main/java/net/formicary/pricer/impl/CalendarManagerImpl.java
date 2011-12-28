@@ -105,23 +105,34 @@ public class CalendarManagerImpl implements CalendarManager {
       return unadjustedDates;
     }
     LocalDate current = new LocalDate(start);
+    boolean isIMM = false;
+    boolean isEOM = false;
     if(interval instanceof CalculationPeriodFrequency) {
       CalculationPeriodFrequency f = (CalculationPeriodFrequency)interval;
       if(f.getRollConvention().equals("IMM")) {
-
+        isIMM = true;
       } else if(f.getRollConvention().equals("EOM")) {
-        while(current.isBefore(end) || current.equals(end)) {
-          unadjustedDates.add(current);
-          current = current.plusMonths(1);
-          current = current.property(DateTimeFieldType.dayOfMonth()).withMaximumValue();
-        }
-        return unadjustedDates;
+        isEOM = true;
       }
     }
     ReadablePeriod period = getPeriod(interval);
     while(current.isBefore(end) || current.equals(end)) {
       unadjustedDates.add(current);
       current = current.plus(period);
+      if(isEOM) {
+        current = current.property(DateTimeFieldType.dayOfMonth()).withMaximumValue();
+      } else if(isIMM) {
+        //go to the first day
+        current = current.property(DateTimeFieldType.dayOfMonth()).withMinimumValue();
+        //go to the first wednesday
+        //if we're after a weds on the first, then our first one is the next week's weds
+        if(current.getDayOfWeek() > DateTimeConstants.WEDNESDAY) {
+          current = current.plusWeeks(1);
+        }
+        current = current.withDayOfWeek(DateTimeConstants.WEDNESDAY);
+        //we have the first weds, we want the third, so move forward twice
+        current = current.plusWeeks(2);
+      }
     }
     return unadjustedDates;
   }

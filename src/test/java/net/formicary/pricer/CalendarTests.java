@@ -48,7 +48,7 @@ public class CalendarTests {
     assertEquals(manager.getAdjustedDate(new LocalDate(2011, 8, 13), FOLLOWING, getCenters("USNY")), new LocalDate(2011, 8, 15));
   }
 
-  public void eomRollConvention() {
+  public void verifyEOMConvention() {
     CalculationPeriodFrequency f = new CalculationPeriodFrequency();
     f.setRollConvention("EOM");
     f.setPeriod(PeriodEnum.M);
@@ -58,6 +58,17 @@ public class CalendarTests {
     assertEquals(dates.get(1), new LocalDate(2011, 2, 28));
     assertEquals(dates.get(2), new LocalDate(2011, 3, 31));
     assertEquals(dates.get(3), new LocalDate(2011, 4, 30));
+  }
+
+  public void verifyIMMConvention() {
+    CalculationPeriodFrequency f = new CalculationPeriodFrequency();
+    f.setRollConvention("IMM");
+    f.setPeriod(PeriodEnum.Y);
+    f.setPeriodMultiplier(new BigInteger("1"));
+    List<LocalDate> dates = manager.getDatesInRange(new LocalDate(2010, 12, 19), new LocalDate(2022, 12, 21), f);
+    assertEquals(dates.get(1), new LocalDate(2011, 12, 21));
+    assertEquals(dates.get(2), new LocalDate(2012, 12, 19));
+    assertEquals(dates.get(3), new LocalDate(2013, 12, 18));
   }
 
   public void holiday() {
