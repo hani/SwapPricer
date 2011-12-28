@@ -43,7 +43,7 @@ public class CashflowGenerator {
     Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
     AmountSchedule notional = calculation.getNotionalSchedule().getNotionalStepSchedule();
     String currency = notional.getCurrency().getValue();
-    Interval interval = leg.getPaymentDates().getPaymentFrequency();
+    CalculationPeriodFrequency interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
     List<LocalDate> paymentDates = calendarManager.getAdjustedDates(startDate, endDate, conventions, interval, FpMLUtil.getBusinessCenters(leg));
     List<LocalDate> fixingDates = calendarManager.getFixingDates(paymentDates, leg.getResetDates().getFixingDates());
     List<Cashflow> flows = new ArrayList<Cashflow>();
@@ -71,7 +71,9 @@ public class CashflowGenerator {
     LocalDate startDate = getStartDate(leg);
     LocalDate endDate = DateUtil.getDate(leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
     BusinessDayConventionEnum[] conventions = FpMLUtil.getBusinessDayConventions(leg);
-    List<LocalDate> dates = calendarManager.getAdjustedDates(startDate, endDate, conventions, leg.getPaymentDates().getPaymentFrequency(), FpMLUtil.getBusinessCenters(leg));
+    //todo clarify: we're using calculation interval rather than payment interval, and hoping hoping hoping that they never mismatch or we're screwed
+    CalculationPeriodFrequency interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
+    List<LocalDate> dates = calendarManager.getAdjustedDates(startDate, endDate, conventions, interval, FpMLUtil.getBusinessCenters(leg));
     List<Cashflow> flows = new ArrayList<Cashflow>();
     for(int i = 1; i < dates.size(); i++) {
       LocalDate paymentDate = dates.get(i);

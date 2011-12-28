@@ -38,13 +38,12 @@ public class DMPReportGenerator {
     }));
     BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(outputFile, false));
     os.write("LchTradeId,NpvAmount,CashflowDate,CashflowAmount\n".getBytes());
+    long now  = System.currentTimeMillis();
     for (String file : files) {
       String id = file.substring(0, file.indexOf('.'));
       List<Cashflow> cashflows = null;
       try {
-        long now  = System.currentTimeMillis();
         cashflows = generator.generateCashflows(date, id);
-        log.info("Time to price {}: {}ms", id, System.currentTimeMillis() - now);
         for (Cashflow cashflow : cashflows) {
           StringBuilder sb = new StringBuilder();
           sb.append(id).append(",");
@@ -58,6 +57,8 @@ public class DMPReportGenerator {
         log.error("Error calculating cashflows for trade " + id, e);
       }
     }
+    long timeTaken = System.currentTimeMillis() - now;
+    log.info("Time to price {} trades: {}ms", files.size(), timeTaken);
     os.close();
   }
 
