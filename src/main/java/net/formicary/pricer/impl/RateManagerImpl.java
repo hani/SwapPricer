@@ -32,7 +32,6 @@ public class RateManagerImpl implements RateManager {
       query.field("tenorUnit").equal(interval.getPeriodMultiplier().toString());
     }
     query.field("fixingDate").equal(date);
-    //TODO shouldn't hardcode
     query.field("name").equal(indexName);
     Index index = query.get();
     if(index == null) {
@@ -42,8 +41,8 @@ public class RateManagerImpl implements RateManager {
   }
 
   @Override
-  public double getDiscountFactor(String currency, Interval interval, LocalDate date, LocalDate valuationDate) {
-    double zero = getZeroRate("LIBOR", currency, interval, date) / 100;
+  public double getDiscountFactor(String indexName, String currency, Interval interval, LocalDate date, LocalDate valuationDate) {
+    double zero = getZeroRate(indexName, currency, interval, date) / 100;
     double days = Days.daysBetween(date, valuationDate).getDays();
     return Math.exp(zero * -(days) / 365d);
   }

@@ -52,9 +52,7 @@ public class CashflowGenerator {
       LocalDate periodStartDate = paymentDates.get(i - 1);
       LocalDate fixingDate = fixingDates.get(i -1);
       if(fixingDate.isBefore(valuationDate) && periodEndDate.isAfter(valuationDate)) {
-        FloatingRateCalculation floatingCalc = (FloatingRateCalculation) calculation.getRateCalculation().getValue();
-        String index = floatingCalc.getFloatingRateIndex().getValue();
-        index = index.substring(index.indexOf('-') + 1, index.lastIndexOf('-'));
+        String index = getFloatingIndexName(calculation);
         double rate = rateManager.getZeroRate(index, currency, interval, fixingDate) / 100;
         Cashflow flow = getCashflow(valuationDate, periodStartDate, periodEndDate, leg, rate);
         flows.add(flow);
@@ -65,6 +63,14 @@ public class CashflowGenerator {
       }
     }
     return flows;
+  }
+
+  private String getFloatingIndexName(Calculation calculation) {
+    FloatingRateCalculation floatingCalc = (FloatingRateCalculation) calculation.getRateCalculation().getValue();
+    String index = floatingCalc.getFloatingRateIndex().getValue();
+    int dash = index.indexOf('-') + 1;
+    index = index.substring(dash, index.indexOf('-', dash));
+    return index;
   }
 
   private List<Cashflow> generateFixedFlows(LocalDate valuationDate, InterestRateStream leg) {
