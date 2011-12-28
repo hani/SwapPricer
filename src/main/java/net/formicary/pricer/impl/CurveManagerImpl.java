@@ -121,8 +121,9 @@ public class CurveManagerImpl implements CurveManager {
         CurvePillarPoint start = points.get(i - 1);
         CurvePillarPoint end = points.get(i);
         double daysFromStartToNow = Days.daysBetween(start.getMaturityDate(), date).getDays();
-        double daysBetweenPoints = Days.daysBetween(start.getMaturityDate(), end.getMaturityDate()).getDays();
-        return start.getZeroRate() + daysFromStartToNow * (end.getZeroRate() - start.getZeroRate()) / daysBetweenPoints;
+        double totalDays = Days.daysBetween(start.getMaturityDate(), end.getMaturityDate()).getDays();
+        //linear interpolation, nothing fancy
+        return start.getZeroRate() + daysFromStartToNow * (end.getZeroRate() - start.getZeroRate()) / totalDays;
       }
     }
     throw new IllegalArgumentException("No rate data found for date " + date + " currency " + ccy);
@@ -132,7 +133,7 @@ public class CurveManagerImpl implements CurveManager {
   public double getImpliedForwardRate(LocalDate start, LocalDate end, LocalDate valuationDate, String ccy, Interval tenor) {
     String val = tenor.getPeriodMultiplier() + tenor.getPeriod().value();
     double startRate = getInterpolatedForwardRate(start, ccy, val);
-    //get the start discount factor
+    //all LCH curves are quoted /365
     double startDf = Math.exp(startRate * -(Days.daysBetween(valuationDate, start).getDays()) / 365d);
     double endRate = getInterpolatedForwardRate(end, ccy, val);
     double endDf = Math.exp(endRate * - (Days.daysBetween(valuationDate, end).getDays())/ 365d);
