@@ -97,4 +97,9 @@ public class Cashflow implements Comparable<Cashflow>{
         ", rate=" + rate +
         '}';
   }
+
+  public void reverse() {
+    this.npv = -npv;
+    this.amount = -amount;
+  }
 }

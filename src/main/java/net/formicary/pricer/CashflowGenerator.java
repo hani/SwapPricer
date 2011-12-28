@@ -24,6 +24,8 @@ public class CashflowGenerator {
   @Inject CalendarManager calendarManager;
   @Inject TradeStore tradeStore;
   @Inject RateManager rateManager;
+  //we'll always pretend to be partyA from the LCH pov, to match the dmp tool
+  private String ourName = "partyA";
 
   public List<Cashflow> generateCashflows(LocalDate valuationDate, String id) {
     Swap swap = tradeStore.getTrade(id);
@@ -102,6 +104,10 @@ public class CashflowGenerator {
     flow.setDate(periodEnd);
     flow.setRate(rate);
     flow.setType(isFixed ? FlowType.FIX : FlowType.FLT);
+    if(((Party)leg.getPayerPartyReference().getHref()).getId().equals(ourName)) {
+      //we're paying, so reverse values
+      flow.reverse();
+    }
     return flow;
   }
 }

@@ -22,6 +22,7 @@ dependencies {
   compile 'com.google.code.morphia:morphia:0.99'
   compile 'com.google.code.morphia:morphia-logging-slf4j:0.99'
   compile 'org.mongodb:mongo-java-driver:2.7.2'
+//  compile 'org.perf4j:perf4j:0.9.16'
   compile 'net.objectlab.kit:datecalc-common:1.2.0'
   compile 'net.objectlab.kit:datecalc-joda:1.2.0'
   compile 'com.google.inject:guice:3.0'
