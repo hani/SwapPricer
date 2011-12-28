@@ -50,18 +50,11 @@ public class CashflowGenerator {
       LocalDate fixingDate = fixingDates.get(i -1);
       if(fixingDate.isBefore(valuationDate) && periodEndDate.isAfter(valuationDate)) {
         double rate = rateManager.getZeroRate(currency, interval, fixingDate) / 100;
-        double discountedAmount = calculateDiscountedAmount(valuationDate, periodStartDate, periodEndDate, leg, rate);
-        Cashflow flow = new Cashflow(discountedAmount, periodEndDate);
-        flow.setRate(rate);
-        flow.setType(FlowType.FLT);
+        Cashflow flow = getCashflow(valuationDate, periodStartDate, periodEndDate, leg, rate);
         flows.add(flow);
       } else if(fixingDate.isAfter(valuationDate)) {
-        //future flows, doesn't work yet
         double impliedForwardRate = curveManager.getImpliedForwardRate(periodStartDate, periodEndDate, valuationDate, currency, interval);
-        double discountedAmount = calculateDiscountedAmount(valuationDate, paymentDates.get(i - 1), periodEndDate, leg, impliedForwardRate);
-        Cashflow flow = new Cashflow(discountedAmount, periodEndDate);
-        flow.setRate(impliedForwardRate);
-        flow.setType(FlowType.FLT);
+        Cashflow flow = getCashflow(valuationDate, paymentDates.get(i - 1), periodEndDate, leg, impliedForwardRate);
         flows.add(flow);
       }
     }
@@ -75,14 +68,11 @@ public class CashflowGenerator {
     List<LocalDate> dates = calendarManager.getAdjustedDates(startDate, endDate, conventions, leg.getPaymentDates().getPaymentFrequency(), FpMLUtil.getBusinessCenters(leg));
     List<Cashflow> flows = new ArrayList<Cashflow>();
     for(int i = 1; i < dates.size(); i++) {
-      LocalDate start = dates.get(i);
+      LocalDate paymentDate = dates.get(i);
       //TODO verify that LCH skips the payment thats due in between valuation date and next period start
-      if(start.isAfter(valuationDate)) {
+      if(paymentDate.isAfter(valuationDate)) {
         BigDecimal rate = leg.getCalculationPeriodAmount().getCalculation().getFixedRateSchedule().getInitialValue();
-        double discountedAmount = calculateDiscountedAmount(valuationDate, dates.get(i - 1), dates.get(i), leg, rate.doubleValue());
-        Cashflow flow = new Cashflow(discountedAmount, start);
-        flow.setRate(rate.doubleValue());
-        flow.setType(FlowType.FIX);
+        Cashflow flow = getCashflow(valuationDate, dates.get(i - 1), paymentDate, leg, rate.doubleValue());
         flows.add(flow);
       }
     }
@@ -96,13 +86,22 @@ public class CashflowGenerator {
     return DateUtil.getDate(cal);
   }
 
-  private double calculateDiscountedAmount(LocalDate valuationDate, LocalDate periodStart, LocalDate periodEnd, InterestRateStream leg, double rate) {
+  private Cashflow getCashflow(LocalDate valuationDate, LocalDate periodStart, LocalDate periodEnd, InterestRateStream leg, double rate) {
+    Cashflow flow = new Cashflow();
     DayCountFraction fraction = leg.getCalculationPeriodAmount().getCalculation().getDayCountFraction();
     double dayCountFraction = calendarManager.getDayCountFraction(periodStart, periodEnd, FpMLUtil.getDayCountFraction(fraction.getValue()));
+    flow.setDayCountFraction(dayCountFraction);
     AmountSchedule notional = leg.getCalculationPeriodAmount().getCalculation().getNotionalSchedule().getNotionalStepSchedule();
     String currency = notional.getCurrency().getValue();
     double undiscountedAmount = notional.getInitialValue().doubleValue() * rate * dayCountFraction;
-    double discountFactor = curveManager.getDiscountFactor(periodEnd, valuationDate, currency, leg.getPaymentDates().getPaymentFrequency(), FpMLUtil.isFixedStream(leg));
-    return discountFactor * undiscountedAmount;
+    flow.setAmount(undiscountedAmount);
+    boolean isFixed = FpMLUtil.isFixedStream(leg);
+    double discountFactor = curveManager.getDiscountFactor(periodEnd, valuationDate, currency, leg.getPaymentDates().getPaymentFrequency(), isFixed);
+    flow.setDiscountFactor(discountFactor);
+    flow.setNpv(discountFactor * undiscountedAmount);
+    flow.setDate(periodEnd);
+    flow.setRate(rate);
+    flow.setType(isFixed ? FlowType.FIX : FlowType.FLT);
+    return flow;
   }
 }

@@ -38,7 +38,7 @@ public class CashflowTests {
     generator = injector.getInstance(CashflowGenerator.class);
   }
 
-  @Test(dataProvider = "trades")
+  @Test(dataProvider = "singletrade")
   public void generateFixedCashflows(String id) {
     long now = System.currentTimeMillis();
 
@@ -69,7 +69,7 @@ public class CashflowTests {
   @DataProvider(name = "singletrade")
   public Object[][] singleTrade() {
     Object[][] data = new Object[1][];
-    data[0] = new Object[]{"LCH00000923966-OIS"};
+    data[0] = new Object[]{"LCH00000997564"};
     return data;
   }
 }

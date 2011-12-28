@@ -13,6 +13,8 @@ public class Cashflow implements Comparable<Cashflow>{
   private FlowType type;
   private double discountFactor;
   private double rate;
+  private double amount;
+  private double dayCountFraction;
 
   public Cashflow() {
   }
@@ -68,10 +70,27 @@ public class Cashflow implements Comparable<Cashflow>{
     return getDate().compareTo(o.getDate());
   }
 
+  public double getAmount() {
+    return amount;
+  }
+
+  public void setAmount(double amount) {
+    this.amount = amount;
+  }
+
+  public double getDayCountFraction() {
+    return dayCountFraction;
+  }
+
+  public void setDayCountFraction(double dayCountFraction) {
+    this.dayCountFraction = dayCountFraction;
+  }
+
   @Override
   public String toString() {
     return "Cashflow{" +
         "npv=" + npv +
+        ", amount=" + amount +
         ", date=" + date +
         ", type=" + type +
         ", discountFactor=" + discountFactor +
