@@ -7,13 +7,21 @@ import org.joda.time.LocalDate;
  *         Date: 10/11/11
  *         Time: 10:30 AM
  */
-public class CurvePillarPoint {
+public class CurvePillarPoint implements Comparable<CurvePillarPoint> {
   private String curveName;
   private LocalDate closeDate;
   private LocalDate maturityDate;
   private double accrualFactor;
   private double zeroRate;
   private double discountFactor;
+
+  public CurvePillarPoint() {
+  }
+
+  public CurvePillarPoint(String curveName, LocalDate maturityDate) {
+    this.curveName = curveName;
+    this.maturityDate = maturityDate;
+  }
 
   public String getCurveName() {
     return curveName;
@@ -61,6 +69,34 @@ public class CurvePillarPoint {
 
   public void setDiscountFactor(double discountFactor) {
     this.discountFactor = discountFactor;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof CurvePillarPoint)) return false;
+
+    CurvePillarPoint that = (CurvePillarPoint) o;
+
+    if (!closeDate.equals(that.closeDate)) return false;
+    if (!curveName.equals(that.curveName)) return false;
+    //if we ever start storing curves for different close dates, we'll need to take that into account here
+
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = curveName.hashCode();
+    result = 31 * result + maturityDate.hashCode();
+    return result;
+  }
+
+  @Override
+  public int compareTo(CurvePillarPoint o) {
+    int c = maturityDate.compareTo(o.maturityDate);
+    if(c != 0) return c;
+    return curveName.compareTo(o.curveName);
   }
 
   @Override
