@@ -4,7 +4,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Provider;
 import net.formicary.pricer.impl.CalendarManagerImpl;
 import net.formicary.pricer.impl.CurveManagerImpl;
-import net.formicary.pricer.impl.FpmlJAXBTradeStore;
 import net.formicary.pricer.loader.HolidayLoader;
 import net.objectlab.kit.datecalc.joda.LocalDateKitCalculatorsFactory;
 import org.fpml.spec503wd3.DataDocument;
@@ -30,7 +29,10 @@ public class PricerModule extends AbstractModule {
     bind(JAXBContext.class).toProvider(new Provider<JAXBContext>() {
       public JAXBContext get() {
         try {
-          return JAXBContext.newInstance(DataDocument.class);
+          long now = System.currentTimeMillis();
+          JAXBContext context = JAXBContext.newInstance(DataDocument.class);
+          log.info("Time taken to initialise jaxb context: {}ms", System.currentTimeMillis() - now);
+          return context;
         } catch (JAXBException e) {
           throw new RuntimeException("Could not create the JAXBContext object", e);
         }

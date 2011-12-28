@@ -5,6 +5,7 @@ import net.formicary.pricer.impl.parsers.*;
 import org.fpml.spec503wd3.Swap;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -28,7 +29,6 @@ public class FpmlTradeStore implements TradeStore {
 
   private Map<String, NodeParser> parsers = new HashMap<String, NodeParser>();
   private final XMLInputFactory factory;
-  @Inject
   private String fpmlDir;
 
   public FpmlTradeStore() {
@@ -45,7 +45,8 @@ public class FpmlTradeStore implements TradeStore {
     return fpmlDir;
   }
 
-  public void setFpmlDir(String fpmlDir) {
+  @Inject
+  public void setFpmlDir(@Named("fpmlDir") String fpmlDir) {
     this.fpmlDir = fpmlDir;
   }
 

@@ -44,8 +44,10 @@ public class ResetDatesParser implements NodeParser<ResetDates> {
     dates.setResetDatesAdjustments(adjustments);
     dates.setFixingDates(new RelativeDateOffset());
     dates.setResetFrequency(new ResetFrequency());
+    RelativeDateOffset fixingDates = dates.getFixingDates();
     String period = null;
     BigInteger multiplier = null;
+    BusinessCenters centers = null;
     while(reader.hasNext()) {
       int event = reader.next();
       if(event == START_ELEMENT) {
@@ -71,18 +73,21 @@ public class ResetDatesParser implements NodeParser<ResetDates> {
           case periodMultiplier:
             multiplier = new BigInteger(reader.getElementText());
             break;
+          case businessCenters:
+            centers = new BusinessCenters();
+            break;
           case businessCenter:
             BusinessCenter bc = new BusinessCenter();
             bc.setId(reader.getElementText());
             bc.setValue(bc.getId());
-            adjustments.getBusinessCenters().getBusinessCenter().add(bc);
+            centers.getBusinessCenter().add(bc);
             break;
           case businessCentersReference:
             BusinessCenters bcs = ctx.getBusinessCenters().get(reader.getAttributeValue(null, "href"));
             adjustments.setBusinessCenters(bcs);
             break;
           case dayType:
-            dates.getFixingDates().setDayType(DayTypeEnum.fromValue(reader.getElementText()));
+            fixingDates.setDayType(DayTypeEnum.fromValue(reader.getElementText()));
             break;
         }
       } else if(event == END_ELEMENT) {
@@ -90,9 +95,19 @@ public class ResetDatesParser implements NodeParser<ResetDates> {
         switch(element) {
           case resetDates:
             return dates;
+          case resetDatesAdjustments:
+            if(centers != null) {
+              adjustments.setBusinessCenters(centers);
+              centers = null;
+            }
+            break;
           case fixingDates:
-            dates.getFixingDates().setPeriod(PeriodEnum.valueOf(period));
-            dates.getFixingDates().setPeriodMultiplier(multiplier);
+            if(centers != null) {
+              fixingDates.setBusinessCenters(centers);
+              centers = null;
+            }
+            fixingDates.setPeriod(PeriodEnum.valueOf(period));
+            fixingDates.setPeriodMultiplier(multiplier);
             break;
           case resetFrequency:
             dates.getResetFrequency().setPeriod(PeriodEnum.valueOf(period));
