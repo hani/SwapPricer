@@ -18,7 +18,7 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
  *         Date: 12/20/11
  *         Time: 11:44 AM
  */
-public class CalculationPeriodDateParser implements NodeParser<CalculationPeriodDates>, HrefListener {
+public class CalculationPeriodDatesParser implements NodeParser<CalculationPeriodDates>, HrefListener {
 
   private AdjustableDate currentDate;
   private BusinessCenters centers;
@@ -51,16 +51,16 @@ public class CalculationPeriodDateParser implements NodeParser<CalculationPeriod
   public CalculationPeriodDates parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
     CalculationPeriodDates dates = new CalculationPeriodDates();
     dates.setCalculationPeriodFrequency(new CalculationPeriodFrequency());
+    String myId = reader.getAttributeValue(null, "id");
+    if(myId != null) {
+      ctx.registerObject(myId, dates);
+    }
     currentDate = null;
     centers = null;
     while(reader.hasNext()) {
       int event = reader.next();
       if (event == START_ELEMENT) {
         Element element = Element.valueOf(reader.getLocalName());
-        String myId = reader.getAttributeValue(null, "id");
-        if(myId != null) {
-          ctx.registerObject(myId, dates);
-        }
         switch(element) {
           case effectiveDate:
             currentDate = new AdjustableDate();

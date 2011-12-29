@@ -21,11 +21,10 @@ public class FpmlContext {
 
   public void registerObject(String id, Object node) {
     List<HrefListener> list = listeners.get(id);
-    if(list == null) {
-      return;
-    }
-    for (HrefListener hrefListener : list) {
-      hrefListener.nodeAdded(id, node);
+    if(list != null) {
+      for (HrefListener hrefListener : list) {
+        hrefListener.nodeAdded(id, node);
+      }
     }
     addedNodes.put(id, node);
   }
