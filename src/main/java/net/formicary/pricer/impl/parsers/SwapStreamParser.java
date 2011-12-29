@@ -50,6 +50,8 @@ public class SwapStreamParser implements NodeParser<InterestRateStream> {
             stream.setPaymentDates((PaymentDates)entity);
           } else if(entity instanceof ResetDates) {
             stream.setResetDates((ResetDates)entity);
+          } else if(entity instanceof StubCalculationPeriodAmount) {
+            stream.setStubCalculationPeriodAmount((StubCalculationPeriodAmount)entity);
           }
         } else {
           final Element element = Element.valueOf(reader.getLocalName());
