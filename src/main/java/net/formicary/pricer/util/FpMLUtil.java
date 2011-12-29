@@ -1,10 +1,11 @@
 package net.formicary.pricer.util;
 
 import net.formicary.pricer.model.DayCountFraction;
-import org.fpml.spec503wd3.BusinessCenters;
-import org.fpml.spec503wd3.BusinessDayConventionEnum;
-import org.fpml.spec503wd3.InterestRateStream;
-import org.fpml.spec503wd3.Swap;
+import org.fpml.spec503wd3.*;
+import org.joda.time.LocalDate;
+
+import javax.xml.bind.JAXBElement;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * @author hsuleiman
@@ -54,5 +55,40 @@ public class FpMLUtil {
     centers[1] = leg.getCalculationPeriodDates().getCalculationPeriodDatesAdjustments().getBusinessCenters();
     centers[2] = leg.getCalculationPeriodDates().getTerminationDate().getDateAdjustments().getBusinessCenters();
     return centers;
+  }
+
+  private static Stub getStub(InterestRateStream leg, String type) {
+    StubCalculationPeriodAmount stubCalculationPeriodAmount = leg.getStubCalculationPeriodAmount();
+    if(stubCalculationPeriodAmount == null) return null;
+    for (JAXBElement<?> element : stubCalculationPeriodAmount.getContent()) {
+      if(element.getName().getLocalPart().equals(type)) {
+        return (Stub)element.getValue();
+      }
+    }
+    return null;
+  }
+
+  public static Stub getInitialStub(InterestRateStream leg) {
+    return getStub(leg, "initialStub");
+  }
+
+  public static Stub getFinalStub(InterestRateStream leg) {
+    return getStub(leg, "finalStub");
+  }
+
+  public static LocalDate getEndDate(InterestRateStream leg) {
+    //if we have a stub, then our end is from this date
+    XMLGregorianCalendar cal = leg.getCalculationPeriodDates().getLastRegularPeriodEndDate();
+    //no stub, just use the termination date
+    if(cal == null) cal = leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue();
+    return DateUtil.getDate(cal);
+  }
+
+  public static LocalDate getStartDate(InterestRateStream leg) {
+    //if we have a stub, then our start is from this date
+    XMLGregorianCalendar cal = leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate();
+    //no stub, just use the effective date
+    if(cal == null) cal = leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue();
+    return DateUtil.getDate(cal);
   }
 }

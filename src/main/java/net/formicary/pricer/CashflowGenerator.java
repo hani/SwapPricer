@@ -2,13 +2,11 @@ package net.formicary.pricer;
 
 import net.formicary.pricer.model.Cashflow;
 import net.formicary.pricer.model.FlowType;
-import net.formicary.pricer.util.DateUtil;
 import net.formicary.pricer.util.FpMLUtil;
 import org.fpml.spec503wd3.*;
 import org.joda.time.LocalDate;
 
 import javax.inject.Inject;
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,22 +28,23 @@ public class CashflowGenerator {
 
   public List<Cashflow> generateCashflows(LocalDate valuationDate, String id) {
     Swap swap = tradeStore.getTrade(id);
+
     InterestRateStream fixed = FpMLUtil.getFixedStream(swap);
     List<Cashflow> flows = generateFixedFlows(valuationDate, fixed);
-    flows.addAll(generateFloatingFlows(valuationDate, FpMLUtil.getFloatingStream(swap)));
+
+    InterestRateStream floating = FpMLUtil.getFloatingStream(swap);
+    flows.addAll(generateFloatingFlows(valuationDate, floating));
+
     Collections.sort(flows);
     return flows;
   }
 
   private List<Cashflow> generateFloatingFlows(LocalDate valuationDate, InterestRateStream leg) {
-    LocalDate startDate = getStartDate(leg);
-    LocalDate endDate = getEndDate(leg);
-    BusinessDayConventionEnum[] conventions = FpMLUtil.getBusinessDayConventions(leg);
+    StreamContext ctx = new StreamContext(leg);
     Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
-    AmountSchedule notional = calculation.getNotionalSchedule().getNotionalStepSchedule();
-    String currency = notional.getCurrency().getValue();
-    CalculationPeriodFrequency interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
-    List<LocalDate> calculationDates = calendarManager.getAdjustedDates(startDate, endDate, conventions, interval, FpMLUtil.getBusinessCenters(leg));
+    String currency = calculation.getNotionalSchedule().getNotionalStepSchedule().getCurrency().getValue();
+    CalculationPeriodFrequency interval = ctx.interval;
+    List<LocalDate> calculationDates = ctx.calculationDates;
     List<LocalDate> fixingDates = calendarManager.getFixingDates(calculationDates, leg.getResetDates().getFixingDates());
     List<Cashflow> flows = new ArrayList<Cashflow>();
     //todo verify LCH skips the payment thats 3 days after valuation date
@@ -74,18 +73,14 @@ public class CashflowGenerator {
     if(interval.getPeriod() == paymentInterval.getPeriod() && interval.getPeriodMultiplier().equals(paymentInterval.getPeriodMultiplier())) {
       return flows;
     } else {
-      List<LocalDate> paymentDates = calendarManager.getAdjustedDates(startDate, endDate, conventions, paymentInterval, FpMLUtil.getBusinessCenters(leg));
+      List<LocalDate> paymentDates = calendarManager.getAdjustedDates(ctx.startDate, ctx.endDate, ctx.conventions, paymentInterval, FpMLUtil.getBusinessCenters(leg));
       return convertToPaymentFlows(flows, cutoff, paymentDates);
     }
   }
 
   private List<Cashflow> generateFixedFlows(LocalDate valuationDate, InterestRateStream leg) {
-    LocalDate startDate = getStartDate(leg);
-    LocalDate endDate = getEndDate(leg);
-    BusinessDayConventionEnum[] conventions = FpMLUtil.getBusinessDayConventions(leg);
-    //todo clarify: we're using calculation interval rather than payment interval, we could convert but do we ever have mismatched dates for fixed flows?
-    CalculationPeriodFrequency interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
-    List<LocalDate> calculationDates = calendarManager.getAdjustedDates(startDate, endDate, conventions, interval, FpMLUtil.getBusinessCenters(leg));
+    StreamContext ctx = new StreamContext(leg);
+    List<LocalDate> calculationDates = ctx.calculationDates;
     List<Cashflow> flows = new ArrayList<Cashflow>();
     //TODO verify that LCH skips the payment thats 3 days after valuation date
     LocalDate cutoff = valuationDate.plusDays(3);
@@ -128,22 +123,6 @@ public class CashflowGenerator {
     return paymentFlows;
   }
 
-  private LocalDate getEndDate(InterestRateStream leg) {
-    //if we have a stub, then our end is from this date
-    XMLGregorianCalendar cal = leg.getCalculationPeriodDates().getLastRegularPeriodEndDate();
-    //no stub, just use the termination date
-    if(cal == null) cal = leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue();
-    return DateUtil.getDate(cal);
-  }
-
-  private LocalDate getStartDate(InterestRateStream leg) {
-    //if we have a stub, then our start is from this date
-    XMLGregorianCalendar cal = leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate();
-    //no stub, just use the effective date
-    if(cal == null) cal = leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue();
-    return DateUtil.getDate(cal);
-  }
-
   private Cashflow getCashflow(LocalDate valuationDate, LocalDate periodStart, LocalDate periodEnd, InterestRateStream leg, double rate) {
     Cashflow flow = new Cashflow();
     DayCountFraction fraction = leg.getCalculationPeriodAmount().getCalculation().getDayCountFraction();
@@ -165,6 +144,22 @@ public class CashflowGenerator {
       flow.reverse();
     }
     return flow;
+  }
+
+  class StreamContext {
+    CalculationPeriodFrequency interval;
+    LocalDate startDate;
+    LocalDate endDate;
+    BusinessDayConventionEnum[] conventions;
+    private List<LocalDate> calculationDates;
+
+    public StreamContext(InterestRateStream leg) {
+      startDate = FpMLUtil.getStartDate(leg);
+      endDate = FpMLUtil.getEndDate(leg);
+      conventions = FpMLUtil.getBusinessDayConventions(leg);
+      interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
+      calculationDates = calendarManager.getAdjustedDates(startDate, endDate, conventions, interval, FpMLUtil.getBusinessCenters(leg));
+    }
   }
 
   private String getFloatingIndexName(Calculation calculation) {
