@@ -80,7 +80,7 @@ public class FpmlParserTests {
       Text el = (Text)entry.getValue().xpath.selectSingleNode(doc);
       Expression e = engine.createExpression(entry.getValue().objPath);
       Object obj = e.evaluate(jc);
-      assertEquals(toString(obj), el == null ? null : el.getText(), "Mismatch in evaluating " + entry.getKey());
+      assertEquals(toString(obj), el == null ? null : el.getText(), "Mismatch in evaluating " + entry.getKey() + " in trade " + id);
     }
   }
 
