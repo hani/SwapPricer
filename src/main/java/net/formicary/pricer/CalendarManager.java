@@ -15,7 +15,7 @@ import java.util.List;
  *         Time: 9:54 AM
  */
 public interface CalendarManager {
-  LocalDate getAdjustedDate(LocalDate date, BusinessDayConventionEnum convention, BusinessCenters businessCentre);
+  LocalDate getAdjustedDate(LocalDate date, BusinessDayConventionEnum convention, BusinessCenters businessCenters);
   /**
    * @param conventions An array of 3 business day conventions. The first is the start date convention, followed
    *                    by the calculation period convention, and finally the termination date convention.
@@ -25,7 +25,7 @@ public interface CalendarManager {
   List<LocalDate> getAdjustedDates(LocalDate start, LocalDate end, BusinessDayConventionEnum[] conventions, Interval interval, BusinessCenters[] businessCenters);
   double getDayCountFraction(LocalDate start, LocalDate end, DayCountFraction dayCountFraction);
 
-  List<LocalDate> adjustDates(List<LocalDate> dates, BusinessDayConventionEnum conventions[], BusinessCenters[] businessCenter);
+  List<LocalDate> adjustDates(List<LocalDate> dates, BusinessDayConventionEnum conventions[], BusinessCenters[] businessCenters);
 
   List<LocalDate> getDatesInRange(LocalDate start, LocalDate end, Interval interval);
 

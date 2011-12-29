@@ -72,27 +72,27 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
-  public List<LocalDate> getAdjustedDates(LocalDate start, LocalDate end, BusinessDayConventionEnum conventions[], Interval interval, BusinessCenters[] businessCentres) {
+  public List<LocalDate> getAdjustedDates(LocalDate start, LocalDate end, BusinessDayConventionEnum conventions[], Interval interval, BusinessCenters[] businessCenters) {
     if(end == null) {
       throw new NullPointerException("end date is null");
     }
     List<LocalDate> unadjustedDates = getDatesInRange(start, end, interval);
-    unadjustedDates.set(0, getAdjustedDate(unadjustedDates.get(0), conventions[0], businessCentres[0]));
+    unadjustedDates.set(0, getAdjustedDate(unadjustedDates.get(0), conventions[0], businessCenters[0]));
     for(int i = 1; i < unadjustedDates.size() - 1; i++) {
-      unadjustedDates.set(i, getAdjustedDate(unadjustedDates.get(i), conventions[1], businessCentres[1]));
+      unadjustedDates.set(i, getAdjustedDate(unadjustedDates.get(i), conventions[1], businessCenters[1]));
     }
-    unadjustedDates.set(unadjustedDates.size() - 1, getAdjustedDate(unadjustedDates.get(unadjustedDates.size() - 1), conventions[2], businessCentres[2]));
+    unadjustedDates.set(unadjustedDates.size() - 1, getAdjustedDate(unadjustedDates.get(unadjustedDates.size() - 1), conventions[2], businessCenters[2]));
     return unadjustedDates;
   }
 
   @Override
-  public List<LocalDate> adjustDates(List<LocalDate> dates, BusinessDayConventionEnum conventions[], BusinessCenters[] businessCentres) {
+  public List<LocalDate> adjustDates(List<LocalDate> dates, BusinessDayConventionEnum conventions[], BusinessCenters[] businessCenters) {
     List<LocalDate> adjusted = new ArrayList<LocalDate>(dates);
-    dates.set(0, getAdjustedDate(dates.get(0), conventions[0], businessCentres[0]));
+    dates.set(0, getAdjustedDate(dates.get(0), conventions[0], businessCenters[0]));
     for(int i = 0; i < dates.size() - 1; i++) {
-      adjusted.set(i, getAdjustedDate(dates.get(i), conventions[1], businessCentres[1]));
+      adjusted.set(i, getAdjustedDate(dates.get(i), conventions[1], businessCenters[1]));
     }
-    adjusted.set(dates.size() - 1, getAdjustedDate(dates.get(dates.size() - 1), conventions[2], businessCentres[2]));
+    adjusted.set(dates.size() - 1, getAdjustedDate(dates.get(dates.size() - 1), conventions[2], businessCenters[2]));
     return adjusted;
   }
 
