@@ -110,4 +110,11 @@ public class FpmlParserTests {
     }
     return data;
   }
+
+  @DataProvider(name = "onefpml")
+  public Object[][] singleTrade() {
+    Object[][] data = new Object[1][];
+    data[0] = new Object[]{"LCH00000894736"};
+    return data;
+  }
 }
