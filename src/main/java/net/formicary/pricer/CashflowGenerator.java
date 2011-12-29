@@ -143,6 +143,8 @@ public class CashflowGenerator {
         if(flow.getDate().isBefore(paymentDate) || flow.getDate().equals(paymentDate)) {
           payment.setAmount(payment.getAmount() + flow.getAmount());
           payment.setNpv(payment.getNpv() + flow.getNpv());
+          if(payment.getType() == null)
+            payment.setType(flow.getType());
           iter.remove();
         } else {
           //we have a flow after our current payment, let it go to the next payment date

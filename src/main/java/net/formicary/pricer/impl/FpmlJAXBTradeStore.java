@@ -57,15 +57,4 @@ public class FpmlJAXBTradeStore implements TradeStore {
     JAXBElement<DataDocument> dd = (JAXBElement<DataDocument>)unmarshaller.unmarshal(f);
     return dd.getValue().getTrade().get(0);
   }
-
-  public static void main(String[] args) throws JAXBException {
-    FpmlJAXBTradeStore store = new FpmlJAXBTradeStore(JAXBContext.newInstance(DataDocument.class));
-    store.setFpmlDir("src/test/resources/fpml");
-    long now = System.currentTimeMillis();
-    for(int i = 0; i < 1000; i++) {
-      store.getTrade("LCH00000894736");
-    }
-    long timeTaken = System.currentTimeMillis() - now;
-    System.out.println("Time to read 1000 trades: " + timeTaken + "ms average:" + (timeTaken / 1000) + "ms");
-  }
 }

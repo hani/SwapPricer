@@ -4,7 +4,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.name.Names;
-import net.formicary.pricer.impl.FpmlJAXBTradeStore;
+import net.formicary.pricer.impl.FpmlTradeStore;
 import net.formicary.pricer.model.Cashflow;
 import org.joda.time.LocalDate;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ import java.util.List;
 public class CashflowTests {
 
   private CashflowGenerator generator;
-  private FpmlJAXBTradeStore store;
+  private TradeStore store;
   private static final Logger log = LoggerFactory.getLogger(CashflowTests.class);
 
   @BeforeClass
@@ -40,7 +40,7 @@ public class CashflowTests {
         bind(String.class).annotatedWith(Names.named("fpmlDir")).toInstance("src/test/resources/fpml");
       }
     });
-    store = injector.getInstance(FpmlJAXBTradeStore.class);
+    store = injector.getInstance(FpmlTradeStore.class);
     generator = injector.getInstance(CashflowGenerator.class);
   }
 
@@ -56,7 +56,7 @@ public class CashflowTests {
 
   @DataProvider(name = "trades")
   public Object[][] allTrades() {
-    File file = new File(store.getFpmlDir());
+    File file = new File("src/test/resources/fpml");
     List<String> files = new ArrayList<String>();
     Collections.addAll(files, file.list(new FilenameFilter() {
       @Override
@@ -75,7 +75,7 @@ public class CashflowTests {
   @DataProvider(name = "singletrade")
   public Object[][] singleTrade() {
     Object[][] data = new Object[1][];
-    data[0] = new Object[]{"LCH00000997564"};
+    data[0] = new Object[]{"LCH00000513426"};
     return data;
   }
 }
