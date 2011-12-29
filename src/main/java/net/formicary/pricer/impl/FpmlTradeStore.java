@@ -10,6 +10,7 @@ import javax.inject.Singleton;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -65,7 +66,9 @@ public class FpmlTradeStore implements TradeStore {
     Swap swap = new Swap();
     FpmlContext ctx = new FpmlContext();
     ctx.setParsers(parsers);
-    XMLStreamReader reader = factory.createXMLStreamReader(new FileInputStream(f));
+    //most fpml files are around 8.5k
+    BufferedInputStream is = new BufferedInputStream(new FileInputStream(f), 12000);
+    XMLStreamReader reader = factory.createXMLStreamReader(is);
     for (int event = reader.next(); event != END_DOCUMENT; event = reader.next()) {
       if (event == START_ELEMENT) {
         NodeParser parser = parsers.get(reader.getLocalName());
@@ -74,6 +77,7 @@ public class FpmlTradeStore implements TradeStore {
         }
       }
     }
+    is.close();
     swap.getSwapStream().addAll(ctx.getStreams());
     return swap;
   }
