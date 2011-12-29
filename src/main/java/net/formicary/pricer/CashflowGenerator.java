@@ -38,7 +38,7 @@ public class CashflowGenerator {
 
   private List<Cashflow> generateFloatingFlows(LocalDate valuationDate, InterestRateStream leg) {
     LocalDate startDate = getStartDate(leg);
-    LocalDate endDate = DateUtil.getDate(leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
+    LocalDate endDate = getEndDate(leg);
     BusinessDayConventionEnum[] conventions = FpMLUtil.getBusinessDayConventions(leg);
     Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
     AmountSchedule notional = calculation.getNotionalSchedule().getNotionalStepSchedule();
@@ -69,17 +69,9 @@ public class CashflowGenerator {
     return flows;
   }
 
-  private String getFloatingIndexName(Calculation calculation) {
-    FloatingRateCalculation floatingCalc = (FloatingRateCalculation) calculation.getRateCalculation().getValue();
-    String index = floatingCalc.getFloatingRateIndex().getValue();
-    int dash = index.indexOf('-') + 1;
-    index = index.substring(dash, index.indexOf('-', dash));
-    return index;
-  }
-
   private List<Cashflow> generateFixedFlows(LocalDate valuationDate, InterestRateStream leg) {
     LocalDate startDate = getStartDate(leg);
-    LocalDate endDate = DateUtil.getDate(leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
+    LocalDate endDate = getEndDate(leg);
     BusinessDayConventionEnum[] conventions = FpMLUtil.getBusinessDayConventions(leg);
     //todo clarify: we're using calculation interval rather than payment interval, and hoping hoping hoping that they never mismatch or we're screwed
     CalculationPeriodFrequency interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
@@ -98,9 +90,18 @@ public class CashflowGenerator {
     return flows;
   }
 
+  private LocalDate getEndDate(InterestRateStream leg) {
+    //if we have a stub, then our end is from this date
+    XMLGregorianCalendar cal = leg.getCalculationPeriodDates().getLastRegularPeriodEndDate();
+    //no stub, just use the termination date
+    if(cal == null) cal = leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue();
+    return DateUtil.getDate(cal);
+  }
+
   private LocalDate getStartDate(InterestRateStream leg) {
+    //if we have a stub, then our start is from this date
     XMLGregorianCalendar cal = leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate();
-    //if we don't have an explicit start date, use the effective date
+    //no stub, just use the effective date
     if(cal == null) cal = leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue();
     return DateUtil.getDate(cal);
   }
@@ -126,5 +127,13 @@ public class CashflowGenerator {
       flow.reverse();
     }
     return flow;
+  }
+
+  private String getFloatingIndexName(Calculation calculation) {
+    FloatingRateCalculation floatingCalc = (FloatingRateCalculation) calculation.getRateCalculation().getValue();
+    String index = floatingCalc.getFloatingRateIndex().getValue();
+    int dash = index.indexOf('-') + 1;
+    index = index.substring(dash, index.indexOf('-', dash));
+    return index;
   }
 }
