@@ -2,6 +2,7 @@ package net.formicary.pricer;
 
 import net.formicary.pricer.model.Cashflow;
 import net.formicary.pricer.model.FlowType;
+import net.formicary.pricer.util.DateUtil;
 import net.formicary.pricer.util.FpMLUtil;
 import org.fpml.spec503wd3.*;
 import org.joda.time.LocalDate;
@@ -40,29 +41,26 @@ public class CashflowGenerator {
   }
 
   private List<Cashflow> generateFloatingFlows(LocalDate valuationDate, InterestRateStream leg) {
-    StreamContext ctx = new StreamContext(leg);
+    StreamContext ctx = new StreamContext(valuationDate, leg);
     Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
-    String currency = calculation.getNotionalSchedule().getNotionalStepSchedule().getCurrency().getValue();
     CalculationPeriodFrequency interval = ctx.interval;
     List<LocalDate> calculationDates = ctx.calculationDates;
     List<LocalDate> fixingDates = calendarManager.getFixingDates(calculationDates, leg.getResetDates().getFixingDates());
     List<Cashflow> flows = new ArrayList<Cashflow>();
-    //todo verify LCH skips the payment thats 3 days after valuation date
-    LocalDate cutoff = valuationDate.plusDays(3);
     for(int i = 1; i < calculationDates.size(); i++) {
       LocalDate periodEndDate = calculationDates.get(i);
       //todo optimise and use binarySearch to find the right index
-      if(periodEndDate.isAfter(cutoff)) {
+      if(periodEndDate.isAfter(ctx.cutoffDate)) {
         LocalDate periodStartDate = calculationDates.get(i - 1);
         LocalDate fixingDate = fixingDates.get(i -1);
         if(fixingDate.isBefore(valuationDate)) {
           String index = getFloatingIndexName(calculation);
-          double rate = rateManager.getZeroRate(index, currency, interval, fixingDate) / 100;
-          Cashflow flow = getCashflow(valuationDate, periodStartDate, periodEndDate, leg, rate);
+          double rate = rateManager.getZeroRate(index, ctx.currency, interval, fixingDate) / 100;
+          Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, rate);
           flows.add(flow);
         } else {
-          double impliedForwardRate = curveManager.getImpliedForwardRate(periodStartDate, periodEndDate, valuationDate, currency, interval);
-          Cashflow flow = getCashflow(valuationDate, calculationDates.get(i - 1), periodEndDate, leg, impliedForwardRate);
+          double impliedForwardRate = curveManager.getImpliedForwardRate(periodStartDate, periodEndDate, valuationDate, ctx.currency, interval);
+          Cashflow flow = getCashflow(calculationDates.get(i - 1), periodEndDate, ctx, impliedForwardRate);
           flows.add(flow);
         }
       }
@@ -70,29 +68,63 @@ public class CashflowGenerator {
     //we have all the calculated cashflows, we next need to check the payment dates
     //shortcut case, we have the same schedules
     Interval paymentInterval = leg.getPaymentDates().getPaymentFrequency();
-    if(interval.getPeriod() == paymentInterval.getPeriod() && interval.getPeriodMultiplier().equals(paymentInterval.getPeriodMultiplier())) {
-      return flows;
-    } else {
+    if(interval.getPeriod() != paymentInterval.getPeriod() || !interval.getPeriodMultiplier().equals(paymentInterval.getPeriodMultiplier())) {
       List<LocalDate> paymentDates = calendarManager.getAdjustedDates(ctx.startDate, ctx.endDate, ctx.conventions, paymentInterval, FpMLUtil.getBusinessCenters(leg));
-      return convertToPaymentFlows(flows, cutoff, paymentDates);
+      flows = convertToPaymentFlows(flows, ctx.cutoffDate, paymentDates);
     }
+    if(ctx.initialStub != null && ctx.startDate.isAfter(ctx.cutoffDate)) {
+      flows.add(calculateInitialStubCashflow(ctx));
+    }
+    if(ctx.finalStub != null) {
+      flows.add(calculateFinalStubCashflow(ctx));
+    }
+    return flows;
   }
 
   private List<Cashflow> generateFixedFlows(LocalDate valuationDate, InterestRateStream leg) {
-    StreamContext ctx = new StreamContext(leg);
+    StreamContext ctx = new StreamContext(valuationDate, leg);
     List<LocalDate> calculationDates = ctx.calculationDates;
     List<Cashflow> flows = new ArrayList<Cashflow>();
-    //TODO verify that LCH skips the payment thats 3 days after valuation date
-    LocalDate cutoff = valuationDate.plusDays(3);
     for(int i = 1; i < calculationDates.size(); i++) {
       LocalDate paymentDate = calculationDates.get(i);
-      if(paymentDate.isAfter(cutoff)) {
+      if(paymentDate.isAfter(ctx.cutoffDate)) {
         BigDecimal rate = leg.getCalculationPeriodAmount().getCalculation().getFixedRateSchedule().getInitialValue();
-        Cashflow flow = getCashflow(valuationDate, calculationDates.get(i - 1), paymentDate, leg, rate.doubleValue());
+        Cashflow flow = getCashflow(calculationDates.get(i - 1), paymentDate, ctx, rate.doubleValue());
         flows.add(flow);
       }
     }
     return flows;
+  }
+
+  private Cashflow calculateInitialStubCashflow(StreamContext ctx) {
+    LocalDate endDate = ctx.startDate;
+    BusinessCenters centers = ctx.stream.getCalculationPeriodDates().getCalculationPeriodDatesAdjustments().getBusinessCenters();
+    endDate = calendarManager.getAdjustedDate(endDate, ctx.conventions[1], centers);
+    LocalDate startDate = DateUtil.getDate(ctx.stream.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
+    List<FloatingRate> rates = ctx.initialStub.getFloatingRate();
+    double rateToUse = 0;
+    if(rates.size() > 0) {
+      FloatingRate rate1 = rates.get(0);
+      String index = getFloatingIndexName(rate1.getFloatingRateIndex().getValue());
+      String tenor1 = rate1.getIndexTenor().getPeriodMultiplier() + rate1.getIndexTenor().getPeriod().value();
+      double rate1Value = curveManager.getInterpolatedForwardRate(startDate, ctx.currency, tenor1);
+      if(rates.size() == 1) {
+        rateToUse = rate1Value;
+      } else if(rates.size() == 2) {
+        FloatingRate rate2 = rates.get(0);
+        String tenor2 = rate2.getIndexTenor().getPeriodMultiplier() + rate1.getIndexTenor().getPeriod().value();
+        rateToUse = (rate1Value + curveManager.getInterpolatedForwardRate(startDate, ctx.currency, tenor2)) / 2;
+      }
+    }
+    return getCashflow(startDate, endDate, ctx, rateToUse);
+  }
+
+  private Cashflow calculateFinalStubCashflow(StreamContext ctx) {
+    //todo verify which business centers and conventions we use for stubs
+    BusinessCenters centers = ctx.stream.getCalculationPeriodDates().getCalculationPeriodDatesAdjustments().getBusinessCenters();
+    LocalDate endDate = DateUtil.getDate(ctx.stream.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
+    endDate = calendarManager.getAdjustedDate(endDate, ctx.conventions[1], centers);
+    return getCashflow(ctx.endDate, endDate, ctx, 0);
   }
 
   private List<Cashflow> convertToPaymentFlows(List<Cashflow> flows, LocalDate cutoff, List<LocalDate> paymentDates) {
@@ -123,8 +155,9 @@ public class CashflowGenerator {
     return paymentFlows;
   }
 
-  private Cashflow getCashflow(LocalDate valuationDate, LocalDate periodStart, LocalDate periodEnd, InterestRateStream leg, double rate) {
+  private Cashflow getCashflow(LocalDate periodStart, LocalDate periodEnd, StreamContext ctx, double rate) {
     Cashflow flow = new Cashflow();
+    InterestRateStream leg = ctx.stream;
     DayCountFraction fraction = leg.getCalculationPeriodAmount().getCalculation().getDayCountFraction();
     double dayCountFraction = calendarManager.getDayCountFraction(periodStart, periodEnd, FpMLUtil.getDayCountFraction(fraction.getValue()));
     flow.setDayCountFraction(dayCountFraction);
@@ -132,13 +165,12 @@ public class CashflowGenerator {
     String currency = notional.getCurrency().getValue();
     double undiscountedAmount = notional.getInitialValue().doubleValue() * rate * dayCountFraction;
     flow.setAmount(undiscountedAmount);
-    boolean isFixed = FpMLUtil.isFixedStream(leg);
-    double discountFactor = curveManager.getDiscountFactor(periodEnd, valuationDate, currency, leg.getPaymentDates().getPaymentFrequency(), isFixed);
+    double discountFactor = curveManager.getDiscountFactor(periodEnd, ctx.valuationDate, currency, leg.getPaymentDates().getPaymentFrequency(), ctx.isFixed);
     flow.setDiscountFactor(discountFactor);
     flow.setNpv(discountFactor * undiscountedAmount);
     flow.setDate(periodEnd);
     flow.setRate(rate);
-    flow.setType(isFixed ? FlowType.FIX : FlowType.FLT);
+    flow.setType(ctx.isFixed ? FlowType.FIX : FlowType.FLT);
     if(((Party)leg.getPayerPartyReference().getHref()).getId().equals(ourName)) {
       //we're paying, so reverse values
       flow.reverse();
@@ -147,24 +179,42 @@ public class CashflowGenerator {
   }
 
   class StreamContext {
+    boolean isFixed;
+    Stub initialStub;
+    Stub finalStub;
     CalculationPeriodFrequency interval;
+    LocalDate valuationDate;
+    LocalDate cutoffDate;
     LocalDate startDate;
     LocalDate endDate;
     BusinessDayConventionEnum[] conventions;
-    private List<LocalDate> calculationDates;
+    List<LocalDate> calculationDates;
+    InterestRateStream stream;
+    String currency;
 
-    public StreamContext(InterestRateStream leg) {
+    public StreamContext(LocalDate valuationDate, InterestRateStream leg) {
+      this.stream = leg;
+      this.valuationDate = valuationDate;
+      this.cutoffDate = valuationDate.plusDays(3);
+      this.isFixed = FpMLUtil.isFixedStream(leg);
       startDate = FpMLUtil.getStartDate(leg);
       endDate = FpMLUtil.getEndDate(leg);
       conventions = FpMLUtil.getBusinessDayConventions(leg);
       interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
       calculationDates = calendarManager.getAdjustedDates(startDate, endDate, conventions, interval, FpMLUtil.getBusinessCenters(leg));
+      initialStub = FpMLUtil.getInitialStub(leg);
+      finalStub = FpMLUtil.getFinalStub(leg);
+      currency = leg.getCalculationPeriodAmount().getCalculation().getNotionalSchedule().getNotionalStepSchedule().getCurrency().getValue();
     }
   }
 
   private String getFloatingIndexName(Calculation calculation) {
     FloatingRateCalculation floatingCalc = (FloatingRateCalculation) calculation.getRateCalculation().getValue();
     String index = floatingCalc.getFloatingRateIndex().getValue();
+    return getFloatingIndexName(index);
+  }
+
+  private static String getFloatingIndexName(String index) {
     int dash = index.indexOf('-') + 1;
     index = index.substring(dash, index.indexOf('-', dash));
     return index;

@@ -59,7 +59,7 @@ public class DMPReportGenerator {
     }
     long timeTaken = System.currentTimeMillis() - now;
     log.info("Time to price {} trades: {}ms", files.size(), timeTaken);
-    log.info("Average time to price 1 trade: {}ms", timeTaken/files.size());
+    log.info("Average time to price a trade: {}ms", timeTaken/files.size());
     os.close();
   }
 
