@@ -1,5 +1,6 @@
 package net.formicary.pricer.impl.parsers;
 
+import net.formicary.pricer.HrefListener;
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
 import net.formicary.pricer.util.DateUtil;
@@ -17,7 +18,10 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
  *         Date: 12/20/11
  *         Time: 11:44 AM
  */
-public class CalculationPeriodDateParser implements NodeParser<CalculationPeriodDates> {
+public class CalculationPeriodDateParser implements NodeParser<CalculationPeriodDates>, HrefListener {
+
+  private AdjustableDate currentDate;
+  private BusinessCenters centers;
 
   enum Element {
     effectiveDate,
@@ -38,18 +42,24 @@ public class CalculationPeriodDateParser implements NodeParser<CalculationPeriod
   }
 
   @Override
+  public void nodeAdded(String id, Object o) {
+    //it's only business centers for now
+    centers = (BusinessCenters)o;
+  }
+
+  @Override
   public CalculationPeriodDates parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
     CalculationPeriodDates dates = new CalculationPeriodDates();
     dates.setCalculationPeriodFrequency(new CalculationPeriodFrequency());
-    AdjustableDate currentDate = null;
-    BusinessCenters centers = null;
+    currentDate = null;
+    centers = null;
     while(reader.hasNext()) {
       int event = reader.next();
       if (event == START_ELEMENT) {
         Element element = Element.valueOf(reader.getLocalName());
         String myId = reader.getAttributeValue(null, "id");
         if(myId != null) {
-          ctx.getCalculationPeriodDates().put(myId, dates);
+          ctx.registerObject(myId, dates);
         }
         switch(element) {
           case effectiveDate:
@@ -106,11 +116,11 @@ public class CalculationPeriodDateParser implements NodeParser<CalculationPeriod
             }
             String id = reader.getAttributeValue(null, "id");
             if(id != null) {
-              ctx.getBusinessCenters().put(id, centers);
+              ctx.registerObject(id, centers);
             }
             break;
           case businessCentersReference:
-            centers = ctx.getBusinessCenters().get(reader.getAttributeValue(null, "href"));
+            ctx.addHrefListener(reader.getAttributeValue(null, "href"), this);
             break;
           case businessCenter:
             BusinessCenter bc = new BusinessCenter();

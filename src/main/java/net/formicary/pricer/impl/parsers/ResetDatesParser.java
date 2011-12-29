@@ -1,5 +1,6 @@
 package net.formicary.pricer.impl.parsers;
 
+import net.formicary.pricer.HrefListener;
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
 import org.fpml.spec503wd3.*;
@@ -38,8 +39,8 @@ public class ResetDatesParser implements NodeParser<ResetDates> {
 
   @Override
   public ResetDates parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
-    ResetDates dates = new ResetDates();
-    BusinessDayAdjustments adjustments = new BusinessDayAdjustments();
+    final ResetDates dates = new ResetDates();
+    final BusinessDayAdjustments adjustments = new BusinessDayAdjustments();
     adjustments.setBusinessCenters(new BusinessCenters());
     dates.setResetDatesAdjustments(adjustments);
     dates.setFixingDates(new RelativeDateOffset());
@@ -54,10 +55,15 @@ public class ResetDatesParser implements NodeParser<ResetDates> {
         Element element = Element.valueOf(reader.getLocalName());
         switch(element) {
           case calculationPeriodDatesReference:
-            CalculationPeriodDates item = ctx.getCalculationPeriodDates().get(reader.getAttributeValue(null, "href"));
-            CalculationPeriodDatesReference ref = new CalculationPeriodDatesReference();
-            ref.setHref(item);
-            dates.setCalculationPeriodDatesReference(ref);
+            ctx.addHrefListener(reader.getAttributeValue(null, "href"), new HrefListener() {
+              @Override
+              public void nodeAdded(String id, Object o) {
+                CalculationPeriodDates item = (CalculationPeriodDates) o;
+                CalculationPeriodDatesReference ref = new CalculationPeriodDatesReference();
+                ref.setHref(item);
+                dates.setCalculationPeriodDatesReference(ref);
+              }
+            });
             break;
           case resetRelativeTo:
             dates.setResetRelativeTo(ResetRelativeToEnum.fromValue(reader.getElementText()));
@@ -83,8 +89,13 @@ public class ResetDatesParser implements NodeParser<ResetDates> {
             centers.getBusinessCenter().add(bc);
             break;
           case businessCentersReference:
-            BusinessCenters bcs = ctx.getBusinessCenters().get(reader.getAttributeValue(null, "href"));
-            adjustments.setBusinessCenters(bcs);
+            ctx.addHrefListener(reader.getAttributeValue(null, "href"), new HrefListener() {
+              @Override
+              public void nodeAdded(String id, Object o) {
+                BusinessCenters b = (BusinessCenters)o;
+                adjustments.setBusinessCenters(b);
+              }
+            });
             break;
           case dayType:
             fixingDates.setDayType(DayTypeEnum.fromValue(reader.getElementText()));

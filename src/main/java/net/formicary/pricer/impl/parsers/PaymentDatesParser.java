@@ -1,5 +1,6 @@
 package net.formicary.pricer.impl.parsers;
 
+import net.formicary.pricer.HrefListener;
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
 import org.fpml.spec503wd3.*;
@@ -35,8 +36,8 @@ public class PaymentDatesParser implements NodeParser<PaymentDates> {
 
   @Override
   public PaymentDates parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
-    PaymentDates dates = new PaymentDates();
-    BusinessDayAdjustments adjustments = new BusinessDayAdjustments();
+    final PaymentDates dates = new PaymentDates();
+    final BusinessDayAdjustments adjustments = new BusinessDayAdjustments();
     dates.setPaymentDatesAdjustments(adjustments);
     adjustments.setBusinessCenters(new BusinessCenters());
     dates.setPaymentDaysOffset(new RelativeDateOffset());
@@ -57,10 +58,15 @@ public class PaymentDatesParser implements NodeParser<PaymentDates> {
             adjustments.setBusinessDayConvention(BusinessDayConventionEnum.valueOf(reader.getElementText()));
             break;
           case calculationPeriodDatesReference:
-            CalculationPeriodDates d = ctx.getCalculationPeriodDates().get(reader.getAttributeValue(null, "href"));
-            CalculationPeriodDatesReference ref = new CalculationPeriodDatesReference();
-            ref.setHref(d);
-            dates.setCalculationPeriodDatesReference(ref);
+            ctx.addHrefListener(reader.getAttributeValue(null, "href"), new HrefListener() {
+              @Override
+              public void nodeAdded(String id, Object o) {
+                CalculationPeriodDates d = (CalculationPeriodDates) o;
+                CalculationPeriodDatesReference ref = new CalculationPeriodDatesReference();
+                ref.setHref(d);
+                dates.setCalculationPeriodDatesReference(ref);
+              }
+            });
             break;
           case businessCenter:
             BusinessCenter bc = new BusinessCenter();
@@ -71,7 +77,12 @@ public class PaymentDatesParser implements NodeParser<PaymentDates> {
           case calculationPeriodDates:
             throw new RuntimeException("Not implemented: " + element.name());
           case businessCentersReference:
-            adjustments.setBusinessCenters(ctx.getBusinessCenters().get(reader.getAttributeValue(null, "href")));
+            ctx.addHrefListener(reader.getAttributeValue(null, "href"), new HrefListener() {
+              @Override
+              public void nodeAdded(String id, Object o) {
+                adjustments.setBusinessCenters((BusinessCenters) o);
+              }
+            });
             break;
           case payRelativeTo:
             dates.setPayRelativeTo(PayRelativeToEnum.fromValue(reader.getElementText()));
