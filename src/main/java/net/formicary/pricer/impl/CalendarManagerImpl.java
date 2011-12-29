@@ -105,13 +105,15 @@ public class CalendarManagerImpl implements CalendarManager {
       return unadjustedDates;
     }
     LocalDate current = new LocalDate(start);
+    String rollConvention = null;
     boolean isIMM = false;
     boolean isEOM = false;
     if(interval instanceof CalculationPeriodFrequency) {
       CalculationPeriodFrequency f = (CalculationPeriodFrequency)interval;
-      if(f.getRollConvention().equals("IMM")) {
+      rollConvention = f.getRollConvention();
+      if(rollConvention.startsWith("IMM")) {
         isIMM = true;
-      } else if(f.getRollConvention().equals("EOM")) {
+      } else if(rollConvention.equals("EOM")) {
         isEOM = true;
       }
     }
@@ -132,6 +134,13 @@ public class CalendarManagerImpl implements CalendarManager {
         current = current.withDayOfWeek(DateTimeConstants.WEDNESDAY);
         //we have the first weds, we want the third, so move forward twice
         current = current.plusWeeks(2);
+        if("IMMCAD".equals(rollConvention)) {
+          current = current.minusDays(2);
+        } else if("IMMNZD".equals(rollConvention)) {
+          throw new UnsupportedOperationException("IMMNZD is not supported yet");
+        } else if("IMMAUD".equals(rollConvention)) {
+          throw new UnsupportedOperationException("IMMAUD is not supported yet");
+        }
       }
     }
     return unadjustedDates;
