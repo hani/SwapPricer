@@ -108,6 +108,7 @@ public class CalendarManagerImpl implements CalendarManager {
     String rollConvention = null;
     boolean isIMM = false;
     boolean isEOM = false;
+    int rollDay = 0;
     if(interval instanceof CalculationPeriodFrequency) {
       CalculationPeriodFrequency f = (CalculationPeriodFrequency)interval;
       rollConvention = f.getRollConvention();
@@ -116,11 +117,21 @@ public class CalendarManagerImpl implements CalendarManager {
       } else if(rollConvention.equals("EOM")) {
         isEOM = true;
       }
+      if(!isIMM && !isEOM) {
+        rollDay = Integer.parseInt(rollConvention);
+      }
     }
     ReadablePeriod period = getPeriod(interval);
     while(current.isBefore(end) || current.equals(end)) {
       unadjustedDates.add(current);
       current = current.plus(period);
+      if(rollDay > 0 && current.getDayOfMonth() != rollDay) {
+        try {
+          current = current.withDayOfMonth(rollDay);
+        } catch(IllegalFieldValueException ex) {
+          //can't do stuff like feb 29 on a non-leap year etc, it's ok.
+        }
+      }
       if(isEOM) {
         current = current.property(DateTimeFieldType.dayOfMonth()).withMaximumValue();
       } else if(isIMM) {
