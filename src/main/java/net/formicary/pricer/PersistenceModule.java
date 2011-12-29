@@ -10,8 +10,9 @@ import com.google.code.morphia.mapping.MappedField;
 import com.google.code.morphia.mapping.MappingException;
 import com.google.inject.AbstractModule;
 import com.mongodb.Mongo;
-import net.formicary.pricer.impl.FpmlJAXBTradeStore;
+import net.formicary.pricer.impl.FpmlTradeStore;
 import net.formicary.pricer.impl.RateManagerImpl;
+import net.formicary.pricer.model.Index;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -32,13 +33,16 @@ public class PersistenceModule extends AbstractModule {
   protected void configure() {
     try {
       Morphia morphia = new Morphia();
+      morphia.map(Index.class);
       morphia.getMapper().getConverters().addConverter(new LocalDateConverter());
-      bind(Datastore.class).toInstance(morphia.createDatastore(new Mongo(), "swappricer"));
+      Datastore datastore = morphia.createDatastore(new Mongo(), "swappricer");
+      datastore.ensureIndexes();
+      bind(Datastore.class).toInstance(datastore);
     } catch(UnknownHostException e) {
       addError(e);
     }
     bind(RateManager.class).to(RateManagerImpl.class);
-    bind(TradeStore.class).to(FpmlJAXBTradeStore.class);
+    bind(TradeStore.class).to(FpmlTradeStore.class);
   }
 
   public class LocalDateConverter  extends TypeConverter implements SimpleValueConverter {

@@ -2,6 +2,7 @@ package net.formicary.pricer.model;
 
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
+import com.google.code.morphia.annotations.Indexes;
 import org.bson.types.ObjectId;
 import org.joda.time.LocalDate;
 
@@ -11,6 +12,9 @@ import org.joda.time.LocalDate;
  *         Time: 7:57 AM
  */
 @Entity
+@Indexes({
+    @com.google.code.morphia.annotations.Index("name, currency, tenorUnit, tenorPeriod, fixingDate")
+})
 public class Index {
   @Id private ObjectId id;
   private String currency;
