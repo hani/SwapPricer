@@ -35,7 +35,7 @@ public class RateManagerImpl implements RateManager {
     query.field("name").equal(indexName);
     Index index = query.get();
     if(index == null) {
-      throw new IllegalArgumentException("No rate found for " + currency + " " + interval.getPeriodMultiplier() + interval.getPeriod() + " on " + date);
+      throw new IllegalArgumentException("No " + indexName + " rate found for " + currency + " " + interval.getPeriodMultiplier() + interval.getPeriod() + " on " + date);
     }
     return index.getRate();
   }
