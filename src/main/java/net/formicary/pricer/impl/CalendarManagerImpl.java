@@ -60,7 +60,7 @@ public class CalendarManagerImpl implements CalendarManager {
 //      if(offset == 0) {
 //        //we need to roll anyway since we can't fix on a holiday
 //        //fixing date is 0 in cases where payment day has an offset (unhandled right now). See LCH00000923966.xml
-//        fixingDates.add(getAdjustedDate(date, fixingOffset.getBusinessDayConvention(), fixingOffset.getBusinessCenters()));
+//        fixingDates.add(adjustDate(date, fixingOffset.getBusinessDayConvention(), fixingOffset.getBusinessCenters()));
 //      } else
       {
         final int numberOfStepsLeft = Math.abs(offset);
@@ -94,22 +94,22 @@ public class CalendarManagerImpl implements CalendarManager {
       throw new NullPointerException("end date is null");
     }
     List<LocalDate> unadjustedDates = getDatesInRange(start, end, interval);
-    unadjustedDates.set(0, getAdjustedDate(unadjustedDates.get(0), conventions[0], businessCenters[0]));
+    unadjustedDates.set(0, adjustDate(unadjustedDates.get(0), conventions[0], businessCenters[0]));
     for(int i = 1; i < unadjustedDates.size() - 1; i++) {
-      unadjustedDates.set(i, getAdjustedDate(unadjustedDates.get(i), conventions[1], businessCenters[1]));
+      unadjustedDates.set(i, adjustDate(unadjustedDates.get(i), conventions[1], businessCenters[1]));
     }
-    unadjustedDates.set(unadjustedDates.size() - 1, getAdjustedDate(unadjustedDates.get(unadjustedDates.size() - 1), conventions[2], businessCenters[2]));
+    unadjustedDates.set(unadjustedDates.size() - 1, adjustDate(unadjustedDates.get(unadjustedDates.size() - 1), conventions[2], businessCenters[2]));
     return unadjustedDates;
   }
 
   @Override
   public List<LocalDate> adjustDates(List<LocalDate> dates, BusinessDayConventionEnum conventions[], BusinessCenters[] businessCenters) {
     List<LocalDate> adjusted = new ArrayList<LocalDate>(dates);
-    dates.set(0, getAdjustedDate(dates.get(0), conventions[0], businessCenters[0]));
+    dates.set(0, adjustDate(dates.get(0), conventions[0], businessCenters[0]));
     for(int i = 0; i < dates.size() - 1; i++) {
-      adjusted.set(i, getAdjustedDate(dates.get(i), conventions[1], businessCenters[1]));
+      adjusted.set(i, adjustDate(dates.get(i), conventions[1], businessCenters[1]));
     }
-    adjusted.set(dates.size() - 1, getAdjustedDate(dates.get(dates.size() - 1), conventions[2], businessCenters[2]));
+    adjusted.set(dates.size() - 1, adjustDate(dates.get(dates.size() - 1), conventions[2], businessCenters[2]));
     return adjusted;
   }
 
@@ -175,7 +175,30 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
-  public LocalDate getAdjustedDate(LocalDate date, BusinessDayConventionEnum convention, BusinessCenters businessCenters) {
+  public LocalDate applyInterval(LocalDate date, Interval interval, BusinessCenters businessCenters) {
+    //move by fixing offset, we only count business days
+    if(interval instanceof Offset) {
+      if(((Offset)interval).getDayType() != DayTypeEnum.BUSINESS) {
+        throw new UnsupportedOperationException("Only BUSINESS dayType is currently supported");
+      }
+    }
+    int offset = interval.getPeriodMultiplier().intValue();
+    {
+      final int numberOfStepsLeft = Math.abs(offset);
+      final int step = (offset < 0 ? -1 : 1);
+
+      for (int i = 0; i < numberOfStepsLeft; i++) {
+        do {
+          date = date.plusDays(step);
+        }
+        while(isNonWorkingDay(date, businessCenters));
+      }
+    }
+    return date;
+  }
+
+  @Override
+  public LocalDate adjustDate(LocalDate date, BusinessDayConventionEnum convention, BusinessCenters businessCenters) {
     if(convention == BusinessDayConventionEnum.NONE) {
       return date;
     }

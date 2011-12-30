@@ -51,7 +51,7 @@ public class CalendarTests {
   }
 
   public void weekend() {
-    assertEquals(manager.getAdjustedDate(new LocalDate(2011, 8, 13), FOLLOWING, getCenters("USNY")), new LocalDate(2011, 8, 15));
+    assertEquals(manager.adjustDate(new LocalDate(2011, 8, 13), FOLLOWING, getCenters("USNY")), new LocalDate(2011, 8, 15));
   }
 
   public void verifyEOMConvention() {
@@ -78,11 +78,11 @@ public class CalendarTests {
   }
 
   public void holiday() {
-    assertEquals(manager.getAdjustedDate(new LocalDate(2010, 12, 27), FOLLOWING, getCenters("GBLO")), new LocalDate(2010, 12, 29));
+    assertEquals(manager.adjustDate(new LocalDate(2010, 12, 27), FOLLOWING, getCenters("GBLO")), new LocalDate(2010, 12, 29));
   }
 
   public void notHoliday() {
-    assertEquals(manager.getAdjustedDate(new LocalDate(2011, 8, 10), MODFOLLOWING, getCenters("GBLO")), new LocalDate(2011, 8, 10));
+    assertEquals(manager.adjustDate(new LocalDate(2011, 8, 10), MODFOLLOWING, getCenters("GBLO")), new LocalDate(2011, 8, 10));
   }
 
   public void dayCountFractionAct360() {
@@ -91,7 +91,7 @@ public class CalendarTests {
   }
 
   public void multipleCalendars() {
-    assertEquals(manager.getAdjustedDate(new LocalDate(2011, 5, 30), PRECEDING, getCenters("GBLO", "USNY")), new LocalDate(2011, 5, 27));
+    assertEquals(manager.adjustDate(new LocalDate(2011, 5, 30), PRECEDING, getCenters("GBLO", "USNY")), new LocalDate(2011, 5, 27));
   }
 
   public void paymentDates() {
@@ -124,6 +124,27 @@ public class CalendarTests {
     offset.setPeriod(PeriodEnum.D);
     offset.setPeriodMultiplier(new BigInteger("-2"));
     assertEquals(manager.getFixingDates(dates, offset).get(0), new LocalDate(2011, 2, 3));
+  }
+
+  public void zeroFixingDateWithPrecedingConvention() {
+    //LCH00000931776
+    Interval interval = new Interval();
+    interval.setPeriod(PeriodEnum.T);
+    interval.setPeriodMultiplier(new BigInteger("1"));
+    BusinessDayConventionEnum[] conventions = new BusinessDayConventionEnum[]{MODFOLLOWING, MODFOLLOWING, MODFOLLOWING};
+    BusinessCenters[] centers = new BusinessCenters[]{getCenters("EUTA"), getCenters("EUTA"), getCenters("EUTA")};
+    List<LocalDate> dates = manager.getAdjustedDates(new LocalDate(2011, 6, 1), new LocalDate(2012, 2, 1), conventions, interval, centers);
+    assertEquals(dates.size(), 2);
+    assertEquals(dates.get(0), new LocalDate(2011, 6, 1));
+    //payment offset for this trade actually means payment is on 2/2, but we don't need to worry about that here
+    assertEquals(dates.get(1), new LocalDate(2012, 2, 1));
+    RelativeDateOffset offset = new RelativeDateOffset();
+    offset.setBusinessDayConvention(PRECEDING);
+    offset.setPeriod(PeriodEnum.D);
+    offset.setPeriodMultiplier(new BigInteger("0"));
+    List<LocalDate> fixingDates = manager.getFixingDates(dates, offset);
+    assertEquals(fixingDates.get(0), new LocalDate(2011, 6, 1));
+    assertEquals(fixingDates.get(1), new LocalDate(2012, 2, 1));
   }
 
   public void startDateWithIMMAndNoStub() {

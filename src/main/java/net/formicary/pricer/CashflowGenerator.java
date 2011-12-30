@@ -33,12 +33,25 @@ public class CashflowGenerator {
 
     InterestRateStream fixed = FpMLUtil.getFixedStream(swap);
     List<Cashflow> flows = generateFixedFlows(valuationDate, fixed);
+    adjustForPaymentOffset(fixed, flows);
 
     InterestRateStream floating = FpMLUtil.getFloatingStream(swap);
-    flows.addAll(generateFloatingFlows(valuationDate, floating));
+    List<Cashflow> floatingFlows = generateFloatingFlows(valuationDate, floating);
+    adjustForPaymentOffset(fixed, floatingFlows);
 
+    flows.addAll(floatingFlows);
     Collections.sort(flows);
     return flows;
+  }
+
+  private void adjustForPaymentOffset(InterestRateStream leg, List<Cashflow> flows) {
+    Offset paymentOffset = leg.getPaymentDates().getPaymentDaysOffset();
+    if(paymentOffset != null) {
+      BusinessCenters centers = leg.getPaymentDates().getPaymentDatesAdjustments().getBusinessCenters();
+      for (Cashflow flow : flows) {
+        flow.setDate(calendarManager.applyInterval(flow.getDate(), paymentOffset, centers));
+      }
+    }
   }
 
   private BigDecimal getInitialFloatingRate(Calculation calculation) {
@@ -114,7 +127,7 @@ public class CashflowGenerator {
   private Cashflow calculateInitialStubCashflow(StreamContext ctx) {
     LocalDate endDate = ctx.startDate;
     BusinessCenters centers = ctx.stream.getCalculationPeriodDates().getCalculationPeriodDatesAdjustments().getBusinessCenters();
-    endDate = calendarManager.getAdjustedDate(endDate, ctx.conventions[1], centers);
+    endDate = calendarManager.adjustDate(endDate, ctx.conventions[1], centers);
     LocalDate startDate = DateUtil.getDate(ctx.stream.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
     List<FloatingRate> rates = ctx.initialStub.getFloatingRate();
     double rateToUse = 0;
@@ -138,7 +151,7 @@ public class CashflowGenerator {
     //todo verify which business centers and conventions we use for stubs
     BusinessCenters centers = ctx.stream.getCalculationPeriodDates().getCalculationPeriodDatesAdjustments().getBusinessCenters();
     LocalDate endDate = DateUtil.getDate(ctx.stream.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
-    endDate = calendarManager.getAdjustedDate(endDate, ctx.conventions[1], centers);
+    endDate = calendarManager.adjustDate(endDate, ctx.conventions[1], centers);
     return getCashflow(ctx.endDate, endDate, ctx, 0);
   }
 

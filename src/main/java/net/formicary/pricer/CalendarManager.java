@@ -15,7 +15,9 @@ import java.util.List;
  *         Time: 9:54 AM
  */
 public interface CalendarManager {
-  LocalDate getAdjustedDate(LocalDate date, BusinessDayConventionEnum convention, BusinessCenters businessCenters);
+  LocalDate adjustDate(LocalDate date, BusinessDayConventionEnum convention, BusinessCenters businessCenters);
+
+  LocalDate applyInterval(LocalDate date, Interval interval, BusinessCenters businessCenters);
   /**
    * @param conventions An array of 3 business day conventions. The first is the start date convention, followed
    *                    by the calculation period convention, and finally the termination date convention.
