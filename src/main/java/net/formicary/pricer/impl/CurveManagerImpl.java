@@ -129,10 +129,14 @@ public class CurveManagerImpl implements CurveManager {
     int index = Collections.binarySearch(points, new CurvePillarPoint(curve, date));
     if(index > -1) {
       //we have an exact match, no need to interpolate, right?
-      return points.get(index).getZeroRate();
+      double zeroRate = points.get(index).getZeroRate();
+      cache.put(key, zeroRate);
+      return zeroRate;
     } else if(index == -1) {
       //it's right before the first element, so we just use that rate
-      return points.get(0).getZeroRate();
+      double zeroRate = points.get(0).getZeroRate();
+      cache.put(key, zeroRate);
+      return zeroRate;
     } else {
       //we definitely need to interpolate, it's a negative index thats somewhere between two pillar points
       int endIndex = -(index + 1);
