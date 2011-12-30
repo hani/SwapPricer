@@ -25,7 +25,8 @@ public class RateManagerImpl implements RateManager {
 
   @Override
   public double getZeroRate(String indexName, String currency, Interval interval, LocalDate date) {
-    String key = indexName + "-" + currency + "-" + date + "-" + interval.getPeriodMultiplier() + interval.getPeriod();
+    //avoid date.toString as it's relatively expensive
+    String key = indexName + "-" + currency + "-" + date.getYear() + '-' + date.getDayOfYear() + '-' + date.getDayOfMonth() + "-" + interval.getPeriodMultiplier() + interval.getPeriod();
     Object value = cache.get(key);
     if(value != null) {
       if(value == NOT_FOUND) {

@@ -111,7 +111,7 @@ public class CurveManagerImpl implements CurveManager {
   }
 
   public double getInterpolatedRate(LocalDate date, String ccy, String curve) {
-    String key = date + ccy + curve;
+    String key = ccy + curve + date.getYear() + '-' + date.getDayOfYear() + '-' + date.getDayOfMonth();
     Object value = cache.get(key);
     if(value != null) {
       if(value == NOT_FOUND) {
