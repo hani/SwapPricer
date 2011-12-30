@@ -8,6 +8,7 @@ import org.fpml.spec503wd3.*;
 import org.joda.time.LocalDate;
 
 import javax.inject.Inject;
+import javax.xml.bind.JAXBElement;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -40,6 +41,14 @@ public class CashflowGenerator {
     return flows;
   }
 
+  private BigDecimal getInitialFloatingRate(Calculation calculation) {
+    JAXBElement<FloatingRateCalculation> fc = (JAXBElement<FloatingRateCalculation>) calculation.getRateCalculation();
+    if(fc != null) {
+      return fc.getValue().getInitialRate();
+    }
+    return null;
+  }
+
   private List<Cashflow> generateFloatingFlows(LocalDate valuationDate, InterestRateStream leg) {
     StreamContext ctx = new StreamContext(valuationDate, leg);
     Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
@@ -53,6 +62,12 @@ public class CashflowGenerator {
       if(periodEndDate.isAfter(ctx.cutoffDate)) {
         LocalDate periodStartDate = calculationDates.get(i - 1);
         LocalDate fixingDate = fixingDates.get(i -1);
+        //todo need to figure out how to handle this
+//        if(isFirst && getInitialFloatingRate(calculation) != null) {
+//          //we have an explicit initial rate
+//          Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, getInitialFloatingRate(calculation).doubleValue());
+//          flows.add(flow);
+//        }
         if(fixingDate.isBefore(valuationDate)) {
           String index = getFloatingIndexName(calculation);
           double rate = rateManager.getZeroRate(index, ctx.currency, interval, fixingDate) / 100;
@@ -60,7 +75,7 @@ public class CashflowGenerator {
           flows.add(flow);
         } else {
           double impliedForwardRate = curveManager.getImpliedForwardRate(periodStartDate, periodEndDate, valuationDate, ctx.currency, interval);
-          Cashflow flow = getCashflow(calculationDates.get(i - 1), periodEndDate, ctx, impliedForwardRate);
+          Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, impliedForwardRate);
           flows.add(flow);
         }
       }

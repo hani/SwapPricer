@@ -36,7 +36,8 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
     spreadSchedule,
     dayCountFraction,
     fixedRateSchedule,
-    compoundingMethod
+    compoundingMethod,
+    initialRate
   }
 
   @Override
@@ -83,6 +84,9 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
             break;
           case compoundingMethod:
             calculation.setCompoundingMethod(CompoundingMethodEnum.fromValue(reader.getElementText()));
+            break;
+          case initialRate:
+            getFloatingCalculation(calculation).setInitialRate(new BigDecimal(reader.getElementText()));
             break;
         }
       } else if (event == END_ELEMENT) {
