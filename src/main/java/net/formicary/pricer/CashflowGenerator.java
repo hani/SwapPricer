@@ -178,9 +178,12 @@ public class CashflowGenerator {
     DayCountFraction fraction = leg.getCalculationPeriodAmount().getCalculation().getDayCountFraction();
     double dayCountFraction = calendarManager.getDayCountFraction(periodStart, periodEnd, FpMLUtil.getDayCountFraction(fraction.getValue()));
     flow.setDayCountFraction(dayCountFraction);
-    AmountSchedule notional = leg.getCalculationPeriodAmount().getCalculation().getNotionalSchedule().getNotionalStepSchedule();
-    String currency = notional.getCurrency().getValue();
-    double undiscountedAmount = notional.getInitialValue().doubleValue() * rate * dayCountFraction;
+    String currency = ctx.currency;
+    double undiscountedAmount = ctx.principal * rate * dayCountFraction;
+    //if it's a compounding trade, then we add the amount to the principal
+    if(leg.getCalculationPeriodAmount().getCalculation().getCompoundingMethod() == CompoundingMethodEnum.FLAT) {
+      ctx.principal += undiscountedAmount;
+    }
     flow.setAmount(undiscountedAmount);
     double discountFactor = curveManager.getDiscountFactor(periodEnd, ctx.valuationDate, currency, leg.getPaymentDates().getPaymentFrequency(), ctx.isFixed);
     flow.setDiscountFactor(discountFactor);
@@ -208,6 +211,7 @@ public class CashflowGenerator {
     List<LocalDate> calculationDates;
     InterestRateStream stream;
     String currency;
+    double principal;
 
     public StreamContext(LocalDate valuationDate, InterestRateStream leg) {
       this.stream = leg;
@@ -221,7 +225,9 @@ public class CashflowGenerator {
       calculationDates = calendarManager.getAdjustedDates(startDate, endDate, conventions, interval, FpMLUtil.getBusinessCenters(leg));
       initialStub = FpMLUtil.getInitialStub(leg);
       finalStub = FpMLUtil.getFinalStub(leg);
-      currency = leg.getCalculationPeriodAmount().getCalculation().getNotionalSchedule().getNotionalStepSchedule().getCurrency().getValue();
+      AmountSchedule notionalStepSchedule = leg.getCalculationPeriodAmount().getCalculation().getNotionalSchedule().getNotionalStepSchedule();
+      currency = notionalStepSchedule.getCurrency().getValue();
+      principal = notionalStepSchedule.getInitialValue().doubleValue();
     }
   }
 
