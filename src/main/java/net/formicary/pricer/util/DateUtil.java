@@ -22,6 +22,7 @@ public class DateUtil {
   }
 
   public static LocalDate getDate(XMLGregorianCalendar cal) {
+    if(cal == null) return null;
     return new LocalDate(cal.getYear(), cal.getMonth(), cal.getDay());
   }
 

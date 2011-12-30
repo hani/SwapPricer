@@ -75,7 +75,7 @@ public class CashflowTests {
   @DataProvider(name = "singletrade")
   public Object[][] singleTrade() {
     Object[][] data = new Object[1][];
-    data[0] = new Object[]{"LCH00000931776"};
+    data[0] = new Object[]{"LCH00001074714"};
     return data;
   }
 }

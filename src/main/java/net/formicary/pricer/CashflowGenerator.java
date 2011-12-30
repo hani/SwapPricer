@@ -234,17 +234,25 @@ public class CashflowGenerator {
       startDate = FpMLUtil.getStartDate(valuationDate, leg);
       endDate = FpMLUtil.getEndDate(leg);
       conventions = FpMLUtil.getBusinessDayConventions(leg);
-      interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
+      LocalDate regularPeriodStartDate =  DateUtil.getDate(leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate());
       BusinessCenters[] centers = FpMLUtil.getBusinessCenters(leg);
+      //if we have a period start date, then we use the period conventions
+      if(regularPeriodStartDate != null) {
+        conventions[0] = conventions[1];
+        centers[0] = centers[1];
+      }
+      interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
       calculationDates = calendarManager.getAdjustedDates(startDate, endDate, conventions, interval, centers);
-      if(isFixed && startDate.isAfter(valuationDate) && leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate() != null) {
+      initialStub = FpMLUtil.getInitialStub(leg);
+      finalStub = FpMLUtil.getFinalStub(leg);
+
+      if(regularPeriodStartDate != null && regularPeriodStartDate.isAfter(cutoffDate) && initialStub == null) {
         //it's an imaginary stub! We have a hidden flow between effectivedate and calcperiodstart date
         LocalDate unadjustedEffectiveDate = DateUtil.getDate(leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
         if(!calculationDates.get(0).equals(unadjustedEffectiveDate))
-          calculationDates.add(0, calendarManager.adjustDate(unadjustedEffectiveDate, conventions[0], centers[0]));
+          calculationDates.add(0, calendarManager.adjustDate(unadjustedEffectiveDate, conventions[1], centers[1]));
       }
-      initialStub = FpMLUtil.getInitialStub(leg);
-      finalStub = FpMLUtil.getFinalStub(leg);
+      //stubs can only be on floating side right? Otherwise it'd be a fake stub handled above
       AmountSchedule notionalStepSchedule = leg.getCalculationPeriodAmount().getCalculation().getNotionalSchedule().getNotionalStepSchedule();
       currency = notionalStepSchedule.getCurrency().getValue();
       principal = notionalStepSchedule.getInitialValue().doubleValue();

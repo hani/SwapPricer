@@ -85,33 +85,12 @@ public class FpMLUtil {
   }
 
   public static LocalDate getStartDate(LocalDate valuationDate, InterestRateStream leg) {
-    //if we have a stub, then our start is from this date
     XMLGregorianCalendar cal = leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate();
-    if(cal == null) {
-      //no period start, life is easy
-      return DateUtil.getDate(leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
-    }
-
-    //if we have a stub, we always use this date
-    if(leg.getStubCalculationPeriodAmount() != null) {
+    if(cal != null) {
       return DateUtil.getDate(cal);
     }
 
     LocalDate effectiveDate = DateUtil.getDate(leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
-    //if our effective date is in the future, then we use that, ignoring the period date
-    if(effectiveDate.isAfter(valuationDate)) {
-      return effectiveDate;
-    }
-
-    //no stub, is it IMM? If it isn't. LCH generates this value for IMM trades since it's not sure if they have
-    //a stub or not, so if it's IMM, we ignore this value
-    boolean isIMM = leg.getCalculationPeriodDates().getCalculationPeriodFrequency().getRollConvention().startsWith("IMM");
-    //we don't ignore this value though if our effectiveDate is in the past
-    if(!isIMM) {
-      return DateUtil.getDate(cal);
-    }
-
-    //no stub or no stub + isIMM, just use the effective date
     return effectiveDate;
   }
 }
