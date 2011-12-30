@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author hani
@@ -29,6 +30,8 @@ public class CurveManagerImpl implements CurveManager {
   private Map<String, Map<String, String[]>> mapping = new HashMap<String, Map<String, String[]>>();
   //a map of curve -> list of pillar points
   private Map<String, List<CurvePillarPoint>> curveData = new HashMap<String, List<CurvePillarPoint>>();
+  private static final Object NOT_FOUND = new Object();
+  private Map<String, Object> cache = new ConcurrentHashMap<String, Object>();
 
   public CurveManagerImpl() throws IOException {
     loadCurveMapping("/curvemapping.csv");
@@ -108,8 +111,18 @@ public class CurveManagerImpl implements CurveManager {
   }
 
   public double getInterpolatedRate(LocalDate date, String ccy, String curve) {
+    String key = date + ccy + curve;
+    Object value = cache.get(key);
+    if(value != null) {
+      if(value == NOT_FOUND) {
+        throw new IllegalArgumentException("No curve points found for curve " + curve + " currency " + ccy + " on date " + date);
+      }
+      return (Double)value;
+    }
+
     List<CurvePillarPoint> points = curveData.get(curve);
     if(points == null) {
+      cache.put(key, NOT_FOUND);
       throw new IllegalArgumentException("No curve points found for curve " + curve + " currency " + ccy + " on date " + date);
     }
     //if we're here, then we definitely have to interpolate, and so the search will always return a negative
@@ -128,7 +141,9 @@ public class CurveManagerImpl implements CurveManager {
       double daysFromStartToNow = Days.daysBetween(start.getMaturityDate(), date).getDays();
       double totalDays = Days.daysBetween(start.getMaturityDate(), end.getMaturityDate()).getDays();
       //linear interpolation, nothing fancy
-      return start.getZeroRate() + daysFromStartToNow * (end.getZeroRate() - start.getZeroRate()) / totalDays;
+      double interpRate = start.getZeroRate() + daysFromStartToNow * (end.getZeroRate() - start.getZeroRate()) / totalDays;
+      cache.put(key, interpRate);
+      return interpRate;
     }
   }
 

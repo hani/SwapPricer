@@ -21,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RateManagerImpl implements RateManager {
   @Inject Datastore ds;
   private static final Object NOT_FOUND = new Object();
-
   private Map<String, Object> cache = new ConcurrentHashMap<String, Object>();
 
   @Override
