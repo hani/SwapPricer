@@ -26,13 +26,23 @@ public class CalendarManagerImpl implements CalendarManager {
 
   @Override
   public double getDayCountFraction(LocalDate start, LocalDate end, DayCountFraction dayCountFraction) {
+    int d2 = end.getDayOfMonth();
+    int d1 = start.getDayOfMonth();
     switch(dayCountFraction) {
       case THIRTY_360:
-        return ((360d * (end.getYear() - start.getYear())) + (30d * (end.getMonthOfYear() - start.getMonthOfYear())) + (end.getDayOfMonth() - start.getDayOfMonth())) / 360d;
+        //ISDA defs section 4.1.6f
+        if(d1 == 31) d1 = 30;
+        if(d2 == 31 && d1 > 29) d2 = 30;
+        return ((360d * (end.getYear() - start.getYear())) + (30d * (end.getMonthOfYear() - start.getMonthOfYear())) + (d2 - d1)) / 360d;
       case ACT_360:
         return Days.daysBetween(start, end).getDays() / 360d;
       case ACT_365:
         return Days.daysBetween(start, end).getDays() / 365d;
+      case THIRTYE_360:
+        //ISDA defs section 4.1.6g
+        if(d1 == 31) d1 = 30;
+        if(d2 == 31) d2 = 30;
+        return ((360d * (end.getYear() - start.getYear())) + (30d * (end.getMonthOfYear() - start.getMonthOfYear())) + (d2 - d1)) / 360d;
       default:
         throw new UnsupportedOperationException("DayCountFraction " + dayCountFraction + " is not supported");
     }

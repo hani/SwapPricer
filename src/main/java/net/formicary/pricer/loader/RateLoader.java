@@ -6,8 +6,10 @@ import java.io.IOException;
 import javax.inject.Inject;
 
 import com.google.code.morphia.Datastore;
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.name.Names;
 import net.formicary.pricer.PersistenceModule;
 import net.formicary.pricer.model.Index;
 import org.joda.time.LocalDate;
@@ -26,9 +28,9 @@ public class RateLoader {
 
   @Inject Datastore ds;
 
-  public void importHistoricRates() throws IOException {
+  public void importHistoricRates(String fileName) throws IOException {
     long now = System.currentTimeMillis();
-    BufferedReader is = new BufferedReader(new FileReader("data/rep00003.txt"));
+    BufferedReader is = new BufferedReader(new FileReader(fileName));
     is.readLine();
     String line;
     DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
@@ -61,7 +63,12 @@ public class RateLoader {
   }
 
   public static void main(String[] args) throws IOException {
-    Injector i = Guice.createInjector(new PersistenceModule());
-    i.getInstance(RateLoader.class).importHistoricRates();
+    Injector i = Guice.createInjector(new PersistenceModule(), new AbstractModule() {
+          @Override
+          protected void configure() {
+            bind(String.class).annotatedWith(Names.named("fpmlDir")).toInstance("src/test/resources/fpml");
+          }
+        });
+    i.getInstance(RateLoader.class).importHistoricRates(args[0]);
   }
 }
