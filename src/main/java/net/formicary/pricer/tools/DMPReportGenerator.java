@@ -64,7 +64,7 @@ public class DMPReportGenerator {
   }
 
   public static void main(final String[] args) throws IOException {
-    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule("src/test/resources/fpml"));
+    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule(args[0]));
     DMPReportGenerator reporter = injector.getInstance(DMPReportGenerator.class);
     reporter.generateReport(args[0], args[1]);
   }
