@@ -10,6 +10,8 @@ import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
 import javax.inject.Inject;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author hani
@@ -18,9 +20,20 @@ import javax.inject.Inject;
  */
 public class RateManagerImpl implements RateManager {
   @Inject Datastore ds;
+  private static final Object NOT_FOUND = new Object();
+
+  private Map<String, Object> cache = new ConcurrentHashMap<String, Object>();
 
   @Override
   public double getZeroRate(String indexName, String currency, Interval interval, LocalDate date) {
+    String key = indexName + "-" + currency + "-" + date + "-" + interval.getPeriodMultiplier() + interval.getPeriod();
+    Object value = cache.get(key);
+    if(value != null) {
+      if(value == NOT_FOUND) {
+        throw new IllegalArgumentException("No " + indexName + " rate found for " + currency + " " + interval.getPeriodMultiplier() + interval.getPeriod() + " on " + date);
+      }
+      return (Double)value;
+    }
     Query<Index> query = ds.createQuery(Index.class);
     query.field("currency").equal(currency);
     //hack, LCH rates are given to us in 12M vs 1Y
@@ -35,8 +48,10 @@ public class RateManagerImpl implements RateManager {
     query.field("name").equal(indexName);
     Index index = query.get();
     if(index == null) {
+      cache.put(key, NOT_FOUND);
       throw new IllegalArgumentException("No " + indexName + " rate found for " + currency + " " + interval.getPeriodMultiplier() + interval.getPeriod() + " on " + date);
     }
+    cache.put(key, index.getRate());
     return index.getRate();
   }
 
