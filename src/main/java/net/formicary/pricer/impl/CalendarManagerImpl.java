@@ -57,16 +57,23 @@ public class CalendarManagerImpl implements CalendarManager {
     for(LocalDate date : dates) {
       //move by fixing offset, we only count business days
       int offset = fixingOffset.getPeriodMultiplier().intValue();
-      final int numberOfStepsLeft = Math.abs(offset);
-      final int step = (offset < 0 ? -1 : 1);
+//      if(offset == 0) {
+//        //we need to roll anyway since we can't fix on a holiday
+//        //fixing date is 0 in cases where payment day has an offset (unhandled right now). See LCH00000923966.xml
+//        fixingDates.add(getAdjustedDate(date, fixingOffset.getBusinessDayConvention(), fixingOffset.getBusinessCenters()));
+//      } else
+      {
+        final int numberOfStepsLeft = Math.abs(offset);
+        final int step = (offset < 0 ? -1 : 1);
 
-      for (int i = 0; i < numberOfStepsLeft; i++) {
-        do {
-          date = date.plusDays(step);
+        for (int i = 0; i < numberOfStepsLeft; i++) {
+          do {
+            date = date.plusDays(step);
+          }
+          while(isNonWorkingDay(date, fixingOffset.getBusinessCenters()));
         }
-        while(isNonWorkingDay(date, fixingOffset.getBusinessCenters()));
+        fixingDates.add(date);
       }
-      fixingDates.add(date);
     }
     return fixingDates;
   }
