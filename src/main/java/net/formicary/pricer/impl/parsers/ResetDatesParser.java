@@ -45,7 +45,7 @@ public class ResetDatesParser implements NodeParser<ResetDates> {
     dates.setResetDatesAdjustments(adjustments);
     dates.setFixingDates(new RelativeDateOffset());
     dates.setResetFrequency(new ResetFrequency());
-    RelativeDateOffset fixingDates = dates.getFixingDates();
+    RelativeDateOffset fixingDates = null;
     String period = null;
     BigInteger multiplier = null;
     BusinessCenters centers = null;
@@ -71,7 +71,11 @@ public class ResetDatesParser implements NodeParser<ResetDates> {
           case calculationPeriodDates:
             throw new RuntimeException("Not implemented: " + element.name());
           case businessDayConvention:
-            dates.getResetDatesAdjustments().setBusinessDayConvention(BusinessDayConventionEnum.valueOf(reader.getElementText()));
+            if(fixingDates != null) {
+              fixingDates.setBusinessDayConvention(BusinessDayConventionEnum.valueOf(reader.getElementText()));
+            } else {
+              dates.getResetDatesAdjustments().setBusinessDayConvention(BusinessDayConventionEnum.valueOf(reader.getElementText()));
+            }
             break;
           case period :
             period = reader.getElementText();
@@ -81,6 +85,10 @@ public class ResetDatesParser implements NodeParser<ResetDates> {
             break;
           case businessCenters:
             centers = new BusinessCenters();
+            break;
+          case fixingDates:
+            fixingDates = new RelativeDateOffset();
+            dates.setFixingDates(fixingDates);
             break;
           case businessCenter:
             BusinessCenter bc = new BusinessCenter();
@@ -119,6 +127,7 @@ public class ResetDatesParser implements NodeParser<ResetDates> {
             }
             fixingDates.setPeriod(PeriodEnum.valueOf(period));
             fixingDates.setPeriodMultiplier(multiplier);
+            fixingDates = null;
             break;
           case resetFrequency:
             dates.getResetFrequency().setPeriod(PeriodEnum.valueOf(period));
