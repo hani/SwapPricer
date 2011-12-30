@@ -235,7 +235,14 @@ public class CashflowGenerator {
       endDate = FpMLUtil.getEndDate(leg);
       conventions = FpMLUtil.getBusinessDayConventions(leg);
       interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
-      calculationDates = calendarManager.getAdjustedDates(startDate, endDate, conventions, interval, FpMLUtil.getBusinessCenters(leg));
+      BusinessCenters[] centers = FpMLUtil.getBusinessCenters(leg);
+      calculationDates = calendarManager.getAdjustedDates(startDate, endDate, conventions, interval, centers);
+      if(isFixed && startDate.isAfter(valuationDate) && leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate() != null) {
+        //it's an imaginary stub! We have a hidden flow between effectivedate and calcperiodstart date
+        LocalDate unadjustedEffectiveDate = DateUtil.getDate(leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
+        if(!calculationDates.get(0).equals(unadjustedEffectiveDate))
+          calculationDates.add(0, calendarManager.adjustDate(unadjustedEffectiveDate, conventions[0], centers[0]));
+      }
       initialStub = FpMLUtil.getInitialStub(leg);
       finalStub = FpMLUtil.getFinalStub(leg);
       AmountSchedule notionalStepSchedule = leg.getCalculationPeriodAmount().getCalculation().getNotionalSchedule().getNotionalStepSchedule();
