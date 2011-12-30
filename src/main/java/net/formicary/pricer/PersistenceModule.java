@@ -9,8 +9,8 @@ import com.google.code.morphia.logging.slf4j.SLF4JLogrImplFactory;
 import com.google.code.morphia.mapping.MappedField;
 import com.google.code.morphia.mapping.MappingException;
 import com.google.inject.AbstractModule;
+import com.google.inject.name.Names;
 import com.mongodb.Mongo;
-import net.formicary.pricer.impl.FpmlTradeStore;
 import net.formicary.pricer.impl.RateManagerImpl;
 import net.formicary.pricer.model.Index;
 import org.joda.time.LocalDate;
@@ -25,13 +25,19 @@ import java.net.UnknownHostException;
  *         Time: 8:02 AM
  */
 public class PersistenceModule extends AbstractModule {
+  private String fpmlDir;
   static {
     MorphiaLoggerFactory.registerLogger(SLF4JLogrImplFactory.class);
+  }
+
+  public PersistenceModule(String fpmlDir) {
+    this.fpmlDir = fpmlDir;
   }
 
   @Override
   protected void configure() {
     try {
+      bind(String.class).annotatedWith(Names.named("fpmlDir")).toInstance(fpmlDir);
       Morphia morphia = new Morphia();
       morphia.map(Index.class);
       morphia.getMapper().getConverters().addConverter(new LocalDateConverter());
@@ -42,7 +48,7 @@ public class PersistenceModule extends AbstractModule {
       addError(e);
     }
     bind(RateManager.class).to(RateManagerImpl.class);
-    bind(TradeStore.class).to(FpmlTradeStore.class);
+    //bind(TradeStore.class).to(FpmlJAXBTradeStore.class);
   }
 
   public class LocalDateConverter  extends TypeConverter implements SimpleValueConverter {

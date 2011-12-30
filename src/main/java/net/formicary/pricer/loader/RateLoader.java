@@ -1,15 +1,8 @@
 package net.formicary.pricer.loader;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import javax.inject.Inject;
-
 import com.google.code.morphia.Datastore;
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.name.Names;
 import net.formicary.pricer.PersistenceModule;
 import net.formicary.pricer.model.Index;
 import org.joda.time.LocalDate;
@@ -17,6 +10,11 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * @author hani
@@ -63,12 +61,7 @@ public class RateLoader {
   }
 
   public static void main(String[] args) throws IOException {
-    Injector i = Guice.createInjector(new PersistenceModule(), new AbstractModule() {
-          @Override
-          protected void configure() {
-            bind(String.class).annotatedWith(Names.named("fpmlDir")).toInstance("src/test/resources/fpml");
-          }
-        });
+    Injector i = Guice.createInjector(new PersistenceModule("src/test/resources/fpml"));
     i.getInstance(RateLoader.class).importHistoricRates(args[0]);
   }
 }

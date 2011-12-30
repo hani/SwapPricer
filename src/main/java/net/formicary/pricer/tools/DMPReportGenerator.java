@@ -1,9 +1,7 @@
 package net.formicary.pricer.tools;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.name.Names;
 import net.formicary.pricer.CashflowGenerator;
 import net.formicary.pricer.PersistenceModule;
 import net.formicary.pricer.PricerModule;
@@ -66,12 +64,7 @@ public class DMPReportGenerator {
   }
 
   public static void main(final String[] args) throws IOException {
-    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule(), new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(String.class).annotatedWith(Names.named("fpmlDir")).toInstance(args[0]);
-      }
-    });
+    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule("src/test/resources/fpml"));
     DMPReportGenerator reporter = injector.getInstance(DMPReportGenerator.class);
     reporter.generateReport(args[0], args[1]);
   }
