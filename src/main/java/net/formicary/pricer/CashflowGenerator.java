@@ -214,7 +214,7 @@ public class CashflowGenerator {
       this.valuationDate = valuationDate;
       this.cutoffDate = valuationDate.plusDays(3);
       this.isFixed = FpMLUtil.isFixedStream(leg);
-      startDate = FpMLUtil.getStartDate(leg);
+      startDate = FpMLUtil.getStartDate(valuationDate, leg);
       endDate = FpMLUtil.getEndDate(leg);
       conventions = FpMLUtil.getBusinessDayConventions(leg);
       interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();

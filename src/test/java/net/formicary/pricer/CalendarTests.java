@@ -3,11 +3,16 @@ package net.formicary.pricer;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import net.formicary.pricer.model.DayCountFraction;
+import net.formicary.pricer.util.FpMLUtil;
 import org.fpml.spec503wd3.*;
 import org.joda.time.LocalDate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -26,6 +31,7 @@ import static org.testng.Assert.assertTrue;
 public class CalendarTests {
 
   private CalendarManager manager;
+  private static final LocalDate valuationDate = new LocalDate(2011, 11, 4);
 
   private BusinessCenters getCenters(String... vals) {
     BusinessCenters c = new BusinessCenters();
@@ -118,5 +124,87 @@ public class CalendarTests {
     offset.setPeriod(PeriodEnum.D);
     offset.setPeriodMultiplier(new BigInteger("-2"));
     assertEquals(manager.getFixingDates(dates, offset).get(0), new LocalDate(2011, 2, 3));
+  }
+
+  public void startDateWithIMMAndNoStub() {
+    //LCH00001018118
+    LocalDate effectiveDate = new LocalDate(2011, 6, 15);
+    InterestRateStream fixed = createStream(effectiveDate, new LocalDate(2011, 12, 1), "IMM", 0.066, false);
+    LocalDate actual = FpMLUtil.getStartDate(valuationDate, fixed);
+    assertEquals(actual, effectiveDate);
+  }
+
+  public void noPeriodStartDate() {
+    LocalDate effectiveDate = new LocalDate(2011, 6, 1);
+    InterestRateStream fixed = createStream(effectiveDate, null, "1", 0.01, false);
+    LocalDate actual = FpMLUtil.getStartDate(valuationDate, fixed);
+    assertEquals(actual, effectiveDate);
+  }
+
+  public void startDateWithoutIMMAndNoStub() {
+    //LCH00000923966
+    LocalDate effectiveDate = new LocalDate(2010, 10, 8);
+    LocalDate periodStart = new LocalDate(2011, 1, 8);
+    InterestRateStream fixed = createStream(effectiveDate, periodStart, "8", 0.0085, false);
+    LocalDate actual = FpMLUtil.getStartDate(valuationDate, fixed);
+    assertEquals(actual, periodStart);
+  }
+
+  public void futureStartDateWithoutIMMAndNoStub() {
+    //LCH00000927940
+    LocalDate effectiveDate = new LocalDate(2019, 11, 11);
+    LocalDate periodStart = new LocalDate(2020, 2, 9);
+    InterestRateStream fixed = createStream(effectiveDate, periodStart, "9", 0.04446, false);
+    LocalDate actual = FpMLUtil.getStartDate(valuationDate, fixed);
+    assertEquals(actual, effectiveDate);
+  }
+
+  public void startDateWithoutIMMAndStubOnOtherLeg() {
+    //LCH00000927688
+    LocalDate effectiveDate = new LocalDate(2009, 10, 12);
+    LocalDate periodStart = new LocalDate(2010, 1, 15);
+    InterestRateStream fixed = createStream(effectiveDate, periodStart, "15", 0.0387, false);
+    LocalDate actual = FpMLUtil.getStartDate(valuationDate, fixed);
+    assertEquals(actual, periodStart);
+  }
+
+  public void startDateWithStub() {
+    LocalDate effectiveDate = new LocalDate(2009, 10, 12);
+    LocalDate periodStart = new LocalDate(2010, 1, 15);
+    InterestRateStream floating = createStream(effectiveDate, periodStart, "15", null, true);
+    LocalDate actual = FpMLUtil.getStartDate(valuationDate, floating);
+    assertEquals(actual, periodStart);
+  }
+
+  private InterestRateStream createStream(LocalDate effectiveDate, LocalDate periodStartDate, String rollConvention, Double fixedRate, boolean withStub) {
+    DatatypeFactory factory;
+    InterestRateStream s = new InterestRateStream();
+    try {
+      factory = DatatypeFactory.newInstance();
+    } catch (DatatypeConfigurationException e) {
+      throw new RuntimeException(e);
+    }
+
+    s.setCalculationPeriodDates(new CalculationPeriodDates());
+    if(periodStartDate != null) {
+      XMLGregorianCalendar cal = factory.newXMLGregorianCalendar(periodStartDate.toString());
+      s.getCalculationPeriodDates().setFirstRegularPeriodStartDate(cal);
+    }
+
+    if(fixedRate != null) {
+      s.setCalculationPeriodAmount(new CalculationPeriodAmount());
+      s.getCalculationPeriodAmount().setCalculation(new Calculation());
+      s.getCalculationPeriodAmount().getCalculation().setFixedRateSchedule(new Schedule());
+      s.getCalculationPeriodAmount().getCalculation().getFixedRateSchedule().setInitialValue(new BigDecimal(fixedRate));
+    }
+    s.getCalculationPeriodDates().setEffectiveDate(new AdjustableDate());
+    s.getCalculationPeriodDates().getEffectiveDate().setUnadjustedDate(new IdentifiedDate());
+    s.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().setValue(factory.newXMLGregorianCalendar(effectiveDate.toString()));
+    s.getCalculationPeriodDates().setCalculationPeriodFrequency(new CalculationPeriodFrequency());
+    s.getCalculationPeriodDates().getCalculationPeriodFrequency().setRollConvention(rollConvention);
+    if(withStub) {
+      s.setStubCalculationPeriodAmount(new StubCalculationPeriodAmount());
+    }
+    return s;
   }
 }
