@@ -179,7 +179,7 @@ public class CalendarManagerImpl implements CalendarManager {
     //move by fixing offset, we only count business days
     if(interval instanceof Offset) {
       if(((Offset)interval).getDayType() != DayTypeEnum.BUSINESS) {
-        throw new UnsupportedOperationException("Only BUSINESS dayType is currently supported");
+        throw new UnsupportedOperationException("Only BUSINESS dayType is currently supported. not " + ((Offset)interval).getDayType());
       }
     }
     int offset = interval.getPeriodMultiplier().intValue();

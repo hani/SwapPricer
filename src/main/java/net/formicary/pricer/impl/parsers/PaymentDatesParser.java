@@ -40,7 +40,6 @@ public class PaymentDatesParser implements NodeParser<PaymentDates> {
     final BusinessDayAdjustments adjustments = new BusinessDayAdjustments();
     dates.setPaymentDatesAdjustments(adjustments);
     adjustments.setBusinessCenters(new BusinessCenters());
-    dates.setPaymentDaysOffset(new RelativeDateOffset());
     BigInteger periodMultiplier = null;
     String period = null;
     while(reader.hasNext()) {
@@ -83,6 +82,9 @@ public class PaymentDatesParser implements NodeParser<PaymentDates> {
                 adjustments.setBusinessCenters((BusinessCenters) o);
               }
             });
+            break;
+          case paymentDaysOffset:
+            dates.setPaymentDaysOffset(new RelativeDateOffset());
             break;
           case payRelativeTo:
             dates.setPayRelativeTo(PayRelativeToEnum.fromValue(reader.getElementText()));
