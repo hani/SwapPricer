@@ -87,8 +87,12 @@ public class FpMLUtil {
   public static LocalDate getStartDate(InterestRateStream leg) {
     //if we have a stub, then our start is from this date
     XMLGregorianCalendar cal = leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate();
-    //no stub, just use the effective date
-    if(cal == null) cal = leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue();
+    //LCH hack, if it's IMM, then LCH generates a period start even though there's no stub, so we ignore it
+    if(cal != null && !leg.getCalculationPeriodDates().getCalculationPeriodFrequency().getRollConvention().startsWith("IMM")) {
+      return DateUtil.getDate(cal);
+    }
+    //no stub or no stub + isIMM, just use the effective date
+    cal = leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue();
     return DateUtil.getDate(cal);
   }
 }
