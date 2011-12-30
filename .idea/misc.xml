@@ -22,6 +22,7 @@
     <option name="OPEN_IN_BROWSER" value="true" />
   </component>
   <component name="ProjectResources">
+    <resource url="http://www.fpml.org/FpML-5/confirmation" location="$PROJECT_DIR$/docs/fpml/fpml-main-5-2.xsd" />
     <default-html-doctype>http://www.w3.org/1999/xhtml</default-html-doctype>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK">
