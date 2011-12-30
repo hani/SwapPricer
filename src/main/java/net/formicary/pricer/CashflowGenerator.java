@@ -192,11 +192,9 @@ public class CashflowGenerator {
     double dayCountFraction = calendarManager.getDayCountFraction(periodStart, periodEnd, FpMLUtil.getDayCountFraction(fraction.getValue()));
     flow.setDayCountFraction(dayCountFraction);
     String currency = ctx.currency;
+    boolean paying = ((Party) leg.getPayerPartyReference().getHref()).getId().equals(ourName);
     double undiscountedAmount = ctx.principal * rate * dayCountFraction;
     //if it's a compounding trade, then we add the amount to the principal
-    if(leg.getCalculationPeriodAmount().getCalculation().getCompoundingMethod() == CompoundingMethodEnum.FLAT) {
-      ctx.principal += undiscountedAmount;
-    }
     flow.setAmount(undiscountedAmount);
     double discountFactor = curveManager.getDiscountFactor(periodEnd, ctx.valuationDate, currency, leg.getPaymentDates().getPaymentFrequency(), ctx.isFixed);
     flow.setDiscountFactor(discountFactor);
@@ -204,9 +202,12 @@ public class CashflowGenerator {
     flow.setDate(periodEnd);
     flow.setRate(rate);
     flow.setType(ctx.isFixed ? FlowType.FIX : FlowType.FLT);
-    if(((Party)leg.getPayerPartyReference().getHref()).getId().equals(ourName)) {
+    if(paying) {
       //we're paying, so reverse values
       flow.reverse();
+    }
+    if(leg.getCalculationPeriodAmount().getCalculation().getCompoundingMethod() == CompoundingMethodEnum.FLAT) {
+      ctx.principal += undiscountedAmount;
     }
     return flow;
   }

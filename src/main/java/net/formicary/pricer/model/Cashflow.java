@@ -95,7 +95,7 @@ public class Cashflow implements Comparable<Cashflow>{
         ", type=" + type +
         ", discountFactor=" + discountFactor +
         ", rate=" + rate +
-        '}';
+        "}\n";
   }
 
   public void reverse() {
