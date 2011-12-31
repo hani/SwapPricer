@@ -111,18 +111,18 @@ public class CurveManagerImpl implements CurveManager {
   }
 
   public double getInterpolatedRate(LocalDate date, String ccy, String curve) {
-    String key = ccy + curve + date.getYear() + '-' + date.getDayOfYear() + '-' + date.getDayOfMonth();
-    Object value = cache.get(key);
-    if(value != null) {
-      if(value == NOT_FOUND) {
-        throw new IllegalArgumentException("No curve points found for curve " + curve + " currency " + ccy + " on date " + date);
-      }
-      return (Double)value;
-    }
+//    String key = ccy + curve + date.getYear() + '-' + date.getDayOfYear() + '-' + date.getDayOfMonth();
+//    Object value = cache.get(key);
+//    if(value != null) {
+//      if(value == NOT_FOUND) {
+//        throw new IllegalArgumentException("No curve points found for curve " + curve + " currency " + ccy + " on date " + date);
+//      }
+//      return (Double)value;
+//    }
 
     List<CurvePillarPoint> points = curveData.get(curve);
     if(points == null) {
-      cache.put(key, NOT_FOUND);
+//      cache.put(key, NOT_FOUND);
       throw new IllegalArgumentException("No curve points found for curve " + curve + " currency " + ccy + " on date " + date);
     }
     //if we're here, then we definitely have to interpolate, and so the search will always return a negative
@@ -130,12 +130,12 @@ public class CurveManagerImpl implements CurveManager {
     if(index > -1) {
       //we have an exact match, no need to interpolate, right?
       double zeroRate = points.get(index).getZeroRate();
-      cache.put(key, zeroRate);
+//      cache.put(key, zeroRate);
       return zeroRate;
     } else if(index == -1) {
       //it's right before the first element, so we just use that rate
       double zeroRate = points.get(0).getZeroRate();
-      cache.put(key, zeroRate);
+//      cache.put(key, zeroRate);
       return zeroRate;
     } else {
       //we definitely need to interpolate, it's a negative index thats somewhere between two pillar points
@@ -146,7 +146,7 @@ public class CurveManagerImpl implements CurveManager {
       double totalDays = Days.daysBetween(start.getMaturityDate(), end.getMaturityDate()).getDays();
       //linear interpolation, nothing fancy
       double interpRate = start.getZeroRate() + daysFromStartToNow * (end.getZeroRate() - start.getZeroRate()) / totalDays;
-      cache.put(key, interpRate);
+//      cache.put(key, interpRate);
       return interpRate;
     }
   }
