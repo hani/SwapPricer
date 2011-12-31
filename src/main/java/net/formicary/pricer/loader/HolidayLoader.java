@@ -6,10 +6,8 @@ import java.util.*;
 import javax.inject.Inject;
 
 import com.google.inject.Guice;
+import net.formicary.pricer.HolidayManager;
 import net.formicary.pricer.PricerModule;
-import net.objectlab.kit.datecalc.common.DefaultHolidayCalendar;
-import net.objectlab.kit.datecalc.common.HolidayCalendar;
-import net.objectlab.kit.datecalc.joda.LocalDateKitCalculatorsFactory;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -26,7 +24,7 @@ public class HolidayLoader {
   private static final Logger log = LoggerFactory.getLogger(HolidayLoader.class);
 
   @Inject
-  public HolidayLoader(LocalDateKitCalculatorsFactory factory) throws IOException {
+  public HolidayLoader(HolidayManager manager) throws IOException {
     long now = System.currentTimeMillis();
     BufferedReader is = new BufferedReader(new FileReader("data/rep00006.txt"));
     is.readLine();
@@ -47,11 +45,10 @@ public class HolidayLoader {
     }
 
     for(Map.Entry<String, Set<LocalDate>> entry : allDates.entrySet()) {
-      HolidayCalendar<LocalDate> calendar = new DefaultHolidayCalendar<LocalDate>(entry.getValue());
-      factory.registerHolidays(entry.getKey(), calendar);
+      manager.registerHolidays(entry.getKey(), entry.getValue());
     }
 
-    log.info("Initialised datecalc factory in " + (System.currentTimeMillis() - now) + "ms with " + count + " dates");
+    log.info("Initialised datecalc manager in " + (System.currentTimeMillis() - now) + "ms with " + count + " dates");
   }
 
   public static void main(String[] args) throws IOException {

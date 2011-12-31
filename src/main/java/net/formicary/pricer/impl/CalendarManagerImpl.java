@@ -1,10 +1,8 @@
 package net.formicary.pricer.impl;
 
 import net.formicary.pricer.CalendarManager;
+import net.formicary.pricer.HolidayManager;
 import net.formicary.pricer.model.DayCountFraction;
-import net.objectlab.kit.datecalc.common.HolidayHandlerType;
-import net.objectlab.kit.datecalc.joda.LocalDateCalculator;
-import net.objectlab.kit.datecalc.joda.LocalDateKitCalculatorsFactory;
 import org.fpml.spec503wd3.*;
 import org.fpml.spec503wd3.Interval;
 import org.joda.time.*;
@@ -22,7 +20,7 @@ import java.util.List;
 public class CalendarManagerImpl implements CalendarManager {
 
   @Inject
-  private LocalDateKitCalculatorsFactory factory;
+  private HolidayManager holidayManager;
 
   @Override
   public double getDayCountFraction(LocalDate start, LocalDate end, DayCountFraction dayCountFraction) {
@@ -82,8 +80,7 @@ public class CalendarManagerImpl implements CalendarManager {
 
   private boolean isNonWorkingDay(LocalDate date, BusinessCenters businessCenters) {
     for(BusinessCenter s : businessCenters.getBusinessCenter()) {
-      LocalDateCalculator calc = factory.getDateCalculator(s.getValue(), null);
-        if(calc.isNonWorkingDay(date)) {
+        if(holidayManager.isNonWorkingDay(s.getValue(), date)) {
           return true;
         }
     }
@@ -204,26 +201,7 @@ public class CalendarManagerImpl implements CalendarManager {
     if(convention == BusinessDayConventionEnum.NONE) {
       return date;
     }
-    LocalDate adjusted = date;
-    for(BusinessCenter s : businessCenters.getBusinessCenter()) {
-      LocalDateCalculator calc = factory.getDateCalculator(s.getValue(), getHolidayHandlerType(convention));
-      calc.setStartDate(adjusted);
-      adjusted = calc.getCurrentBusinessDate();
-    }
-    return adjusted;
-  }
-
-  private String getHolidayHandlerType(BusinessDayConventionEnum convention) {
-    switch(convention) {
-      case FOLLOWING:
-        return HolidayHandlerType.FORWARD;
-      case MODFOLLOWING:
-        return HolidayHandlerType.MODIFIED_FOLLOWING;
-      case PRECEDING:
-        return HolidayHandlerType.BACKWARD;
-      default:
-        return null;
-    }
+    return holidayManager.adjustDate(date, convention, businessCenters);
   }
 
   private ReadablePeriod getPeriod(Interval interval) {

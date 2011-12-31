@@ -48,28 +48,6 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/net.objectlab.kit/datecalc-common/842ad5fe00a5d766a2f1d58c1662c721/bundles/datecalc-common-1.2.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/net.objectlab.kit/datecalc-common/842ad5fe00a5d766a2f1d58c1662c721/sources/datecalc-common-1.2.0-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/net.objectlab.kit/datecalc-joda/842ad5fe00a5d766a2f1d58c1662c721/bundles/datecalc-joda-1.2.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/net.objectlab.kit/datecalc-joda/842ad5fe00a5d766a2f1d58c1662c721/sources/datecalc-joda-1.2.0-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.google.inject/guice/842ad5fe00a5d766a2f1d58c1662c721/jars/guice-3.0.jar!/" />
         </CLASSES>
         <JAVADOC />

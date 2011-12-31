@@ -5,7 +5,6 @@ import com.google.inject.Provider;
 import net.formicary.pricer.impl.CalendarManagerImpl;
 import net.formicary.pricer.impl.CurveManagerImpl;
 import net.formicary.pricer.loader.HolidayLoader;
-import net.objectlab.kit.datecalc.joda.LocalDateKitCalculatorsFactory;
 import org.fpml.spec503wd3.DataDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,12 +39,12 @@ public class PricerModule extends AbstractModule {
     }).in(SINGLETON);
     bind(CalendarManager.class).to(CalendarManagerImpl.class);
     bind(CurveManager.class).to(CurveManagerImpl.class);
-    LocalDateKitCalculatorsFactory calculatorsFactory = LocalDateKitCalculatorsFactory.getDefaultInstance();
+    HolidayManager holidayManager = new HolidayManager();
+    bind(HolidayManager.class).toInstance(holidayManager);
     try {
-      HolidayLoader loader = new HolidayLoader(calculatorsFactory);
+      HolidayLoader loader = new HolidayLoader(holidayManager);
     } catch(IOException e) {
       throw new RuntimeException(e);
     }
-    bind(LocalDateKitCalculatorsFactory.class).toInstance(calculatorsFactory);
   }
 }
