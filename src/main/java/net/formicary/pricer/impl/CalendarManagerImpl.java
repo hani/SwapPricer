@@ -26,11 +26,11 @@ public class CalendarManagerImpl implements CalendarManager {
 
   @Override
   public double getDayCountFraction(LocalDate start, LocalDate end, DayCountFraction dayCountFraction) {
-    int d2 = end.getDayOfMonth();
-    int d1 = start.getDayOfMonth();
     switch(dayCountFraction) {
       case THIRTY_360:
         //ISDA defs section 4.1.6f
+        int d1 = start.getDayOfMonth();
+        int d2 = end.getDayOfMonth();
         if(d1 == 31) d1 = 30;
         if(d2 == 31 && d1 > 29) d2 = 30;
         return ((360d * (end.getYear() - start.getYear())) + (30d * (end.getMonthOfYear() - start.getMonthOfYear())) + (d2 - d1)) / 360d;
@@ -40,6 +40,8 @@ public class CalendarManagerImpl implements CalendarManager {
         return Days.daysBetween(start, end).getDays() / 365d;
       case THIRTYE_360:
         //ISDA defs section 4.1.6g
+        d1 = start.getDayOfMonth();
+        d2 = end.getDayOfMonth();
         if(d1 == 31) d1 = 30;
         if(d2 == 31) d2 = 30;
         return ((360d * (end.getYear() - start.getYear())) + (30d * (end.getMonthOfYear() - start.getMonthOfYear())) + (d2 - d1)) / 360d;
