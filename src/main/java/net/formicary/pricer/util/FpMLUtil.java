@@ -33,15 +33,17 @@ public class FpMLUtil {
 
   public static InterestRateStream getFixedStream(Swap s) {
     for (InterestRateStream stream : s.getSwapStream()) {
-      if(stream.getCalculationPeriodAmount().getCalculation().getFixedRateSchedule() != null) {
+      if(isFixedStream(stream)) {
         return stream;
       }
     }
     return null;
   }
 
-  public static boolean isFixedStream(InterestRateStream s) {
-    return s.getCalculationPeriodAmount().getCalculation().getFixedRateSchedule() != null;
+  public static boolean isFixedStream(InterestRateStream stream) {
+    Calculation calculation = stream.getCalculationPeriodAmount().getCalculation();
+    return (calculation != null && calculation.getFixedRateSchedule() != null)
+      || stream.getCalculationPeriodAmount().getKnownAmountSchedule() != null;
   }
 
   public static InterestRateStream getFloatingStream(Swap s) {

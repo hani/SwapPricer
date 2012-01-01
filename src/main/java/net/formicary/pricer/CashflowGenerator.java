@@ -260,6 +260,9 @@ public class CashflowGenerator {
           calculationDates.add(0, calendarManager.adjustDate(unadjustedEffectiveDate, conventions[1], centers[1]));
       }
       //stubs can only be on floating side right? Otherwise it'd be a fake stub handled above
+      if(stream.getCalculationPeriodAmount().getKnownAmountSchedule() != null) {
+        throw new IllegalArgumentException("Trades with knownAmountSchedule not supported yet");
+      }
       AmountSchedule notionalStepSchedule = leg.getCalculationPeriodAmount().getCalculation().getNotionalSchedule().getNotionalStepSchedule();
       currency = notionalStepSchedule.getCurrency().getValue();
       principal = notionalStepSchedule.getInitialValue().doubleValue();
