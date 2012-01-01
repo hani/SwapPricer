@@ -43,7 +43,16 @@ public class PricerModule extends AbstractModule {
     }).in(SINGLETON);
     bind(CalendarManager.class).to(CalendarManagerImpl.class);
     bind(CurveManager.class).to(CurveManagerImpl.class);
-    bind(Executor.class).toInstance(Executors.newFixedThreadPool(8, new ThreadFactory() {
+    int availableCores = Runtime.getRuntime().availableProcessors();
+    int coresToUse = availableCores;
+    if(availableCores > 1) {
+      coresToUse = coresToUse / 2;
+    }
+    if(availableCores > 8) {
+      coresToUse += -2;
+    }
+    log.info("Detected {} cores. Using thread pool of size {}", availableCores, coresToUse);
+    bind(Executor.class).toInstance(Executors.newFixedThreadPool(coresToUse, new ThreadFactory() {
       private AtomicInteger threadNumber = new AtomicInteger(1);
 
       @Override
