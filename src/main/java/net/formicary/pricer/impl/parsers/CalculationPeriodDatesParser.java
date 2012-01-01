@@ -25,6 +25,7 @@ public class CalculationPeriodDatesParser implements NodeParser<CalculationPerio
     terminationDate,
     calculationPeriodDatesAdjustments,
     firstRegularPeriodStartDate,
+    lastRegularPeriodEndDate,
     businessDayConvention,
     businessCentersReference,
     businessCenter,
@@ -69,6 +70,9 @@ public class CalculationPeriodDatesParser implements NodeParser<CalculationPerio
             break;
           case firstRegularPeriodStartDate:
             dates.setFirstRegularPeriodStartDate(DateUtil.getCalendar(reader.getElementText()));
+            break;
+          case lastRegularPeriodEndDate:
+            dates.setLastRegularPeriodEndDate(DateUtil.getCalendar(reader.getElementText()));
             break;
           case calculationPeriodDatesAdjustments:
             holder.currentDate = null;
