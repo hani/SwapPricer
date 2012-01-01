@@ -35,9 +35,11 @@ public class HolidayManager {
   public LocalDate adjustDate(LocalDate date, BusinessDayConventionEnum convention, BusinessCenters businessCenters) {
     if(convention == BusinessDayConventionEnum.NONE) return date;
     LocalDate current = date;
-    for(BusinessCenter center : businessCenters.getBusinessCenter()) {
-      while(isNonWorkingDay(center.getValue(), current)) {
-        current = adjustDate(current, convention, center.getValue());
+    if(businessCenters != null) {
+      for(BusinessCenter center : businessCenters.getBusinessCenter()) {
+        while(isNonWorkingDay(center.getValue(), current)) {
+          current = adjustDate(current, convention, center.getValue());
+        }
       }
     }
     return current;
