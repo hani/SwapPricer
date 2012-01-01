@@ -243,6 +243,11 @@ public class CashflowGenerator {
         centers[0] = centers[1];
       }
       interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
+      LocalDate earliest = startDate;
+      if(earliest.isBefore(valuationDate)) {
+        earliest = valuationDate.minusYears(1);
+      }
+      calculationDates = calendarManager.getAdjustedDates(earliest, endDate, conventions, interval, centers);
       calculationDates = calendarManager.getAdjustedDates(startDate, endDate, conventions, interval, centers);
       initialStub = FpMLUtil.getInitialStub(leg);
       finalStub = FpMLUtil.getFinalStub(leg);
