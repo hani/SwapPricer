@@ -26,6 +26,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class DMPReportGenerator {
   @Inject private CashflowGenerator generator;
   @Inject private Executor executor;
+  private boolean showTraces = false;
+
   private static final Logger log = LoggerFactory.getLogger(DMPReportGenerator.class);
 
   public void generateReport(String inputDir, String outputFile) throws IOException {
@@ -51,7 +53,10 @@ public class DMPReportGenerator {
               return generator.generateCashflows(date, id);
             } catch(Exception e) {
               failures.incrementAndGet();
-              log.error("Error calculating cashflows for trade " + id, e);
+              if(showTraces)
+                log.error("Error calculating cashflows for trade " + id, e);
+              else
+                log.error("Error calculating cashflows for trade " + id + ": " + e.getMessage());
               return null;
             }
           }
