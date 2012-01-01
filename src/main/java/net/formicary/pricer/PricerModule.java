@@ -45,7 +45,7 @@ public class PricerModule extends AbstractModule {
     bind(CurveManager.class).to(CurveManagerImpl.class);
     int availableCores = Runtime.getRuntime().availableProcessors();
     int coresToUse = availableCores;
-    if(availableCores > 1) {
+    if(availableCores > 2) {
       coresToUse = coresToUse / 2;
     }
     if(availableCores > 8) {
