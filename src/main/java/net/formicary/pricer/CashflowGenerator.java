@@ -215,8 +215,8 @@ public class CashflowGenerator {
 
   class StreamContext {
     boolean isFixed;
-    Stub initialStub;
-    Stub finalStub;
+    StubValue initialStub;
+    StubValue finalStub;
     CalculationPeriodFrequency interval;
     LocalDate valuationDate;
     LocalDate cutoffDate;

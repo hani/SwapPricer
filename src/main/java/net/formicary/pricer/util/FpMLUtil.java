@@ -57,22 +57,22 @@ public class FpMLUtil {
     return centers;
   }
 
-  private static Stub getStub(InterestRateStream leg, String type) {
+  private static StubValue getStub(InterestRateStream leg, String type) {
     StubCalculationPeriodAmount stubCalculationPeriodAmount = leg.getStubCalculationPeriodAmount();
     if(stubCalculationPeriodAmount == null) return null;
     for (JAXBElement<?> element : stubCalculationPeriodAmount.getContent()) {
       if(element.getName().getLocalPart().equals(type)) {
-        return (Stub)element.getValue();
+        return (StubValue)element.getValue();
       }
     }
     return null;
   }
 
-  public static Stub getInitialStub(InterestRateStream leg) {
+  public static StubValue getInitialStub(InterestRateStream leg) {
     return getStub(leg, "initialStub");
   }
 
-  public static Stub getFinalStub(InterestRateStream leg) {
+  public static StubValue getFinalStub(InterestRateStream leg) {
     return getStub(leg, "finalStub");
   }
 
