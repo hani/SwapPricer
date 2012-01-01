@@ -37,7 +37,7 @@ public class FpMLUtil {
         return stream;
       }
     }
-    return null;
+    throw new IllegalArgumentException("Trades with two floating streams not supported yet");
   }
 
   public static boolean isFixedStream(InterestRateStream stream) {
