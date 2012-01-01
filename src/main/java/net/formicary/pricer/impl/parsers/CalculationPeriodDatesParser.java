@@ -18,10 +18,7 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
  *         Date: 12/20/11
  *         Time: 11:44 AM
  */
-public class CalculationPeriodDatesParser implements NodeParser<CalculationPeriodDates>, HrefListener {
-
-  private AdjustableDate currentDate;
-  private BusinessCenters centers;
+public class CalculationPeriodDatesParser implements NodeParser<CalculationPeriodDates> {
 
   enum Element {
     effectiveDate,
@@ -41,51 +38,49 @@ public class CalculationPeriodDatesParser implements NodeParser<CalculationPerio
     calculationPeriodDates
   }
 
-  @Override
-  public void nodeAdded(String id, Object o) {
-    //it's only business centers for now
-    centers = (BusinessCenters)o;
+  private class Holder {
+    BusinessCenters centers;
+    AdjustableDate currentDate;
   }
 
   @Override
   public CalculationPeriodDates parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
-    CalculationPeriodDates dates = new CalculationPeriodDates();
+    final CalculationPeriodDates dates = new CalculationPeriodDates();
     dates.setCalculationPeriodFrequency(new CalculationPeriodFrequency());
     String myId = reader.getAttributeValue(null, "id");
     if(myId != null) {
       ctx.registerObject(myId, dates);
     }
-    currentDate = null;
-    centers = null;
+    final Holder holder = new Holder();
     while(reader.hasNext()) {
       int event = reader.next();
       if (event == START_ELEMENT) {
         Element element = Element.valueOf(reader.getLocalName());
         switch(element) {
           case effectiveDate:
-            currentDate = new AdjustableDate();
-            currentDate.setDateAdjustments(new BusinessDayAdjustments());
-            dates.setEffectiveDate(currentDate);
+            holder.currentDate = new AdjustableDate();
+            holder.currentDate.setDateAdjustments(new BusinessDayAdjustments());
+            dates.setEffectiveDate(holder.currentDate);
             break;
           case terminationDate:
-            currentDate = new AdjustableDate();
-            currentDate.setDateAdjustments(new BusinessDayAdjustments());
-            dates.setTerminationDate(currentDate);
+            holder.currentDate = new AdjustableDate();
+            holder.currentDate.setDateAdjustments(new BusinessDayAdjustments());
+            dates.setTerminationDate(holder.currentDate);
             break;
           case firstRegularPeriodStartDate:
             dates.setFirstRegularPeriodStartDate(DateUtil.getCalendar(reader.getElementText()));
             break;
           case calculationPeriodDatesAdjustments:
-            currentDate = null;
+            holder.currentDate = null;
             break;
           case unadjustedDate:
             //advance and read the text
-            if(currentDate == null) {
+            if(holder.currentDate == null) {
               throw new RuntimeException("Parser error: found unadjustedDate outside of effective/terminationDate");
             }
             IdentifiedDate date = new IdentifiedDate();
             date.setValue(DateUtil.getCalendar(reader.getElementText()));
-            currentDate.setUnadjustedDate(date);
+            holder.currentDate.setUnadjustedDate(date);
             break;
           case period:
             dates.getCalculationPeriodFrequency().setPeriod(PeriodEnum.valueOf(reader.getElementText()));
@@ -98,8 +93,8 @@ public class CalculationPeriodDatesParser implements NodeParser<CalculationPerio
             break;
           case businessDayConvention:
             BusinessDayConventionEnum convention = BusinessDayConventionEnum.valueOf(reader.getElementText());
-            if(currentDate != null) {
-              currentDate.getDateAdjustments().setBusinessDayConvention(convention);
+            if(holder.currentDate != null) {
+              holder.currentDate.getDateAdjustments().setBusinessDayConvention(convention);
             } else {
               if(dates.getCalculationPeriodDatesAdjustments() == null) {
                 dates.setCalculationPeriodDatesAdjustments(new BusinessDayAdjustments());
@@ -108,25 +103,34 @@ public class CalculationPeriodDatesParser implements NodeParser<CalculationPerio
             }
             break;
           case businessCenters:
-            centers = new BusinessCenters();
-            if(currentDate == null) {
-              dates.getCalculationPeriodDatesAdjustments().setBusinessCenters(centers);
+            holder.centers = new BusinessCenters();
+            if(holder.currentDate == null) {
+              dates.getCalculationPeriodDatesAdjustments().setBusinessCenters(holder.centers);
             } else {
-              currentDate.getDateAdjustments().setBusinessCenters(centers);
+              holder.currentDate.getDateAdjustments().setBusinessCenters(holder.centers);
             }
             String id = reader.getAttributeValue(null, "id");
             if(id != null) {
-              ctx.registerObject(id, centers);
+              ctx.registerObject(id, holder.centers);
             }
             break;
           case businessCentersReference:
-            ctx.addHrefListener(reader.getAttributeValue(null, "href"), this);
+            ctx.addHrefListener(reader.getAttributeValue(null, "href"), new HrefListener() {
+              @Override
+              public void nodeAdded(String id, Object o) {
+                if(holder.currentDate != null) {
+                  holder.currentDate.getDateAdjustments().setBusinessCenters(holder.centers);
+                } else {
+                  dates.getCalculationPeriodDatesAdjustments().setBusinessCenters(holder.centers);
+                }
+              }
+            });
             break;
           case businessCenter:
             BusinessCenter bc = new BusinessCenter();
             bc.setId(reader.getElementText());
             bc.setValue(bc.getId());
-            centers.getBusinessCenter().add(bc);
+            holder.centers.getBusinessCenter().add(bc);
             break;
         }
       } else if(event == END_ELEMENT) {
@@ -136,11 +140,6 @@ public class CalculationPeriodDatesParser implements NodeParser<CalculationPerio
             //we're done
             return dates;
           case businessCentersReference:
-            if(currentDate != null) {
-              currentDate.getDateAdjustments().setBusinessCenters(centers);
-            } else {
-              dates.getCalculationPeriodDatesAdjustments().setBusinessCenters(centers);
-            }
             break;
         }
       }
