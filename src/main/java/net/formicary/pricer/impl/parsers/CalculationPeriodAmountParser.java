@@ -37,20 +37,16 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
     dayCountFraction,
     fixedRateSchedule,
     compoundingMethod,
-    initialRate
+    initialRate,
+    knownAmountSchedule
   }
 
   @Override
   public CalculationPeriodAmount parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
     CalculationPeriodAmount cpa = new CalculationPeriodAmount();
-    Calculation calculation = new Calculation();
-    Notional notional = new Notional();
-    calculation.setNotionalSchedule(notional);
-    cpa.setCalculation(calculation);
-    AmountSchedule amount = new AmountSchedule();
-    notional.setNotionalStepSchedule(amount);
 
     String initialValue = "0";
+    Currency currency = null;
 
     while (reader.hasNext()) {
       int event = reader.next();
@@ -60,33 +56,45 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
           case dayCountFraction:
             DayCountFraction dayCountFraction = new DayCountFraction();
             dayCountFraction.setValue(reader.getElementText());
-            calculation.setDayCountFraction(dayCountFraction);
+            cpa.getCalculation().setDayCountFraction(dayCountFraction);
             break;
           case currency:
-            Currency currency = new Currency();
+            currency = new Currency();
             currency.setValue(reader.getElementText());
-            amount.setCurrency(currency);
+            break;
+          case calculation:
+            cpa.setCalculation(new Calculation());
             break;
           case initialValue:
             initialValue = reader.getElementText();
             break;
           case floatingRateIndex:
-            FloatingRateCalculation c = getFloatingCalculation(calculation);
+            FloatingRateCalculation c = getFloatingCalculation(cpa.getCalculation());
             FloatingRateIndex i = new FloatingRateIndex();
             i.setValue(reader.getElementText());
             c.setFloatingRateIndex(i);
             break;
+          case knownAmountSchedule:
+            cpa.setKnownAmountSchedule(new AmountSchedule());
+            break;
           case periodMultiplier:
-            getFloatingCalculation(calculation).getIndexTenor().setPeriodMultiplier(new BigInteger(reader.getElementText()));
+            getFloatingCalculation(cpa.getCalculation()).getIndexTenor().setPeriodMultiplier(new BigInteger(reader.getElementText()));
             break;
           case period:
-            getFloatingCalculation(calculation).getIndexTenor().setPeriod(PeriodEnum.valueOf(reader.getElementText()));
+            getFloatingCalculation(cpa.getCalculation()).getIndexTenor().setPeriod(PeriodEnum.valueOf(reader.getElementText()));
+            break;
+          case notionalSchedule:
+            cpa.getCalculation().setNotionalSchedule(new Notional());
             break;
           case compoundingMethod:
-            calculation.setCompoundingMethod(CompoundingMethodEnum.fromValue(reader.getElementText()));
+            cpa.getCalculation().setCompoundingMethod(CompoundingMethodEnum.fromValue(reader.getElementText()));
             break;
           case initialRate:
-            getFloatingCalculation(calculation).setInitialRate(new BigDecimal(reader.getElementText()));
+            getFloatingCalculation(cpa.getCalculation()).setInitialRate(new BigDecimal(reader.getElementText()));
+            break;
+          case notionalStepSchedule:
+            AmountSchedule schedule = new AmountSchedule();
+            cpa.getCalculation().getNotionalSchedule().setNotionalStepSchedule(schedule);
             break;
         }
       } else if (event == END_ELEMENT) {
@@ -98,12 +106,21 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
             //TODO where do we stuff this?
             break;
           case notionalStepSchedule:
-            amount.setInitialValue(new BigDecimal(initialValue));
+            cpa.getCalculation().getNotionalSchedule().getNotionalStepSchedule().setInitialValue(new BigDecimal(initialValue));
+            cpa.getCalculation().getNotionalSchedule().getNotionalStepSchedule().setCurrency(currency);
+            initialValue = null;
+            currency = null;
+            break;
+          case knownAmountSchedule:
+            cpa.getKnownAmountSchedule().setInitialValue(new BigDecimal(initialValue));
+            cpa.getKnownAmountSchedule().setCurrency(currency);
+            initialValue = null;
+            currency = null;
             break;
           case fixedRateSchedule:
             Schedule fr = new Schedule();
             fr.setInitialValue(new BigDecimal(initialValue));
-            calculation.setFixedRateSchedule(fr);
+            cpa.getCalculation().setFixedRateSchedule(fr);
             break;
         }
       }
