@@ -26,11 +26,11 @@ public class FpmlJAXBTradeStore implements TradeStore {
   @Inject
   private String fpmlDir;
 
-  private Unmarshaller unmarshaller;
+  private JAXBContext context;
 
   @Inject
   public FpmlJAXBTradeStore(JAXBContext context) throws JAXBException {
-    this.unmarshaller = context.createUnmarshaller();
+    this.context = context;
   }
 
   public String getFpmlDir() {
@@ -54,6 +54,7 @@ public class FpmlJAXBTradeStore implements TradeStore {
   }
 
   public Trade readFpml(File f) throws IOException, JAXBException {
+    Unmarshaller unmarshaller = context.createUnmarshaller();
     JAXBElement<DataDocument> dd = (JAXBElement<DataDocument>)unmarshaller.unmarshal(f);
     return dd.getValue().getTrade().get(0);
   }
