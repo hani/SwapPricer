@@ -1,5 +1,8 @@
 package net.formicary.pricer.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.formicary.pricer.model.DayCountFraction;
 import org.fpml.spec503wd3.*;
 import org.joda.time.LocalDate;
@@ -7,12 +10,27 @@ import org.joda.time.LocalDate;
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import static net.formicary.pricer.model.DayCountFraction.*;
+
 /**
  * @author hsuleiman
  *         Date: 12/27/11
  *         Time: 10:11 AM
  */
 public class FpMLUtil {
+  private static final Map<String, DayCountFraction> fractionMapping = new HashMap<String, DayCountFraction>();
+  static {
+    fractionMapping.put("1/1", ONE);
+    fractionMapping.put("ACT/ACT.ISDA", ACT);
+    fractionMapping.put("ACT/360", ACT_360);
+    fractionMapping.put("ACT/ACT", ACT);
+    fractionMapping.put("ACT", ACT);
+    fractionMapping.put("ACT/365", ACT_365);
+    fractionMapping.put("30/360", THIRTY_360);
+    fractionMapping.put("30E/360", THIRTYE_360);
+    fractionMapping.put("30E/360.ISDA", THIRTYE_360_ISDA);
+  }
+
   public static InterestRateStream getFixedStream(Swap s) {
     for (InterestRateStream stream : s.getSwapStream()) {
       if(stream.getCalculationPeriodAmount().getCalculation().getFixedRateSchedule() != null) {
@@ -36,9 +54,11 @@ public class FpMLUtil {
   }
 
   public static DayCountFraction getDayCountFraction(String value) {
-    String text = value.replace('/', '_');
-    text = text.replace("30", "THIRTY");
-    return DayCountFraction.valueOf(text);
+    DayCountFraction f = fractionMapping.get(value);
+    if(value == null) {
+      throw new IllegalArgumentException("No mapping found for day count fraction " + value);
+    }
+    return f;
   }
 
   public static BusinessDayConventionEnum[] getBusinessDayConventions(InterestRateStream leg) {

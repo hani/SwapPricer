@@ -25,13 +25,16 @@ public class CalendarManagerImpl implements CalendarManager {
   @Override
   public double getDayCountFraction(LocalDate start, LocalDate end, DayCountFraction dayCountFraction) {
     switch(dayCountFraction) {
+      case ONE:
+        return 1;
       case THIRTY_360:
         //ISDA defs section 4.1.6f
         int d1 = start.getDayOfMonth();
         int d2 = end.getDayOfMonth();
         if(d1 == 31) d1 = 30;
         if(d2 == 31 && d1 > 29) d2 = 30;
-        return ((360d * (end.getYear() - start.getYear())) + (30d * (end.getMonthOfYear() - start.getMonthOfYear())) + (d2 - d1)) / 360d;
+        return ((360d * (end.getYear() - start.getYear())) + (30d * (end.getMonthOfYear() - start.getMonthOfYear()))
+          + (d2 - d1)) / 360d;
       case ACT_360:
         return Days.daysBetween(start, end).getDays() / 360d;
       case ACT_365:
@@ -42,7 +45,24 @@ public class CalendarManagerImpl implements CalendarManager {
         d2 = end.getDayOfMonth();
         if(d1 == 31) d1 = 30;
         if(d2 == 31) d2 = 30;
-        return ((360d * (end.getYear() - start.getYear())) + (30d * (end.getMonthOfYear() - start.getMonthOfYear())) + (d2 - d1)) / 360d;
+        return ((360d * (end.getYear() - start.getYear())) + (30d * (end.getMonthOfYear() - start.getMonthOfYear()))
+          + (d2 - d1)) / 360d;
+      case ACT:
+        //note that we don't handle periods that span >2 years, should flag it as an error really so it's easier to spot
+        int startYear = start.getYear();
+        boolean isStartInLeapYear = startYear % 4 == 0;
+        int endYear = end.getYear();
+        boolean isEndInLeapYear = endYear % 4 == 0;
+        if(!isStartInLeapYear && !isEndInLeapYear) {
+          return Days.daysBetween(start, end).getDays() / 365d;
+        }
+        //one of the start or end is in a leap year, so we work out the number of days separately
+        LocalDate startPeriodEnd = new LocalDate(startYear, 12, 31);
+        LocalDate endPeriodStart = new LocalDate(endYear, 1, 1);
+        double startFraction = Days.daysBetween(start, startPeriodEnd).getDays() / (isStartInLeapYear ? 366d : 365d);
+        double endFraction = Days.daysBetween(endPeriodStart, end).getDays() / (isEndInLeapYear ? 366d : 365d);
+        return startFraction + endFraction;
+      case THIRTYE_360_ISDA:
       default:
         throw new UnsupportedOperationException("DayCountFraction " + dayCountFraction + " is not supported");
     }
