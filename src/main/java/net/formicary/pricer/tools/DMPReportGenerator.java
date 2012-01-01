@@ -70,7 +70,7 @@ public class DMPReportGenerator {
           writeCashflows(os, cashflows.get(0).getTradeId(), cashflows);
         }
       } catch(Exception e) {
-        log.error("");
+        log.error("Error writing cashflow", e);
       }
     }
     long timeTaken = System.currentTimeMillis() - now;
