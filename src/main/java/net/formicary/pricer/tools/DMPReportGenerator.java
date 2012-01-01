@@ -15,6 +15,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author hsuleiman
@@ -23,10 +25,11 @@ import java.util.List;
  */
 public class DMPReportGenerator {
   @Inject private CashflowGenerator generator;
+  @Inject private Executor executor;
   private static final Logger log = LoggerFactory.getLogger(DMPReportGenerator.class);
 
   public void generateReport(String inputDir, String outputFile) throws IOException {
-    LocalDate date = new LocalDate(2011, 11, 4);
+    final LocalDate date = new LocalDate(2011, 11, 4);
     List<String> files = new ArrayList<String>();
     Collections.addAll(files, new File(inputDir).list(new FilenameFilter() {
       @Override
@@ -34,33 +37,53 @@ public class DMPReportGenerator {
         return name.startsWith("LCH") && name.endsWith(".xml");
       }
     }));
-    BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(outputFile, false));
+    final BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(outputFile, false));
     os.write("LchTradeId,NpvAmount,CashflowDate,CashflowAmount\n".getBytes());
+    final AtomicInteger failures = new AtomicInteger(0);
+    CompletionService<List<Cashflow>> service = new ExecutorCompletionService<List<Cashflow>>(executor);
     long now  = System.currentTimeMillis();
-    int failures = 0;
     for (String file : files) {
-      String id = file.substring(0, file.indexOf('.'));
-      List<Cashflow> cashflows = null;
+      final String id = file.substring(0, file.indexOf('.'));
+        service.submit(new Callable<List<Cashflow>>() {
+          @Override
+          public List<Cashflow> call() throws Exception {
+            try {
+              return generator.generateCashflows(date, id);
+            } catch(Exception e) {
+              failures.incrementAndGet();
+              log.error("Error calculating cashflows for trade " + id, e);
+              return null;
+            }
+          }
+        });
+    }
+    int total = files.size();
+    for(int i = 0; i < total; i++) {
       try {
-        cashflows = generator.generateCashflows(date, id);
-        for (Cashflow cashflow : cashflows) {
-          StringBuilder sb = new StringBuilder();
-          sb.append(id).append(",");
-          sb.append(cashflow.getNpv()).append(",");
-          sb.append(cashflow.getDate()).append(",");
-          sb.append(cashflow.getAmount());
-          sb.append('\n');
-          os.write(sb.toString().getBytes());
+        List<Cashflow> cashflows = service.take().get();
+        if(cashflows != null) {
+          writeCashflows(os, cashflows.get(0).getTradeId(), cashflows);
         }
-      } catch (Exception e) {
-        log.error("Error calculating cashflows for trade " + id, e);
-        failures++;
+      } catch(Exception e) {
+        log.error("");
       }
     }
     long timeTaken = System.currentTimeMillis() - now;
-    log.info("Priced {} trades with {} failures", files.size(), failures);
+    log.info("Priced {} trades with {} failures", total, failures);
     log.info("Total time: {}ms. Average time: {}ms", timeTaken, timeTaken/files.size());
     os.close();
+  }
+
+  private void writeCashflows(BufferedOutputStream os, String id, List<Cashflow> cashflows) throws IOException {
+    for (Cashflow cashflow : cashflows) {
+      StringBuilder sb = new StringBuilder();
+      sb.append(id).append(",");
+      sb.append(cashflow.getNpv()).append(",");
+      sb.append(cashflow.getDate()).append(",");
+      sb.append(cashflow.getAmount());
+      sb.append('\n');
+      os.write(sb.toString().getBytes());
+    }
   }
 
   public static void main(final String[] args) throws IOException {
