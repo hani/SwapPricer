@@ -41,6 +41,7 @@ public class CashflowGenerator {
 
     flows.addAll(floatingFlows);
     Collections.sort(flows);
+    flows.get(0).setTradeId(id);
     return flows;
   }
 

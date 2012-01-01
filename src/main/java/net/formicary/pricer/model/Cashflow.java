@@ -8,6 +8,7 @@ import org.joda.time.LocalDate;
  *         Time: 9:22 PM
  */
 public class Cashflow implements Comparable<Cashflow>{
+  private String tradeId;
   private double npv;
   private LocalDate date;
   private FlowType type;
@@ -22,6 +23,14 @@ public class Cashflow implements Comparable<Cashflow>{
   public Cashflow(double npv, LocalDate date) {
     this.npv = npv;
     this.date = date;
+  }
+
+  public String getTradeId() {
+    return tradeId;
+  }
+
+  public void setTradeId(String tradeId) {
+    this.tradeId = tradeId;
   }
 
   public double getDiscountFactor() {
