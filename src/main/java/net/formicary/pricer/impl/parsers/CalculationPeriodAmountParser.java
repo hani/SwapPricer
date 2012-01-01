@@ -83,6 +83,10 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
           case period:
             getFloatingCalculation(cpa.getCalculation()).getIndexTenor().setPeriod(PeriodEnum.valueOf(reader.getElementText()));
             break;
+          case spreadSchedule:
+            SpreadSchedule spread = new SpreadSchedule();
+            getFloatingCalculation(cpa.getCalculation()).getSpreadSchedule().add(spread);
+            break;
           case notionalSchedule:
             cpa.getCalculation().setNotionalSchedule(new Notional());
             break;
@@ -103,7 +107,8 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
           case calculationPeriodAmount:
             return cpa;
           case spreadSchedule:
-            //TODO where do we stuff this?
+            getFloatingCalculation(cpa.getCalculation()).getSpreadSchedule().get(0).setInitialValue(new BigDecimal(initialValue));
+            initialValue = null;
             break;
           case notionalStepSchedule:
             cpa.getCalculation().getNotionalSchedule().getNotionalStepSchedule().setInitialValue(new BigDecimal(initialValue));
