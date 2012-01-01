@@ -12,6 +12,10 @@ import org.slf4j.LoggerFactory;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.inject.Scopes.SINGLETON;
 
@@ -39,6 +43,18 @@ public class PricerModule extends AbstractModule {
     }).in(SINGLETON);
     bind(CalendarManager.class).to(CalendarManagerImpl.class);
     bind(CurveManager.class).to(CurveManagerImpl.class);
+    bind(Executor.class).toInstance(Executors.newFixedThreadPool(8, new ThreadFactory() {
+      private AtomicInteger threadNumber = new AtomicInteger(1);
+
+      @Override
+      public Thread newThread(Runnable r) {
+        Thread t = new Thread(r, "pricer-" + threadNumber.getAndIncrement());
+        t.setDaemon(true);
+        if(t.getPriority() != Thread.NORM_PRIORITY)
+          t.setPriority(Thread.NORM_PRIORITY);
+        return t;
+      }
+    }));
     HolidayManager holidayManager = new HolidayManager();
     bind(HolidayManager.class).toInstance(holidayManager);
     try {
