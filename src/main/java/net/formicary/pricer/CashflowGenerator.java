@@ -237,6 +237,7 @@ public class CashflowGenerator {
       endDate = FpMLUtil.getEndDate(leg);
       conventions = FpMLUtil.getBusinessDayConventions(leg);
       LocalDate regularPeriodStartDate =  DateUtil.getDate(leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate());
+      LocalDate lastRegularPeriodEndDate = DateUtil.getDate(leg.getCalculationPeriodDates().getLastRegularPeriodEndDate());
       BusinessCenters[] centers = FpMLUtil.getBusinessCenters(leg);
       //if we have a period start date, then we use the period conventions
       if(regularPeriodStartDate != null) {
@@ -258,6 +259,13 @@ public class CashflowGenerator {
         LocalDate unadjustedEffectiveDate = DateUtil.getDate(leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
         if(!calculationDates.get(0).equals(unadjustedEffectiveDate))
           calculationDates.add(0, calendarManager.adjustDate(unadjustedEffectiveDate, conventions[1], centers[1]));
+      }
+      //now check if we have a back stub of some sort
+      if(lastRegularPeriodEndDate != null && finalStub == null) {
+        LocalDate terminationDate = DateUtil.getDate(leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
+        //add a final period
+        if(terminationDate.isAfter(lastRegularPeriodEndDate))
+          calculationDates.add(calendarManager.adjustDate(terminationDate, conventions[2], centers[2]));
       }
       //stubs can only be on floating side right? Otherwise it'd be a fake stub handled above
       if(stream.getCalculationPeriodAmount().getKnownAmountSchedule() != null) {
