@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,17 +30,30 @@ public class CurveManagerImpl implements CurveManager {
   //a map of currency -> (tenor -> forward,discount) curves
   private Map<String, Map<String, String[]>> mapping = new HashMap<String, Map<String, String[]>>();
   //a map of curve -> list of pillar points
+  private String curveDir = "curvedata";
   private Map<String, List<CurvePillarPoint>> curveData = new HashMap<String, List<CurvePillarPoint>>();
-  private static final Object NOT_FOUND = new Object();
-  private Map<String, Object> cache = new ConcurrentHashMap<String, Object>();
+//  private static final Object NOT_FOUND = new Object();
+//  private Map<String, Object> cache = new ConcurrentHashMap<String, Object>();
 
   public CurveManagerImpl() throws IOException {
+    File dir = new File(curveDir);
+    if(!dir.exists() || !dir.isDirectory()) {
+      throw new IllegalArgumentException("Invalid curve dir " + dir.getAbsolutePath());
+    }
     loadCurveMapping("/curvemapping.csv");
-    loadCurveData("data/rep00100a.txt");
+    String[] files = dir.list(new FilenameFilter() {
+      @Override
+      public boolean accept(File dir, String name) {
+        return name.toLowerCase().endsWith(".txt");
+      }
+    });
+    for(String file : files) {
+      loadCurveData(new File(dir, file));
+    }
   }
 
-  private void loadCurveData(String fileName) throws IOException {
-    List<String> list = FileUtils.readLines(new File(fileName));
+  private void loadCurveData(File file) throws IOException {
+    List<String> list = FileUtils.readLines(file);
     for(int i = 1; i < list.size(); i++) {
       String[] data = list.get(i).split("\t");
       CurvePillarPoint p = getPillar(data);
