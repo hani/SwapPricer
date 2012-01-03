@@ -136,8 +136,7 @@ public class CashflowGenerator {
     LocalDate endDate = ctx.startDate;
     BusinessCenters centers = ctx.stream.getCalculationPeriodDates().getCalculationPeriodDatesAdjustments().getBusinessCenters();
     endDate = calendarManager.adjustDate(endDate, ctx.conventions[1], centers);
-    LocalDate startDate = DateUtil.getDate(ctx.stream.getCalculationPeriodDates().getEffectiveDate()
-      .getUnadjustedDate().getValue());
+    LocalDate startDate = DateUtil.getDate(ctx.stream.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
     List<FloatingRate> rates = ctx.initialStub.getFloatingRate();
     double rate1Value = 0, rate2Value = 0;
     if(rates.size() > 0) {
@@ -202,9 +201,7 @@ public class CashflowGenerator {
 
   private Cashflow getCashflow(LocalDate periodStart, LocalDate periodEnd, StreamContext ctx, double rate) {
     Cashflow flow = new Cashflow();
-    InterestRateStream leg = ctx.stream;
-    DayCountFraction fraction = leg.getCalculationPeriodAmount().getCalculation().getDayCountFraction();
-    double dayCountFraction = calendarManager.getDayCountFraction(periodStart, periodEnd, FpMLUtil.getDayCountFraction(fraction.getValue()));
+    double dayCountFraction = calendarManager.getDayCountFraction(periodStart, periodEnd, FpMLUtil.getDayCountFraction(ctx.fraction.getValue()));
     flow.setDayCountFraction(dayCountFraction);
     double undiscountedAmount = ctx.principal * rate * dayCountFraction;
     //if it's a compounding trade, then we add the amount to the principal
@@ -216,7 +213,7 @@ public class CashflowGenerator {
       //we're paying, so reverse values
       flow.setAmount(-flow.getAmount());
     }
-    if(leg.getCalculationPeriodAmount().getCalculation().getCompoundingMethod() == CompoundingMethodEnum.FLAT) {
+    if(ctx.compoundingMethod == CompoundingMethodEnum.FLAT) {
       ctx.principal += undiscountedAmount;
     }
     return flow;
@@ -244,6 +241,8 @@ public class CashflowGenerator {
     String currency;
     double principal;
     boolean paying;
+    CompoundingMethodEnum compoundingMethod;
+    DayCountFraction fraction;
 
     public StreamContext(LocalDate valuationDate, InterestRateStream leg) {
       this.stream = leg;
@@ -254,6 +253,8 @@ public class CashflowGenerator {
       endDate = FpMLUtil.getEndDate(leg);
       conventions = FpMLUtil.getBusinessDayConventions(leg);
       paying = ((Party) leg.getPayerPartyReference().getHref()).getId().equals(ourName);
+      fraction = leg.getCalculationPeriodAmount().getCalculation().getDayCountFraction();
+      compoundingMethod = leg.getCalculationPeriodAmount().getCalculation().getCompoundingMethod();
       LocalDate regularPeriodStartDate =  DateUtil.getDate(leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate());
       LocalDate lastRegularPeriodEndDate = DateUtil.getDate(leg.getCalculationPeriodDates().getLastRegularPeriodEndDate());
       BusinessCenters[] centers = FpMLUtil.getBusinessCenters(leg);
