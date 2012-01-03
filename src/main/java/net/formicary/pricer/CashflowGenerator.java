@@ -83,7 +83,7 @@ public class CashflowGenerator {
 //          Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, getInitialFloatingRate(calculation).doubleValue());
 //          flows.add(flow);
 //        }
-        if(fixingDate.isBefore(valuationDate)) {
+        if(fixingDate.isBefore(valuationDate) || fixingDate.equals(valuationDate)) {
           String index = getFloatingIndexName(calculation);
           double rate = rateManager.getZeroRate(index, ctx.currency, interval, fixingDate) / 100;
           Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, rate);
