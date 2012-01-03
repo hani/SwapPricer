@@ -156,6 +156,8 @@ public class CalendarManagerImpl implements CalendarManager {
       if(!isIMM && !isEOM) {
         rollDay = Integer.parseInt(rollConvention);
       }
+    } else if(interval.getPeriod() == PeriodEnum.M) {
+      rollDay = start.getDayOfMonth();
     }
     ReadablePeriod period = getPeriod(interval);
     while(current.isBefore(end) || current.equals(end)) {
