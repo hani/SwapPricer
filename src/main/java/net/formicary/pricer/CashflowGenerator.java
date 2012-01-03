@@ -173,7 +173,13 @@ public class CashflowGenerator {
       int rate2Period = Days.daysBetween(startDate, tenor2End).getDays();
       rateToUse = rate1Value + (periodLength - rate1Period) * (rate2Value - rate1Value)/(rate2Period - rate1Period);
     }
-    return getCashflow(startDate, endDate, ctx, rateToUse);
+    Cashflow flow = getCashflow(startDate, endDate, ctx, rateToUse);
+    flow.setAmount(ctx.notional * flow.getRate() * flow.getDayCountFraction());
+    if(ctx.paying) {
+      //we're paying, so reverse values
+      flow.setAmount(-flow.getAmount());
+    }
+    return flow;
   }
 
   private Cashflow calculateFinalStubCashflow(StreamContext ctx) {
