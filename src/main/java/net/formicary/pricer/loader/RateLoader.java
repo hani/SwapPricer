@@ -42,19 +42,17 @@ public class RateLoader {
       index.setTenorUnit(items[2]);
       index.setTenorPeriod(items[3]);
       LocalDate fixingDate = formatter.parseLocalDate(items[4]);
-      if(fixingDate.getYear() > 2010) {
-        index.setFixingDate(fixingDate);
-        index.setEffectiveDate(formatter.parseLocalDate(items[5]));
-        try {
-          index.setRate(Double.parseDouble(items[6]));
-          index.setRegulatoryBody(items[7]);
-          ds.save(index);
-          if(++count % 20000 == 0) {
-            log.info("Saved " + count  + " rates");
-          }
-        } catch(NumberFormatException e) {
-          log.info("Invalid rate found for index " + index + ":" + items[5]);
+      index.setFixingDate(fixingDate);
+      index.setEffectiveDate(formatter.parseLocalDate(items[5]));
+      try {
+        index.setRate(Double.parseDouble(items[6]));
+        index.setRegulatoryBody(items[7]);
+        ds.save(index);
+        if(++count % 20000 == 0) {
+          log.info("Saved " + count  + " rates");
         }
+      } catch(NumberFormatException e) {
+        log.info("Invalid rate found for index " + index + ":" + items[5]);
       }
     }
     log.info("Initialised historic rates in " + (System.currentTimeMillis() - now) + "ms with " + count + " rates");
