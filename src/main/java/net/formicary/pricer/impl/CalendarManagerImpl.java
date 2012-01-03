@@ -112,6 +112,9 @@ public class CalendarManagerImpl implements CalendarManager {
       throw new NullPointerException("end date is null");
     }
     List<LocalDate> unadjustedDates = getDatesInRange(start, end, interval);
+    if(unadjustedDates.get(unadjustedDates.size() - 1).isBefore(end)) {
+      unadjustedDates.add(end);
+    }
     unadjustedDates.set(0, adjustDate(unadjustedDates.get(0), conventions[0], businessCenters[0]));
     for(int i = 1; i < unadjustedDates.size() - 1; i++) {
       unadjustedDates.set(i, adjustDate(unadjustedDates.get(i), conventions[1], businessCenters[1]));
