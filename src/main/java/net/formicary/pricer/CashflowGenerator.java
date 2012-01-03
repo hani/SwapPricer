@@ -26,8 +26,6 @@ public class CashflowGenerator {
   @Inject CalendarManager calendarManager;
   @Inject TradeStore tradeStore;
   @Inject RateManager rateManager;
-  //we'll always pretend to be partyA from the LCH pov, to match the dmp tool
-  private String ourName = "partyA";
 
   public List<Cashflow> generateCashflows(LocalDate valuationDate, String id) {
     Swap swap = tradeStore.getTrade(id);
@@ -67,7 +65,7 @@ public class CashflowGenerator {
   }
 
   private List<Cashflow> generateFloatingFlows(LocalDate valuationDate, InterestRateStream leg) {
-    StreamContext ctx = new StreamContext(valuationDate, leg);
+    StreamContext ctx = new StreamContext(calendarManager, valuationDate, leg);
     Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
     CalculationPeriodFrequency interval = ctx.interval;
     List<LocalDate> calculationDates = ctx.calculationDates;
@@ -129,7 +127,7 @@ public class CashflowGenerator {
   }
 
   private List<Cashflow> generateFixedFlows(LocalDate valuationDate, InterestRateStream leg) {
-    StreamContext ctx = new StreamContext(valuationDate, leg);
+    StreamContext ctx = new StreamContext(calendarManager, valuationDate, leg);
     List<LocalDate> calculationDates = ctx.calculationDates;
     List<Cashflow> flows = new ArrayList<Cashflow>();
     BigDecimal rate = leg.getCalculationPeriodAmount().getCalculation().getFixedRateSchedule().getInitialValue();
@@ -158,7 +156,8 @@ public class CashflowGenerator {
     double rate1Value = 0, rate2Value = 0;
     if(stubRates.size() > 0) {
       FloatingRate rate1 = stubRates.get(0);
-      String index = getFloatingIndexName(rate1.getFloatingRateIndex().getValue());
+      //I guess for stuff in the past we need to check the historic index?
+      //String index = getFloatingIndexName(rate1.getFloatingRateIndex().getValue());
       String tenor1 = rate1.getIndexTenor().getPeriodMultiplier() + rate1.getIndexTenor().getPeriod().value();
       rate1Value = curveManager.getInterpolatedForwardRate(startDate, ctx.currency, tenor1);
       if(stubRates.size() == 2) {
@@ -246,76 +245,6 @@ public class CashflowGenerator {
     double discountFactor = curveManager.getDiscountFactor(flow.getDate(), ctx.valuationDate, currency, leg.getPaymentDates().getPaymentFrequency(), ctx.isFixed);
     flow.setDiscountFactor(discountFactor);
     flow.setNpv(discountFactor * flow.getAmount());
-  }
-
-  class StreamContext {
-    boolean isFixed;
-    StubValue initialStub;
-    StubValue finalStub;
-    CalculationPeriodFrequency interval;
-    LocalDate valuationDate;
-    LocalDate cutoffDate;
-    LocalDate startDate;
-    LocalDate endDate;
-    BusinessDayConventionEnum[] conventions;
-    List<LocalDate> calculationDates;
-    InterestRateStream stream;
-    String currency;
-    double notional;
-    boolean paying;
-    CompoundingMethodEnum compoundingMethod;
-    DayCountFraction fraction;
-
-    public StreamContext(LocalDate valuationDate, InterestRateStream leg) {
-      this.stream = leg;
-      this.valuationDate = valuationDate;
-      this.cutoffDate = valuationDate.plusDays(3);
-      this.isFixed = FpMLUtil.isFixedStream(leg);
-      startDate = FpMLUtil.getStartDate(valuationDate, leg);
-      endDate = FpMLUtil.getEndDate(leg);
-      conventions = FpMLUtil.getBusinessDayConventions(leg);
-      paying = ((Party) leg.getPayerPartyReference().getHref()).getId().equals(ourName);
-      fraction = leg.getCalculationPeriodAmount().getCalculation().getDayCountFraction();
-      compoundingMethod = leg.getCalculationPeriodAmount().getCalculation().getCompoundingMethod();
-      LocalDate regularPeriodStartDate =  DateUtil.getDate(leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate());
-      LocalDate lastRegularPeriodEndDate = DateUtil.getDate(leg.getCalculationPeriodDates().getLastRegularPeriodEndDate());
-      BusinessCenters[] centers = FpMLUtil.getBusinessCenters(leg);
-      //if we have a period start date, then we use the period conventions
-      if(regularPeriodStartDate != null) {
-        conventions[0] = conventions[1];
-        centers[0] = centers[1];
-      }
-      interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
-      LocalDate earliest = startDate;
-      if(earliest.isBefore(valuationDate)) {
-        earliest = valuationDate.minusYears(1);
-      }
-      calculationDates = calendarManager.getAdjustedDates(earliest, endDate, conventions, interval, centers);
-      calculationDates = calendarManager.getAdjustedDates(startDate, endDate, conventions, interval, centers);
-      initialStub = FpMLUtil.getInitialStub(leg);
-      finalStub = FpMLUtil.getFinalStub(leg);
-
-      if(regularPeriodStartDate != null && regularPeriodStartDate.isAfter(cutoffDate) && initialStub == null) {
-        //it's an imaginary stub! We have a hidden flow between effectivedate and calcperiodstart date
-        LocalDate unadjustedEffectiveDate = DateUtil.getDate(leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
-        if(!calculationDates.get(0).equals(unadjustedEffectiveDate))
-          calculationDates.add(0, calendarManager.adjustDate(unadjustedEffectiveDate, conventions[1], centers[1]));
-      }
-      //now check if we have a back stub of some sort
-      if(lastRegularPeriodEndDate != null && finalStub == null) {
-        LocalDate terminationDate = DateUtil.getDate(leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
-        //add a final period
-        if(terminationDate.isAfter(lastRegularPeriodEndDate))
-          calculationDates.add(calendarManager.adjustDate(terminationDate, conventions[2], centers[2]));
-      }
-      //stubs can only be on floating side right? Otherwise it'd be a fake stub handled above
-      if(stream.getCalculationPeriodAmount().getKnownAmountSchedule() != null) {
-        throw new IllegalArgumentException("Trades with knownAmountSchedule not supported yet");
-      }
-      AmountSchedule notionalStepSchedule = leg.getCalculationPeriodAmount().getCalculation().getNotionalSchedule().getNotionalStepSchedule();
-      currency = notionalStepSchedule.getCurrency().getValue();
-      notional = notionalStepSchedule.getInitialValue().doubleValue();
-    }
   }
 
   private String getFloatingIndexName(Calculation calculation) {
