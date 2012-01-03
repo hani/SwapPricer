@@ -57,10 +57,9 @@ public class CalendarManagerImpl implements CalendarManager {
           return Days.daysBetween(start, end).getDays() / 365d;
         }
         //one of the start or end is in a leap year, so we work out the number of days separately
-        LocalDate startPeriodEnd = new LocalDate(startYear, 12, 31);
-        LocalDate endPeriodStart = new LocalDate(endYear, 1, 1);
-        double startFraction = Days.daysBetween(start, startPeriodEnd).getDays() / (isStartInLeapYear ? 366d : 365d);
-        double endFraction = Days.daysBetween(endPeriodStart, end).getDays() / (isEndInLeapYear ? 366d : 365d);
+        LocalDate yearSwitchOver = new LocalDate(endYear, 1, 1);
+        double startFraction = Days.daysBetween(start, yearSwitchOver).getDays() / (isStartInLeapYear ? 366d : 365d);
+        double endFraction = Days.daysBetween(yearSwitchOver, end).getDays() / (isEndInLeapYear ? 366d : 365d);
         return startFraction + endFraction;
       case THIRTYE_360_ISDA:
       default:
