@@ -113,10 +113,13 @@ public class CashflowGenerator {
       }
     }
     if(ctx.initialStub != null && ctx.startDate.isAfter(ctx.cutoffDate)) {
-      flows.add(0, calculateInitialStubCashflow(ctx));
+      LocalDate endDate = DateUtil.getDate(ctx.stream.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
+      flows.add(0, calculateStubCashflow(ctx, ctx.startDate, endDate, ctx.initialStub.getFloatingRate()));
     }
     if(ctx.finalStub != null) {
-      flows.add(calculateFinalStubCashflow(ctx));
+      LocalDate endDate = DateUtil.getDate(ctx.stream.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
+      LocalDate startDate = ctx.endDate;
+      flows.add(calculateStubCashflow(ctx, endDate, startDate, ctx.finalStub.getFloatingRate()));
     }
     for(Cashflow flow : flows) {
       discountFlow(ctx, flow, leg);
@@ -148,29 +151,26 @@ public class CashflowGenerator {
     return flows;
   }
 
-  private Cashflow calculateInitialStubCashflow(StreamContext ctx) {
-    LocalDate endDate = ctx.startDate;
+  private Cashflow calculateStubCashflow(StreamContext ctx, LocalDate endDate, LocalDate startDate, List<FloatingRate> stubRates) {
     BusinessCenters centers = ctx.stream.getCalculationPeriodDates().getCalculationPeriodDatesAdjustments().getBusinessCenters();
     endDate = calendarManager.adjustDate(endDate, ctx.conventions[1], centers);
-    LocalDate startDate = DateUtil.getDate(ctx.stream.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
-    List<FloatingRate> rates = ctx.initialStub.getFloatingRate();
     double rate1Value = 0, rate2Value = 0;
-    if(rates.size() > 0) {
-      FloatingRate rate1 = rates.get(0);
+    if(stubRates.size() > 0) {
+      FloatingRate rate1 = stubRates.get(0);
       String index = getFloatingIndexName(rate1.getFloatingRateIndex().getValue());
       String tenor1 = rate1.getIndexTenor().getPeriodMultiplier() + rate1.getIndexTenor().getPeriod().value();
       rate1Value = curveManager.getInterpolatedForwardRate(startDate, ctx.currency, tenor1);
-      if(rates.size() == 2) {
-        FloatingRate rate2 = rates.get(1);
+      if(stubRates.size() == 2) {
+        FloatingRate rate2 = stubRates.get(1);
         String tenor2 = rate2.getIndexTenor().getPeriodMultiplier() + rate1.getIndexTenor().getPeriod().value();
         rate2Value = curveManager.getInterpolatedForwardRate(startDate, ctx.currency, tenor2);
       }
     }
     double rateToUse = rate1Value;
-    if(rates.size() == 2) {
+    if(stubRates.size() == 2) {
       int periodLength = Days.daysBetween(startDate, endDate).getDays();
-      LocalDate tenor1End = calendarManager.applyInterval(startDate, rates.get(0).getIndexTenor(), ctx.conventions[1], centers);
-      LocalDate tenor2End = calendarManager.applyInterval(startDate, rates.get(1).getIndexTenor(), ctx.conventions[1], centers);
+      LocalDate tenor1End = calendarManager.applyInterval(startDate, stubRates.get(0).getIndexTenor(), ctx.conventions[1], centers);
+      LocalDate tenor2End = calendarManager.applyInterval(startDate, stubRates.get(1).getIndexTenor(), ctx.conventions[1], centers);
       int rate1Period = Days.daysBetween(startDate, tenor1End).getDays();
       int rate2Period = Days.daysBetween(startDate, tenor2End).getDays();
       rateToUse = rate1Value + (periodLength - rate1Period) * (rate2Value - rate1Value)/(rate2Period - rate1Period);
