@@ -100,7 +100,15 @@ public class CashflowGenerator {
     Interval paymentInterval = leg.getPaymentDates().getPaymentFrequency();
     if(interval.getPeriod() != paymentInterval.getPeriod() || !interval.getPeriodMultiplier().equals(paymentInterval.getPeriodMultiplier())) {
       List<LocalDate> paymentDates = calendarManager.getAdjustedDates(ctx.startDate, ctx.endDate, ctx.conventions, paymentInterval, FpMLUtil.getBusinessCenters(leg));
-      flows = convertToPaymentFlows(flows, ctx.cutoffDate, paymentDates);
+      flows = convertToPaymentFlows(ctx, flows, paymentDates);
+    } else {
+      for(Cashflow flow : flows) {
+        flow.setAmount(ctx.notional * flow.getRate() * flow.getDayCountFraction());
+        if(ctx.paying) {
+          //we're paying, so reverse values
+          flow.setAmount(-flow.getAmount());
+        }
+      }
     }
     if(ctx.initialStub != null && ctx.startDate.isAfter(ctx.cutoffDate)) {
       flows.add(0, calculateInitialStubCashflow(ctx));
@@ -118,15 +126,21 @@ public class CashflowGenerator {
     StreamContext ctx = new StreamContext(valuationDate, leg);
     List<LocalDate> calculationDates = ctx.calculationDates;
     List<Cashflow> flows = new ArrayList<Cashflow>();
+    BigDecimal rate = leg.getCalculationPeriodAmount().getCalculation().getFixedRateSchedule().getInitialValue();
     for(int i = 1; i < calculationDates.size(); i++) {
       LocalDate paymentDate = calculationDates.get(i);
       if(paymentDate.isAfter(ctx.cutoffDate)) {
-        BigDecimal rate = leg.getCalculationPeriodAmount().getCalculation().getFixedRateSchedule().getInitialValue();
         Cashflow flow = getCashflow(calculationDates.get(i - 1), paymentDate, ctx, rate.doubleValue());
         flows.add(flow);
       }
     }
     for(Cashflow flow : flows) {
+      double undiscountedAmount = ctx.notional * flow.getRate() * flow.getDayCountFraction();
+      flow.setAmount(undiscountedAmount);
+      if(ctx.paying) {
+        //we're paying, so reverse values
+        flow.setAmount(-flow.getAmount());
+      }
       discountFlow(ctx, flow, leg);
     }
     return flows;
@@ -170,9 +184,9 @@ public class CashflowGenerator {
     return getCashflow(ctx.endDate, endDate, ctx, 0);
   }
 
-  private List<Cashflow> convertToPaymentFlows(List<Cashflow> flows, LocalDate cutoff, List<LocalDate> paymentDates) {
+  private List<Cashflow> convertToPaymentFlows(StreamContext ctx, List<Cashflow> flows, List<LocalDate> paymentDates) {
     List<Cashflow> paymentFlows = new ArrayList<Cashflow>();
-    int start = Collections.binarySearch(paymentDates, cutoff);
+    int start = Collections.binarySearch(paymentDates, ctx.cutoffDate);
     //if start >= 0, then we have a payment on the cutoff day, so we go from start to end
     //if start < 0, then we reverse it to find the right index to start at, then go to the end
     if(start < 0) start = -(start + 1);
@@ -180,10 +194,19 @@ public class CashflowGenerator {
       Cashflow payment = new Cashflow();
       LocalDate paymentDate = paymentDates.get(i);
       payment.setDate(paymentDate);
+      double notional = ctx.notional;
       Iterator<Cashflow> iter = flows.iterator();
       while(iter.hasNext()) {
         Cashflow flow = iter.next();
         if(flow.getDate().isBefore(paymentDate) || flow.getDate().equals(paymentDate)) {
+          flow.setAmount(notional * flow.getRate() * flow.getDayCountFraction());
+          if(ctx.compoundingMethod == CompoundingMethodEnum.FLAT) {
+            notional += flow.getAmount();
+          }
+          if(ctx.paying) {
+            //we're paying, so reverse values
+            flow.setAmount(-flow.getAmount());
+          }
           payment.setAmount(payment.getAmount() + flow.getAmount());
           if(payment.getType() == null)
             payment.setType(flow.getType());
@@ -203,19 +226,9 @@ public class CashflowGenerator {
     Cashflow flow = new Cashflow();
     double dayCountFraction = calendarManager.getDayCountFraction(periodStart, periodEnd, FpMLUtil.getDayCountFraction(ctx.fraction.getValue()));
     flow.setDayCountFraction(dayCountFraction);
-    double undiscountedAmount = ctx.principal * rate * dayCountFraction;
-    //if it's a compounding trade, then we add the amount to the principal
-    flow.setAmount(undiscountedAmount);
     flow.setDate(periodEnd);
     flow.setRate(rate);
     flow.setType(ctx.isFixed ? FlowType.FIX : FlowType.FLT);
-    if(ctx.paying) {
-      //we're paying, so reverse values
-      flow.setAmount(-flow.getAmount());
-    }
-    if(ctx.compoundingMethod == CompoundingMethodEnum.FLAT) {
-      ctx.principal += undiscountedAmount;
-    }
     return flow;
   }
 
@@ -239,7 +252,7 @@ public class CashflowGenerator {
     List<LocalDate> calculationDates;
     InterestRateStream stream;
     String currency;
-    double principal;
+    double notional;
     boolean paying;
     CompoundingMethodEnum compoundingMethod;
     DayCountFraction fraction;
@@ -292,7 +305,7 @@ public class CashflowGenerator {
       }
       AmountSchedule notionalStepSchedule = leg.getCalculationPeriodAmount().getCalculation().getNotionalSchedule().getNotionalStepSchedule();
       currency = notionalStepSchedule.getCurrency().getValue();
-      principal = notionalStepSchedule.getInitialValue().doubleValue();
+      notional = notionalStepSchedule.getInitialValue().doubleValue();
     }
   }
 
