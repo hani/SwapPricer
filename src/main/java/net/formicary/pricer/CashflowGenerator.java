@@ -71,47 +71,48 @@ public class CashflowGenerator {
     Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
     CalculationPeriodFrequency interval = ctx.interval;
     List<LocalDate> calculationDates = ctx.calculationDates;
+    Interval paymentInterval = leg.getPaymentDates().getPaymentFrequency();
+    if(interval.getPeriod() == paymentInterval.getPeriod() && interval.getPeriodMultiplier().equals(paymentInterval.getPeriodMultiplier())) {
+      paymentInterval = interval;
+    }
+    List<LocalDate> paymentDates = calendarManager.getAdjustedDates(ctx.startDate, ctx.endDate, ctx.conventions, paymentInterval, FpMLUtil.getBusinessCenters(leg));
+    int nextPaymentIndex = Collections.binarySearch(paymentDates, ctx.cutoffDate);
+    if(nextPaymentIndex == 0) {
+      //hrm this is weird, lets flag it for now
+      throw new RuntimeException("Unexpected next payment index");
+    }
+    else if(nextPaymentIndex < 0) {
+      nextPaymentIndex = -(nextPaymentIndex + 1);
+      //if index = 0, means we have a payment at the start (which doesn't count, since nothing has happened yet)
+      if(nextPaymentIndex == 0) nextPaymentIndex = 1;
+    }
+    //we want the last payment thats before the cutoff date, that's when our calculations start
+
     List<LocalDate> fixingDates = calendarManager.getFixingDates(calculationDates, leg.getResetDates().getFixingDates());
     List<Cashflow> flows = new ArrayList<Cashflow>();
-    for(int i = 1; i < calculationDates.size(); i++) {
+    for(int i = nextPaymentIndex; i < calculationDates.size(); i++) {
       LocalDate periodEndDate = calculationDates.get(i);
-      //todo optimise and use binarySearch to find the right index
-      if(periodEndDate.isAfter(ctx.cutoffDate)) {
-        LocalDate periodStartDate = calculationDates.get(i - 1);
-        LocalDate fixingDate = fixingDates.get(i -1);
-        //todo need to figure out how to handle this
+      LocalDate fixingDate = fixingDates.get(i -1);
+      LocalDate periodStartDate = calculationDates.get(i - 1);
+      //todo need to figure out how to handle this
 //        if(isFirst && getInitialFloatingRate(calculation) != null) {
 //          //we have an explicit initial rate
 //          Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, getInitialFloatingRate(calculation).doubleValue());
 //          flows.add(flow);
 //        }
-        if(fixingDate.isBefore(valuationDate) || fixingDate.equals(valuationDate)) {
-          String index = getFloatingIndexName(calculation);
-          double rate = rateManager.getZeroRate(index, ctx.currency, interval, fixingDate) / 100;
-          Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, rate);
-          flows.add(flow);
-        } else {
-          double impliedForwardRate = curveManager.getImpliedForwardRate(periodStartDate, periodEndDate, valuationDate, ctx.currency, interval);
-          Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, impliedForwardRate);
-          flows.add(flow);
-        }
+      if(fixingDate.isBefore(valuationDate) || fixingDate.equals(valuationDate)) {
+        double rate = rateManager.getZeroRate(getFloatingIndexName(calculation), ctx.currency, interval, fixingDate) / 100;
+        Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, rate);
+        flows.add(flow);
+      } else {
+        double impliedForwardRate = curveManager.getImpliedForwardRate(periodStartDate, periodEndDate, valuationDate, ctx.currency, interval);
+        Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, impliedForwardRate);
+        flows.add(flow);
       }
     }
     //we have all the calculated cashflows, we next need to check the payment dates
     //shortcut case, we have the same schedules
-    Interval paymentInterval = leg.getPaymentDates().getPaymentFrequency();
-    if(interval.getPeriod() != paymentInterval.getPeriod() || !interval.getPeriodMultiplier().equals(paymentInterval.getPeriodMultiplier())) {
-      List<LocalDate> paymentDates = calendarManager.getAdjustedDates(ctx.startDate, ctx.endDate, ctx.conventions, paymentInterval, FpMLUtil.getBusinessCenters(leg));
-      flows = convertToPaymentFlows(ctx, flows, paymentDates);
-    } else {
-      for(Cashflow flow : flows) {
-        flow.setAmount(ctx.notional * flow.getRate() * flow.getDayCountFraction());
-        if(ctx.paying) {
-          //we're paying, so reverse values
-          flow.setAmount(-flow.getAmount());
-        }
-      }
-    }
+    flows = convertToPaymentFlows(ctx, flows, paymentDates);
     if(ctx.initialStub != null && ctx.startDate.isAfter(ctx.cutoffDate)) {
       LocalDate endDate = DateUtil.getDate(ctx.stream.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
       flows.add(0, calculateStubCashflow(ctx, ctx.startDate, endDate, ctx.initialStub.getFloatingRate()));
@@ -194,7 +195,7 @@ public class CashflowGenerator {
 
   private List<Cashflow> convertToPaymentFlows(StreamContext ctx, List<Cashflow> flows, List<LocalDate> paymentDates) {
     List<Cashflow> paymentFlows = new ArrayList<Cashflow>();
-    int start = Collections.binarySearch(paymentDates, ctx.cutoffDate);
+    int start = Collections.binarySearch(paymentDates, ctx.cutoffDate.plusDays(1));
     //if start >= 0, then we have a payment on the cutoff day, so we go from start to end
     //if start < 0, then we reverse it to find the right index to start at, then go to the end
     if(start < 0) start = -(start + 1);
