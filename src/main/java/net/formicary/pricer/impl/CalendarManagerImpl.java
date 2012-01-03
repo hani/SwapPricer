@@ -196,12 +196,15 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
-  public LocalDate applyInterval(LocalDate date, Interval interval, BusinessCenters businessCenters) {
+  public LocalDate applyDayInterval(LocalDate date, Interval interval, BusinessCenters businessCenters) {
     //move by fixing offset, we only count business days
     if(interval instanceof Offset) {
       if(((Offset)interval).getDayType() != DayTypeEnum.BUSINESS) {
         throw new UnsupportedOperationException("Only BUSINESS dayType is currently supported. not " + ((Offset)interval).getDayType());
       }
+    }
+    if(interval.getPeriod() != PeriodEnum.D) {
+      throw new IllegalArgumentException("Use applyInterval to caluclate non-day period dates");
     }
     int offset = interval.getPeriodMultiplier().intValue();
     {
@@ -216,6 +219,13 @@ public class CalendarManagerImpl implements CalendarManager {
       }
     }
     return date;
+  }
+
+  @Override
+  public LocalDate applyInterval(LocalDate date, Interval interval, BusinessDayConventionEnum convention, BusinessCenters centers) {
+    ReadablePeriod period = getPeriod(interval);
+    date = date.plus(period);
+    return adjustDate(date, convention, centers);
   }
 
   @Override

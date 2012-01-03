@@ -17,7 +17,7 @@ import java.util.List;
 public interface CalendarManager {
   LocalDate adjustDate(LocalDate date, BusinessDayConventionEnum convention, BusinessCenters businessCenters);
 
-  LocalDate applyInterval(LocalDate date, Interval interval, BusinessCenters businessCenters);
+  LocalDate applyDayInterval(LocalDate date, Interval interval, BusinessCenters businessCenters);
   /**
    * @param conventions An array of 3 business day conventions. The first is the start date convention, followed
    *                    by the calculation period convention, and finally the termination date convention.
@@ -32,4 +32,7 @@ public interface CalendarManager {
   List<LocalDate> getDatesInRange(LocalDate start, LocalDate end, Interval interval);
 
   List<LocalDate> getFixingDates(List<LocalDate> dates, RelativeDateOffset fixingOffset);
+
+  LocalDate applyInterval(LocalDate date, Interval interval, BusinessDayConventionEnum convention,
+    BusinessCenters centers);
 }

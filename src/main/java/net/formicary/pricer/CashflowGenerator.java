@@ -5,6 +5,7 @@ import net.formicary.pricer.model.FlowType;
 import net.formicary.pricer.util.DateUtil;
 import net.formicary.pricer.util.FpMLUtil;
 import org.fpml.spec503wd3.*;
+import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
 import javax.inject.Inject;
@@ -50,7 +51,7 @@ public class CashflowGenerator {
     if(paymentOffset != null) {
       BusinessCenters centers = leg.getPaymentDates().getPaymentDatesAdjustments().getBusinessCenters();
       for (Cashflow flow : flows) {
-        flow.setDate(calendarManager.applyInterval(flow.getDate(), paymentOffset, centers));
+        flow.setDate(calendarManager.applyDayInterval(flow.getDate(), paymentOffset, centers));
       }
     }
   }
@@ -102,7 +103,7 @@ public class CashflowGenerator {
       flows = convertToPaymentFlows(flows, ctx.cutoffDate, paymentDates);
     }
     if(ctx.initialStub != null && ctx.startDate.isAfter(ctx.cutoffDate)) {
-      flows.add(calculateInitialStubCashflow(ctx));
+      flows.add(0, calculateInitialStubCashflow(ctx));
     }
     if(ctx.finalStub != null) {
       flows.add(calculateFinalStubCashflow(ctx));
@@ -135,21 +136,29 @@ public class CashflowGenerator {
     LocalDate endDate = ctx.startDate;
     BusinessCenters centers = ctx.stream.getCalculationPeriodDates().getCalculationPeriodDatesAdjustments().getBusinessCenters();
     endDate = calendarManager.adjustDate(endDate, ctx.conventions[1], centers);
-    LocalDate startDate = DateUtil.getDate(ctx.stream.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
+    LocalDate startDate = DateUtil.getDate(ctx.stream.getCalculationPeriodDates().getEffectiveDate()
+      .getUnadjustedDate().getValue());
     List<FloatingRate> rates = ctx.initialStub.getFloatingRate();
-    double rateToUse = 0;
+    double rate1Value = 0, rate2Value = 0;
     if(rates.size() > 0) {
       FloatingRate rate1 = rates.get(0);
       String index = getFloatingIndexName(rate1.getFloatingRateIndex().getValue());
       String tenor1 = rate1.getIndexTenor().getPeriodMultiplier() + rate1.getIndexTenor().getPeriod().value();
-      double rate1Value = curveManager.getInterpolatedForwardRate(startDate, ctx.currency, tenor1);
-      if(rates.size() == 1) {
-        rateToUse = rate1Value;
-      } else if(rates.size() == 2) {
-        FloatingRate rate2 = rates.get(0);
+      rate1Value = curveManager.getInterpolatedForwardRate(startDate, ctx.currency, tenor1);
+      if(rates.size() == 2) {
+        FloatingRate rate2 = rates.get(1);
         String tenor2 = rate2.getIndexTenor().getPeriodMultiplier() + rate1.getIndexTenor().getPeriod().value();
-        rateToUse = (rate1Value + curveManager.getInterpolatedForwardRate(startDate, ctx.currency, tenor2)) / 2;
+        rate2Value = curveManager.getInterpolatedForwardRate(startDate, ctx.currency, tenor2);
       }
+    }
+    double rateToUse = rate1Value;
+    if(rates.size() == 2) {
+      int periodLength = Days.daysBetween(startDate, endDate).getDays();
+      LocalDate tenor1End = calendarManager.applyInterval(startDate, rates.get(0).getIndexTenor(), ctx.conventions[1], centers);
+      LocalDate tenor2End = calendarManager.applyInterval(startDate, rates.get(1).getIndexTenor(), ctx.conventions[1], centers);
+      int rate1Period = Days.daysBetween(startDate, tenor1End).getDays();
+      int rate2Period = Days.daysBetween(startDate, tenor2End).getDays();
+      rateToUse = rate1Value + (periodLength - rate1Period) * (rate2Value - rate1Value)/(rate2Period - rate1Period);
     }
     return getCashflow(startDate, endDate, ctx, rateToUse);
   }
