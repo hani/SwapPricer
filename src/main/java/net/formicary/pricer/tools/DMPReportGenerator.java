@@ -33,7 +33,11 @@ public class DMPReportGenerator {
   public void generateReport(String inputDir, String outputFile) throws IOException {
     final LocalDate date = new LocalDate(2011, 11, 4);
     List<String> files = new ArrayList<String>();
-    Collections.addAll(files, new File(inputDir).list(new FilenameFilter() {
+    File dir = new File(inputDir);
+    if(!dir.exists() || !dir.isDirectory()) {
+      throw new IllegalArgumentException("Input dir " + dir.getAbsolutePath() +" does not exist or is not a directory");
+    }
+    Collections.addAll(files, dir.list(new FilenameFilter() {
       @Override
       public boolean accept(File dir, String name) {
         return name.startsWith("LCH") && name.endsWith(".xml");
