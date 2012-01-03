@@ -107,6 +107,9 @@ public class CashflowGenerator {
     if(ctx.finalStub != null) {
       flows.add(calculateFinalStubCashflow(ctx));
     }
+    for(Cashflow flow : flows) {
+      discountFlow(ctx, flow, leg);
+    }
     return flows;
   }
 
@@ -121,6 +124,9 @@ public class CashflowGenerator {
         Cashflow flow = getCashflow(calculationDates.get(i - 1), paymentDate, ctx, rate.doubleValue());
         flows.add(flow);
       }
+    }
+    for(Cashflow flow : flows) {
+      discountFlow(ctx, flow, leg);
     }
     return flows;
   }
@@ -171,7 +177,6 @@ public class CashflowGenerator {
         Cashflow flow = iter.next();
         if(flow.getDate().isBefore(paymentDate) || flow.getDate().equals(paymentDate)) {
           payment.setAmount(payment.getAmount() + flow.getAmount());
-          payment.setNpv(payment.getNpv() + flow.getNpv());
           if(payment.getType() == null)
             payment.setType(flow.getType());
           iter.remove();
@@ -192,25 +197,27 @@ public class CashflowGenerator {
     DayCountFraction fraction = leg.getCalculationPeriodAmount().getCalculation().getDayCountFraction();
     double dayCountFraction = calendarManager.getDayCountFraction(periodStart, periodEnd, FpMLUtil.getDayCountFraction(fraction.getValue()));
     flow.setDayCountFraction(dayCountFraction);
-    String currency = ctx.currency;
-    boolean paying = ((Party) leg.getPayerPartyReference().getHref()).getId().equals(ourName);
     double undiscountedAmount = ctx.principal * rate * dayCountFraction;
     //if it's a compounding trade, then we add the amount to the principal
     flow.setAmount(undiscountedAmount);
-    double discountFactor = curveManager.getDiscountFactor(periodEnd, ctx.valuationDate, currency, leg.getPaymentDates().getPaymentFrequency(), ctx.isFixed);
-    flow.setDiscountFactor(discountFactor);
-    flow.setNpv(discountFactor * undiscountedAmount);
     flow.setDate(periodEnd);
     flow.setRate(rate);
     flow.setType(ctx.isFixed ? FlowType.FIX : FlowType.FLT);
-    if(paying) {
+    if(ctx.paying) {
       //we're paying, so reverse values
-      flow.reverse();
+      flow.setAmount(-flow.getAmount());
     }
     if(leg.getCalculationPeriodAmount().getCalculation().getCompoundingMethod() == CompoundingMethodEnum.FLAT) {
       ctx.principal += undiscountedAmount;
     }
     return flow;
+  }
+
+  private void discountFlow(StreamContext ctx, Cashflow flow, InterestRateStream leg) {
+    String currency = ctx.currency;
+    double discountFactor = curveManager.getDiscountFactor(flow.getDate(), ctx.valuationDate, currency, leg.getPaymentDates().getPaymentFrequency(), ctx.isFixed);
+    flow.setDiscountFactor(discountFactor);
+    flow.setNpv(discountFactor * flow.getAmount());
   }
 
   class StreamContext {
@@ -227,6 +234,7 @@ public class CashflowGenerator {
     InterestRateStream stream;
     String currency;
     double principal;
+    boolean paying;
 
     public StreamContext(LocalDate valuationDate, InterestRateStream leg) {
       this.stream = leg;
@@ -236,6 +244,7 @@ public class CashflowGenerator {
       startDate = FpMLUtil.getStartDate(valuationDate, leg);
       endDate = FpMLUtil.getEndDate(leg);
       conventions = FpMLUtil.getBusinessDayConventions(leg);
+      paying = ((Party) leg.getPayerPartyReference().getHref()).getId().equals(ourName);
       LocalDate regularPeriodStartDate =  DateUtil.getDate(leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate());
       LocalDate lastRegularPeriodEndDate = DateUtil.getDate(leg.getCalculationPeriodDates().getLastRegularPeriodEndDate());
       BusinessCenters[] centers = FpMLUtil.getBusinessCenters(leg);
