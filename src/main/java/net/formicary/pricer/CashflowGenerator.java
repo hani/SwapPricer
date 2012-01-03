@@ -32,15 +32,17 @@ public class CashflowGenerator {
   public List<Cashflow> generateCashflows(LocalDate valuationDate, String id) {
     Swap swap = tradeStore.getTrade(id);
 
-    InterestRateStream fixed = FpMLUtil.getFixedStream(swap);
-    List<Cashflow> flows = generateFixedFlows(valuationDate, fixed);
-    adjustForPaymentOffset(fixed, flows);
+    List<Cashflow> flows = new ArrayList<Cashflow>();
+    for(InterestRateStream stream : swap.getSwapStream()) {
+      if(FpMLUtil.isFixedStream(stream)) {
+        List<Cashflow> fixed = generateFixedFlows(valuationDate, stream);
+        adjustForPaymentOffset(stream, fixed);
+        flows.addAll(fixed);
+      } else {
+        flows.addAll(generateFloatingFlows(valuationDate, stream));
+      }
+    }
 
-    InterestRateStream floating = FpMLUtil.getFloatingStream(swap);
-    List<Cashflow> floatingFlows = generateFloatingFlows(valuationDate, floating);
-    adjustForPaymentOffset(fixed, floatingFlows);
-
-    flows.addAll(floatingFlows);
     Collections.sort(flows);
     flows.get(0).setTradeId(id);
     return flows;
