@@ -90,11 +90,11 @@ public class CashflowGenerator {
       LocalDate fixingDate = fixingDates.get(i -1);
       LocalDate periodStartDate = calculationDates.get(i - 1);
       //todo need to figure out how to handle this
-//        if(isFirst && getInitialFloatingRate(calculation) != null) {
-//          //we have an explicit initial rate
-//          Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, getInitialFloatingRate(calculation).doubleValue());
+ //     BigDecimal initialFloatingRate = FpMLUtil.getInitialFloatingRate(calculation);
+//      if(i == nextPaymentIndex && initialFloatingRate != null) {
+//          Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, initialFloatingRate.doubleValue());
 //          flows.add(flow);
-//        }
+//      }
       if((fixingDate.isBefore(valuationDate) || fixingDate.equals(valuationDate)) && interval.getPeriod() != PeriodEnum.T) {
         double rate = rateManager.getZeroRate(ctx.floatingIndexName, ctx.currency, interval, fixingDate) / 100;
         Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, rate);
