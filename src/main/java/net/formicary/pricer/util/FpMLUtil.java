@@ -1,15 +1,15 @@
 package net.formicary.pricer.util;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
-
 import net.formicary.pricer.model.DayCountFraction;
 import org.fpml.spec503wd3.*;
 import org.joda.time.LocalDate;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.XMLGregorianCalendar;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static net.formicary.pricer.model.DayCountFraction.*;
 
@@ -121,6 +121,21 @@ public class FpMLUtil {
     JAXBElement<FloatingRateCalculation> fc = (JAXBElement<FloatingRateCalculation>) calculation.getRateCalculation();
     if(fc != null) {
       return fc.getValue().getInitialRate();
+    }
+    return null;
+  }
+
+  public static BigDecimal getSpread(Calculation calculation) {
+    JAXBElement<FloatingRateCalculation> fc = (JAXBElement<FloatingRateCalculation>) calculation.getRateCalculation();
+    if(fc != null) {
+      List<SpreadSchedule> spreadSchedule = fc.getValue().getSpreadSchedule();
+      if(spreadSchedule.size() == 0) {
+        return null;
+      }
+      if(spreadSchedule.size() > 1) {
+        throw new UnsupportedOperationException("Multiple spreadschedule not supported yet");
+      }
+      return spreadSchedule.get(0).getInitialValue();
     }
     return null;
   }

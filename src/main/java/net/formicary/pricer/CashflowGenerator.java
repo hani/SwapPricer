@@ -188,6 +188,7 @@ public class CashflowGenerator {
   private List<Cashflow> convertToPaymentFlows(StreamContext ctx, List<Cashflow> flows, List<LocalDate> paymentDates) {
     List<Cashflow> paymentFlows = new ArrayList<Cashflow>();
     int start = Collections.binarySearch(paymentDates, ctx.cutoffDate.plusDays(1));
+    BigDecimal spread = FpMLUtil.getSpread(ctx.stream.getCalculationPeriodAmount().getCalculation());
     //if start >= 0, then we have a payment on the cutoff day, so we go from start to end
     //if start < 0, then we reverse it to find the right index to start at, then go to the end
     if(start < 0) start = -(start + 1);
@@ -214,7 +215,11 @@ public class CashflowGenerator {
       while(iter.hasNext()) {
         Cashflow flow = iter.next();
         if(flow.getDate().isBefore(paymentDate) || flow.getDate().equals(paymentDate)) {
-          flow.setAmount(notional * flow.getRate() * flow.getDayCountFraction());
+          double rate = flow.getRate();
+          if(spread != null) {
+            rate = rate + spread.doubleValue();
+          }
+          flow.setAmount(notional * rate * flow.getDayCountFraction());
           if(ctx.compoundingMethod == CompoundingMethodEnum.FLAT) {
             notional += flow.getAmount();
           }
