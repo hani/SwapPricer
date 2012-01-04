@@ -53,9 +53,6 @@ public class StreamContext {
     }
     interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
     LocalDate earliest = startDate;
-    if(earliest.isBefore(valuationDate)) {
-      earliest = valuationDate.minusYears(1);
-    }
     calculationDates = calendarManager.getAdjustedDates(earliest, endDate, conventions, interval, centers);
     initialStub = FpMLUtil.getInitialStub(leg);
     finalStub = FpMLUtil.getFinalStub(leg);

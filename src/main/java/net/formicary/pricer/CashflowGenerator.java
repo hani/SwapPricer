@@ -67,8 +67,8 @@ public class CashflowGenerator {
   private List<Cashflow> generateFloatingFlows(LocalDate valuationDate, InterestRateStream leg) {
     StreamContext ctx = new StreamContext(calendarManager, valuationDate, leg);
     Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
-    CalculationPeriodFrequency interval = ctx.interval;
     List<LocalDate> calculationDates = ctx.calculationDates;
+    CalculationPeriodFrequency interval = ctx.interval;
     Interval paymentInterval = leg.getPaymentDates().getPaymentFrequency();
     if(interval.getPeriod() == paymentInterval.getPeriod() && interval.getPeriodMultiplier().equals(paymentInterval.getPeriodMultiplier())) {
       paymentInterval = interval;
