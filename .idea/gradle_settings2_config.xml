@@ -10,7 +10,7 @@
       <setting name="setup-tab">
         <setting name="setup">
           <setting name="custom-gradle-executor" />
-          <setting name="current-directory" value="$APPLICATION_HOME_DIR$" />
+          <setting name="current-directory" value="C:\Program Files\JetBrains\IntelliJ IDEA 111.139" />
           <setting name="log-level" value="LIFECYCLE" />
         </setting>
       </setting>

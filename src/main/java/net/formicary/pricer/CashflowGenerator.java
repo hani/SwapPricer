@@ -9,6 +9,7 @@ import org.joda.time.LocalDate;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -20,6 +21,7 @@ import java.util.List;
  *         Time: 9:21 PM
  */
 public class CashflowGenerator {
+  private static final BigInteger ONE = new BigInteger("1");
   @Inject CurveManager curveManager;
   @Inject CalendarManager calendarManager;
   @Inject TradeStore tradeStore;
@@ -94,11 +96,23 @@ public class CashflowGenerator {
 //          flows.add(flow);
 //        }
       if((fixingDate.isBefore(valuationDate) || fixingDate.equals(valuationDate)) && interval.getPeriod() != PeriodEnum.T) {
-        double rate = rateManager.getZeroRate(FpMLUtil.getFloatingIndexName(calculation), ctx.currency, interval, fixingDate) / 100;
+        double rate = rateManager.getZeroRate(ctx.floatingIndexName, ctx.currency, interval, fixingDate) / 100;
         Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, rate);
         flows.add(flow);
       } else {
-        double impliedForwardRate = curveManager.getImpliedForwardRate(periodStartDate, periodEndDate, valuationDate, ctx.currency, interval);
+        LocalDate tenorEndDate = periodEndDate;
+//        if(ctx.checkForEndToEndIndexRoll) {
+//          Interval rollInterval = new Interval();
+//          rollInterval.setPeriod(PeriodEnum.D);
+//          rollInterval.setPeriodMultiplier(ONE);
+//          LocalDate rolled = calendarManager.applyInterval(periodStartDate, rollInterval, ctx.conventions[1], ctx.calculationCenters[1]);
+//          if(rolled.getMonthOfYear() != periodStartDate.getMonthOfYear()) {
+//            //need to roll the end date to the last of the month, since the start is at the end of a month and rate is end to end
+//            tenorEndDate = tenorEndDate.dayOfMonth().withMaximumValue();
+//            tenorEndDate = calendarManager.adjustDate(tenorEndDate, ctx.conventions[1], ctx.calculationCenters[1]);
+//          }
+//        }
+        double impliedForwardRate = curveManager.getImpliedForwardRate(periodStartDate, tenorEndDate, valuationDate, ctx.currency, interval);
         Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, impliedForwardRate);
         flows.add(flow);
       }
@@ -164,6 +178,8 @@ public class CashflowGenerator {
       //I guess for stuff in the past we need to check the historic index?
       //String index = getFloatingIndexName(rate1.getFloatingRateIndex().getValue());
       String tenor1 = rate1.getIndexTenor().getPeriodMultiplier() + rate1.getIndexTenor().getPeriod().value();
+      //this is incorrect since we need to use the regular curve and NOT the stub tenor curve, whih is what LCH does
+      //what we do here is technically correct, just not how LCH prices their stubs
       rate1Value = curveManager.getInterpolatedForwardRate(startDate, ctx.currency, tenor1);
       if(stubRates.size() == 2) {
         FloatingRate rate2 = stubRates.get(1);
