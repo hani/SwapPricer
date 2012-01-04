@@ -48,6 +48,17 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.sun.xml.fastinfoset/FastInfoset/842ad5fe00a5d766a2f1d58c1662c721/jars/FastInfoset-1.2.12.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.sun.xml.fastinfoset/FastInfoset/842ad5fe00a5d766a2f1d58c1662c721/sources/FastInfoset-1.2.12-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/com.google.inject/guice/842ad5fe00a5d766a2f1d58c1662c721/jars/guice-3.0.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -109,6 +120,15 @@
         <SOURCES>
           <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/org.slf4j/slf4j-api/842ad5fe00a5d766a2f1d58c1662c721/sources/slf4j-api-1.6.4-sources.jar!/" />
         </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-4/javax.xml.bind/jsr173_api/842ad5fe00a5d766a2f1d58c1662c721/jars/jsr173_api-1.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">

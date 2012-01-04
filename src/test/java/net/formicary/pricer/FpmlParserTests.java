@@ -1,6 +1,6 @@
 package net.formicary.pricer;
 
-import net.formicary.pricer.impl.FpmlTradeStore;
+import net.formicary.pricer.impl.FpmlSTAXTradeStore;
 import org.apache.commons.jexl2.Expression;
 import org.apache.commons.jexl2.JexlContext;
 import org.apache.commons.jexl2.JexlEngine;
@@ -31,7 +31,7 @@ import static org.testng.Assert.assertEquals;
  */
 @Test
 public class FpmlParserTests {
-  private FpmlTradeStore store;
+  private FpmlSTAXTradeStore store;
   private SAXBuilder builder = new SAXBuilder();
   private JexlEngine engine = new JexlEngine();
 
@@ -66,7 +66,7 @@ public class FpmlParserTests {
       }
     }
 
-    store = new FpmlTradeStore();
+    store = new FpmlSTAXTradeStore();
     store.setFpmlDir("src/test/resources/fpml");
   }
 
