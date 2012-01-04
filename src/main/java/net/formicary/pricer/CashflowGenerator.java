@@ -91,7 +91,7 @@ public class CashflowGenerator {
 //          Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, getInitialFloatingRate(calculation).doubleValue());
 //          flows.add(flow);
 //        }
-      if(fixingDate.isBefore(valuationDate) || fixingDate.equals(valuationDate)) {
+      if((fixingDate.isBefore(valuationDate) || fixingDate.equals(valuationDate)) && interval.getPeriod() != PeriodEnum.T) {
         double rate = rateManager.getZeroRate(FpMLUtil.getFloatingIndexName(calculation), ctx.currency, interval, fixingDate) / 100;
         Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, rate);
         flows.add(flow);
@@ -123,17 +123,27 @@ public class CashflowGenerator {
     StreamContext ctx = new StreamContext(calendarManager, valuationDate, leg);
     List<LocalDate> calculationDates = ctx.calculationDates;
     List<Cashflow> flows = new ArrayList<Cashflow>();
-    BigDecimal rate = leg.getCalculationPeriodAmount().getCalculation().getFixedRateSchedule().getInitialValue();
-    for(int i = 1; i < calculationDates.size(); i++) {
-      LocalDate paymentDate = calculationDates.get(i);
-      if(paymentDate.isAfter(ctx.cutoffDate)) {
-        Cashflow flow = getCashflow(calculationDates.get(i - 1), paymentDate, ctx, rate.doubleValue());
-        flows.add(flow);
+    Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
+    if(calculation != null) {
+      BigDecimal rate = calculation.getFixedRateSchedule().getInitialValue();
+      for(int i = 1; i < calculationDates.size(); i++) {
+        LocalDate paymentDate = calculationDates.get(i);
+        if(paymentDate.isAfter(ctx.cutoffDate)) {
+          Cashflow flow = getCashflow(calculationDates.get(i - 1), paymentDate, ctx, rate.doubleValue());
+          flows.add(flow);
+        }
       }
+    } else if (ctx.knownAmount != null) {
+      Cashflow flow = new Cashflow();
+      flow.setAmount(ctx.knownAmount.doubleValue());
+      flow.setDate(ctx.endDate);
+      flows.add(flow);
     }
     for(Cashflow flow : flows) {
-      double undiscountedAmount = ctx.notional * flow.getRate() * flow.getDayCountFraction();
-      flow.setAmount(undiscountedAmount);
+      if(flow.getAmount() == 0) {
+        double undiscountedAmount = ctx.notional * flow.getRate() * flow.getDayCountFraction();
+        flow.setAmount(undiscountedAmount);
+      }
       if(ctx.paying) {
         //we're paying, so reverse values
         flow.setAmount(-flow.getAmount());

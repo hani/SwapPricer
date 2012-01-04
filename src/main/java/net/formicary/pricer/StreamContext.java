@@ -5,6 +5,7 @@ import net.formicary.pricer.util.FpMLUtil;
 import org.fpml.spec503wd3.*;
 import org.joda.time.LocalDate;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -35,6 +36,7 @@ public class StreamContext {
   final LocalDate lastRegularPeriodEndDate;
   final LocalDate effectiveDate;
   final LocalDate terminationDate;
+  final BigDecimal knownAmount;
 
   public StreamContext(CalendarManager calendarManager, LocalDate valuationDate, InterestRateStream leg) {
     this.stream = leg;
@@ -45,8 +47,21 @@ public class StreamContext {
     endDate = FpMLUtil.getEndDate(leg);
     conventions = FpMLUtil.getBusinessDayConventions(leg);
     paying = ((Party) leg.getPayerPartyReference().getHref()).getId().equals(ourName);
-    fraction = leg.getCalculationPeriodAmount().getCalculation().getDayCountFraction();
-    compoundingMethod = leg.getCalculationPeriodAmount().getCalculation().getCompoundingMethod();
+
+    Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
+    if(calculation != null) {
+      fraction = calculation.getDayCountFraction();
+      compoundingMethod = calculation.getCompoundingMethod();
+    } else {
+      fraction = null;
+      compoundingMethod = null;
+    }
+    AmountSchedule knownAmountSchedule = leg.getCalculationPeriodAmount().getKnownAmountSchedule();
+    if(knownAmountSchedule != null) {
+      knownAmount = knownAmountSchedule.getInitialValue();
+    } else {
+      knownAmount = null;
+    }
     firstRegularPeriodStartDate =  DateUtil.getDate(leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate());
     lastRegularPeriodEndDate = DateUtil.getDate(leg.getCalculationPeriodDates().getLastRegularPeriodEndDate());
     BusinessCenters[] centers = FpMLUtil.getBusinessCenters(leg);
@@ -75,11 +90,13 @@ public class StreamContext {
         calculationDates.add(calendarManager.adjustDate(terminationDate, conventions[2], centers[2]));
     }
     //stubs can only be on floating side right? Otherwise it'd be a fake stub handled above
-    if(stream.getCalculationPeriodAmount().getKnownAmountSchedule() != null) {
-      throw new IllegalArgumentException("Trades with knownAmountSchedule not supported yet");
+    if(calculation != null) {
+      AmountSchedule notionalStepSchedule = calculation.getNotionalSchedule().getNotionalStepSchedule();
+      currency = notionalStepSchedule.getCurrency().getValue();
+      notional = notionalStepSchedule.getInitialValue().doubleValue();
+    } else {
+      notional = 0;
+      currency = knownAmountSchedule.getCurrency().getValue();
     }
-    AmountSchedule notionalStepSchedule = leg.getCalculationPeriodAmount().getCalculation().getNotionalSchedule().getNotionalStepSchedule();
-    currency = notionalStepSchedule.getCurrency().getValue();
-    notional = notionalStepSchedule.getInitialValue().doubleValue();
   }
 }

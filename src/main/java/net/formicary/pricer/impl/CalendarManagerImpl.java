@@ -33,8 +33,7 @@ public class CalendarManagerImpl implements CalendarManager {
         int d2 = end.getDayOfMonth();
         if(d1 == 31) d1 = 30;
         if(d2 == 31 && d1 > 29) d2 = 30;
-        return ((360d * (end.getYear() - start.getYear())) + (30d * (end.getMonthOfYear() - start.getMonthOfYear()))
-          + (d2 - d1)) / 360d;
+        return ((360d * (end.getYear() - start.getYear())) + (30d * (end.getMonthOfYear() - start.getMonthOfYear())) + (d2 - d1)) / 360d;
       case ACT_360:
         return Days.daysBetween(start, end).getDays() / 360d;
       case ACT_365:
