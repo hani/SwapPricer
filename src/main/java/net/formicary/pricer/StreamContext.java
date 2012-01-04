@@ -1,11 +1,11 @@
 package net.formicary.pricer;
 
-import java.util.List;
-
 import net.formicary.pricer.util.DateUtil;
 import net.formicary.pricer.util.FpMLUtil;
 import org.fpml.spec503wd3.*;
 import org.joda.time.LocalDate;
+
+import java.util.List;
 
 /**
  * @author hani
@@ -27,10 +27,14 @@ public class StreamContext {
   final String currency;
   final double notional;
   final boolean paying;
-  CompoundingMethodEnum compoundingMethod;
-  DayCountFraction fraction;
+  final CompoundingMethodEnum compoundingMethod;
+  final DayCountFraction fraction;
+  LocalDate firstRegularPeriodStartDate;
   //we'll always pretend to be partyA from the LCH pov, to match the dmp tool
   private String ourName = "partyA";
+  final LocalDate lastRegularPeriodEndDate;
+  final LocalDate effectiveDate;
+  final LocalDate terminationDate;
 
   public StreamContext(CalendarManager calendarManager, LocalDate valuationDate, InterestRateStream leg) {
     this.stream = leg;
@@ -43,11 +47,11 @@ public class StreamContext {
     paying = ((Party) leg.getPayerPartyReference().getHref()).getId().equals(ourName);
     fraction = leg.getCalculationPeriodAmount().getCalculation().getDayCountFraction();
     compoundingMethod = leg.getCalculationPeriodAmount().getCalculation().getCompoundingMethod();
-    LocalDate regularPeriodStartDate =  DateUtil.getDate(leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate());
-    LocalDate lastRegularPeriodEndDate = DateUtil.getDate(leg.getCalculationPeriodDates().getLastRegularPeriodEndDate());
+    firstRegularPeriodStartDate =  DateUtil.getDate(leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate());
+    lastRegularPeriodEndDate = DateUtil.getDate(leg.getCalculationPeriodDates().getLastRegularPeriodEndDate());
     BusinessCenters[] centers = FpMLUtil.getBusinessCenters(leg);
     //if we have a period start date, then we use the period conventions
-    if(regularPeriodStartDate != null) {
+    if(firstRegularPeriodStartDate != null) {
       conventions[0] = conventions[1];
       centers[0] = centers[1];
     }
@@ -57,15 +61,15 @@ public class StreamContext {
     initialStub = FpMLUtil.getInitialStub(leg);
     finalStub = FpMLUtil.getFinalStub(leg);
 
-    if(regularPeriodStartDate != null && regularPeriodStartDate.isAfter(cutoffDate) && initialStub == null) {
+    effectiveDate = DateUtil.getDate(leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
+    if(firstRegularPeriodStartDate != null && firstRegularPeriodStartDate.isAfter(cutoffDate) && initialStub == null) {
       //it's an imaginary stub! We have a hidden flow between effectivedate and calcperiodstart date
-      LocalDate unadjustedEffectiveDate = DateUtil.getDate(leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
-      if(!calculationDates.get(0).equals(unadjustedEffectiveDate))
-        calculationDates.add(0, calendarManager.adjustDate(unadjustedEffectiveDate, conventions[1], centers[1]));
+      if(!calculationDates.get(0).equals(effectiveDate))
+        calculationDates.add(0, calendarManager.adjustDate(effectiveDate, conventions[1], centers[1]));
     }
     //now check if we have a back stub of some sort
+    terminationDate = DateUtil.getDate(leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
     if(lastRegularPeriodEndDate != null && finalStub == null) {
-      LocalDate terminationDate = DateUtil.getDate(leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
       //add a final period
       if(terminationDate.isAfter(lastRegularPeriodEndDate))
         calculationDates.add(calendarManager.adjustDate(terminationDate, conventions[2], centers[2]));

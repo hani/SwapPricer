@@ -2,7 +2,6 @@ package net.formicary.pricer;
 
 import net.formicary.pricer.model.Cashflow;
 import net.formicary.pricer.model.FlowType;
-import net.formicary.pricer.util.DateUtil;
 import net.formicary.pricer.util.FpMLUtil;
 import org.fpml.spec503wd3.*;
 import org.joda.time.Days;
@@ -74,6 +73,9 @@ public class CashflowGenerator {
       paymentInterval = interval;
     }
     List<LocalDate> paymentDates = calendarManager.getAdjustedDates(ctx.startDate, ctx.endDate, ctx.conventions, paymentInterval, FpMLUtil.getBusinessCenters(leg));
+    if(ctx.lastRegularPeriodEndDate != null && ctx.lastRegularPeriodEndDate.isBefore(ctx.terminationDate)) {
+      paymentDates.add(ctx.terminationDate);
+    }
     int nextPaymentIndex = Collections.binarySearch(paymentDates, ctx.cutoffDate.plusDays(1));
     if(nextPaymentIndex == 0) {
       //hrm this is weird, lets flag it for now
@@ -112,11 +114,11 @@ public class CashflowGenerator {
     //shortcut case, we have the same schedules
     flows = convertToPaymentFlows(ctx, flows, paymentDates);
     if(ctx.initialStub != null && ctx.startDate.isAfter(ctx.cutoffDate)) {
-      LocalDate endDate = DateUtil.getDate(ctx.stream.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
+      LocalDate endDate = ctx.effectiveDate;
       flows.add(0, calculateStubCashflow(ctx, ctx.startDate, endDate, ctx.initialStub.getFloatingRate()));
     }
     if(ctx.finalStub != null) {
-      LocalDate endDate = DateUtil.getDate(ctx.stream.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
+      LocalDate endDate = ctx.terminationDate;
       LocalDate startDate = ctx.endDate;
       flows.add(calculateStubCashflow(ctx, endDate, startDate, ctx.finalStub.getFloatingRate()));
     }
@@ -187,7 +189,7 @@ public class CashflowGenerator {
   private Cashflow calculateFinalStubCashflow(StreamContext ctx) {
     //todo verify which business centers and conventions we use for stubs
     BusinessCenters centers = ctx.stream.getCalculationPeriodDates().getCalculationPeriodDatesAdjustments().getBusinessCenters();
-    LocalDate endDate = DateUtil.getDate(ctx.stream.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
+    LocalDate endDate = ctx.terminationDate;
     endDate = calendarManager.adjustDate(endDate, ctx.conventions[1], centers);
     return getCashflow(ctx.endDate, endDate, ctx, 0);
   }
