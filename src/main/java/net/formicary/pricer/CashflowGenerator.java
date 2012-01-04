@@ -8,7 +8,6 @@ import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
 import javax.inject.Inject;
-import javax.xml.bind.JAXBElement;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,14 +54,6 @@ public class CashflowGenerator {
     }
   }
 
-  private BigDecimal getInitialFloatingRate(Calculation calculation) {
-    JAXBElement<FloatingRateCalculation> fc = (JAXBElement<FloatingRateCalculation>) calculation.getRateCalculation();
-    if(fc != null) {
-      return fc.getValue().getInitialRate();
-    }
-    return null;
-  }
-
   private List<Cashflow> generateFloatingFlows(LocalDate valuationDate, InterestRateStream leg) {
     StreamContext ctx = new StreamContext(calendarManager, valuationDate, leg);
     Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
@@ -101,7 +92,7 @@ public class CashflowGenerator {
 //          flows.add(flow);
 //        }
       if(fixingDate.isBefore(valuationDate) || fixingDate.equals(valuationDate)) {
-        double rate = rateManager.getZeroRate(getFloatingIndexName(calculation), ctx.currency, interval, fixingDate) / 100;
+        double rate = rateManager.getZeroRate(FpMLUtil.getFloatingIndexName(calculation), ctx.currency, interval, fixingDate) / 100;
         Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, rate);
         flows.add(flow);
       } else {
@@ -200,6 +191,20 @@ public class CashflowGenerator {
     //if start >= 0, then we have a payment on the cutoff day, so we go from start to end
     //if start < 0, then we reverse it to find the right index to start at, then go to the end
     if(start < 0) start = -(start + 1);
+    //rule out flows before the last payment
+    if(start > 0) {
+      LocalDate lastHistoricPayment = paymentDates.get(start - 1);
+      Iterator<Cashflow> i = flows.iterator();
+      while (i.hasNext()) {
+        Cashflow flow = i.next();
+        if(flow.getDate().isBefore(lastHistoricPayment) || flow.getDate().equals(lastHistoricPayment)) {
+          i.remove();
+        } else {
+          //if we hit one that's later, we know we're done since the flows are date sorted
+          break;
+        }
+      }
+    }
     for(int i = start; i < paymentDates.size(); i++) {
       Cashflow payment = new Cashflow();
       LocalDate paymentDate = paymentDates.get(i);
@@ -247,17 +252,5 @@ public class CashflowGenerator {
     double discountFactor = curveManager.getDiscountFactor(flow.getDate(), ctx.valuationDate, currency, leg.getPaymentDates().getPaymentFrequency(), ctx.isFixed);
     flow.setDiscountFactor(discountFactor);
     flow.setNpv(discountFactor * flow.getAmount());
-  }
-
-  private String getFloatingIndexName(Calculation calculation) {
-    FloatingRateCalculation floatingCalc = (FloatingRateCalculation) calculation.getRateCalculation().getValue();
-    String index = floatingCalc.getFloatingRateIndex().getValue();
-    return getFloatingIndexName(index);
-  }
-
-  private static String getFloatingIndexName(String index) {
-    int dash = index.indexOf('-') + 1;
-    index = index.substring(dash, index.indexOf('-', dash));
-    return index;
   }
 }

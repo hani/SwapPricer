@@ -1,5 +1,6 @@
 package net.formicary.pricer.util;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -114,5 +115,25 @@ public class FpMLUtil {
 
     LocalDate effectiveDate = DateUtil.getDate(leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
     return effectiveDate;
+  }
+
+  public static BigDecimal getInitialFloatingRate(Calculation calculation) {
+    JAXBElement<FloatingRateCalculation> fc = (JAXBElement<FloatingRateCalculation>) calculation.getRateCalculation();
+    if(fc != null) {
+      return fc.getValue().getInitialRate();
+    }
+    return null;
+  }
+
+  public static String getFloatingIndexName(Calculation calculation) {
+    FloatingRateCalculation floatingCalc = (FloatingRateCalculation) calculation.getRateCalculation().getValue();
+    String index = floatingCalc.getFloatingRateIndex().getValue();
+    return getFloatingIndexName(index);
+  }
+
+  public  static String getFloatingIndexName(String index) {
+    int dash = index.indexOf('-') + 1;
+    index = index.substring(dash, index.indexOf('-', dash));
+    return index;
   }
 }
