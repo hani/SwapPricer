@@ -35,7 +35,9 @@ public class CashflowGenerator {
         adjustForPaymentOffset(stream, fixed);
         flows.addAll(fixed);
       } else {
-        flows.addAll(generateFloatingFlows(valuationDate, stream));
+        List<Cashflow> floating = generateFloatingFlows(valuationDate, stream);
+        adjustForPaymentOffset(stream, floating);
+        flows.addAll(floating);
       }
     }
 
@@ -143,10 +145,10 @@ public class CashflowGenerator {
       if(flow.getAmount() == 0) {
         double undiscountedAmount = ctx.notional * flow.getRate() * flow.getDayCountFraction();
         flow.setAmount(undiscountedAmount);
-      }
-      if(ctx.paying) {
-        //we're paying, so reverse values
-        flow.setAmount(-flow.getAmount());
+        if(ctx.paying) {
+          //we're paying, so reverse values
+          flow.setAmount(-flow.getAmount());
+        }
       }
       discountFlow(ctx, flow, leg);
     }
