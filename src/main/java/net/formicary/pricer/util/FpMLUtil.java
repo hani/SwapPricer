@@ -141,7 +141,11 @@ public class FpMLUtil {
   }
 
   public static String getFloatingIndexName(Calculation calculation) {
-    FloatingRateCalculation floatingCalc = (FloatingRateCalculation) calculation.getRateCalculation().getValue();
+    if(calculation == null) return null;
+    JAXBElement<? extends Rate> rateCalculation = calculation.getRateCalculation();
+    if(rateCalculation == null) return null;
+    FloatingRateCalculation floatingCalc = (FloatingRateCalculation) rateCalculation.getValue();
+    if(floatingCalc == null || floatingCalc.getFloatingRateIndex() == null) return null;
     String index = floatingCalc.getFloatingRateIndex().getValue();
     return getFloatingIndexName(index);
   }

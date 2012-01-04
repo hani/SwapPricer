@@ -37,6 +37,9 @@ public class StreamContext {
   final LocalDate effectiveDate;
   final LocalDate terminationDate;
   final BigDecimal knownAmount;
+  final String floatingIndexName;
+  final boolean checkForEndToEndIndexRoll;
+  final BusinessCenters[] calculationCenters;
 
   public StreamContext(CalendarManager calendarManager, LocalDate valuationDate, InterestRateStream leg) {
     this.stream = leg;
@@ -49,6 +52,7 @@ public class StreamContext {
     paying = ((Party) leg.getPayerPartyReference().getHref()).getId().equals(ourName);
 
     Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
+    floatingIndexName = FpMLUtil.getFloatingIndexName(calculation);
     if(calculation != null) {
       fraction = calculation.getDayCountFraction();
       compoundingMethod = calculation.getCompoundingMethod();
@@ -56,6 +60,7 @@ public class StreamContext {
       fraction = null;
       compoundingMethod = null;
     }
+
     AmountSchedule knownAmountSchedule = leg.getCalculationPeriodAmount().getKnownAmountSchedule();
     if(knownAmountSchedule != null) {
       knownAmount = knownAmountSchedule.getInitialValue();
@@ -64,15 +69,22 @@ public class StreamContext {
     }
     firstRegularPeriodStartDate =  DateUtil.getDate(leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate());
     lastRegularPeriodEndDate = DateUtil.getDate(leg.getCalculationPeriodDates().getLastRegularPeriodEndDate());
-    BusinessCenters[] centers = FpMLUtil.getBusinessCenters(leg);
+    calculationCenters = FpMLUtil.getBusinessCenters(leg);
     //if we have a period start date, then we use the period conventions
     if(firstRegularPeriodStartDate != null) {
       conventions[0] = conventions[1];
-      centers[0] = centers[1];
+      calculationCenters[0] = calculationCenters[1];
     }
     interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
+    String rollConvention = interval.getRollConvention();
+    boolean maybeCheckForIndexEndToEnd = rollConvention.equals("EOM");
+    if(!maybeCheckForIndexEndToEnd) {
+      maybeCheckForIndexEndToEnd = !rollConvention.startsWith("IMM")  && !rollConvention.equals("NONE") && Integer.parseInt(rollConvention) > 25;
+    }
+    checkForEndToEndIndexRoll = ("EURIBOR".equals(floatingIndexName) || "LIBOR".equals(floatingIndexName)) && maybeCheckForIndexEndToEnd;
+
     LocalDate earliest = startDate;
-    calculationDates = calendarManager.getAdjustedDates(earliest, endDate, conventions, interval, centers);
+    calculationDates = calendarManager.getAdjustedDates(earliest, endDate, conventions, interval, calculationCenters);
     initialStub = FpMLUtil.getInitialStub(leg);
     finalStub = FpMLUtil.getFinalStub(leg);
 
@@ -80,14 +92,14 @@ public class StreamContext {
     if(firstRegularPeriodStartDate != null && firstRegularPeriodStartDate.isAfter(cutoffDate) && initialStub == null) {
       //it's an imaginary stub! We have a hidden flow between effectivedate and calcperiodstart date
       if(!calculationDates.get(0).equals(effectiveDate))
-        calculationDates.add(0, calendarManager.adjustDate(effectiveDate, conventions[1], centers[1]));
+        calculationDates.add(0, calendarManager.adjustDate(effectiveDate, conventions[1], calculationCenters[1]));
     }
     //now check if we have a back stub of some sort
     terminationDate = DateUtil.getDate(leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
     if(lastRegularPeriodEndDate != null && finalStub == null) {
       //add a final period
       if(terminationDate.isAfter(lastRegularPeriodEndDate))
-        calculationDates.add(calendarManager.adjustDate(terminationDate, conventions[2], centers[2]));
+        calculationDates.add(calendarManager.adjustDate(terminationDate, conventions[2], calculationCenters[2]));
     }
     //stubs can only be on floating side right? Otherwise it'd be a fake stub handled above
     if(calculation != null) {
