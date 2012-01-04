@@ -74,7 +74,7 @@ public class CashflowGenerator {
       paymentInterval = interval;
     }
     List<LocalDate> paymentDates = calendarManager.getAdjustedDates(ctx.startDate, ctx.endDate, ctx.conventions, paymentInterval, FpMLUtil.getBusinessCenters(leg));
-    int nextPaymentIndex = Collections.binarySearch(paymentDates, ctx.cutoffDate);
+    int nextPaymentIndex = Collections.binarySearch(paymentDates, ctx.cutoffDate.plusDays(1));
     if(nextPaymentIndex == 0) {
       //hrm this is weird, lets flag it for now
       throw new RuntimeException("Unexpected next payment index");
