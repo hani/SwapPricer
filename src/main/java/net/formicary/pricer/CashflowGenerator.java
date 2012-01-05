@@ -64,10 +64,14 @@ public class CashflowGenerator {
     List<LocalDate> calculationDates = ctx.calculationDates;
     CalculationPeriodFrequency interval = ctx.interval;
     Interval paymentInterval = leg.getPaymentDates().getPaymentFrequency();
+    LocalDate paymentStartDate = ctx.effectiveDate;
     if(interval.getPeriod() == paymentInterval.getPeriod() && interval.getPeriodMultiplier().equals(paymentInterval.getPeriodMultiplier())) {
       paymentInterval = interval;
+      if(ctx.firstRegularPeriodStartDate != null)
+        paymentStartDate = ctx.firstRegularPeriodStartDate;
     }
-    List<LocalDate> paymentDates = calendarManager.getAdjustedDates(ctx.startDate, ctx.endDate, ctx.conventions, paymentInterval, FpMLUtil.getBusinessCenters(leg));
+
+    List<LocalDate> paymentDates = calendarManager.getAdjustedDates(paymentStartDate, ctx.endDate, ctx.conventions, paymentInterval, FpMLUtil.getBusinessCenters(leg), interval.getRollConvention());
     if(ctx.lastRegularPeriodEndDate != null && ctx.lastRegularPeriodEndDate.isBefore(ctx.terminationDate)) {
       paymentDates.add(ctx.terminationDate);
     }
@@ -119,16 +123,16 @@ public class CashflowGenerator {
     }
     //we have all the calculated cashflows, we next need to check the payment dates
     //shortcut case, we have the same schedules
-    flows = convertToPaymentFlows(ctx, flows, paymentDates);
-    if(ctx.initialStub != null && ctx.startDate.isAfter(ctx.cutoffDate)) {
-      LocalDate endDate = ctx.effectiveDate;
-      flows.add(0, calculateStubCashflow(ctx, ctx.startDate, endDate, ctx.initialStub.getFloatingRate()));
+    if(ctx.initialStub != null && ctx.firstRegularPeriodStartDate.isAfter(ctx.cutoffDate)) {
+      LocalDate endDate = ctx.firstRegularPeriodStartDate;
+      flows.add(0, calculateStubCashflow(ctx, ctx.effectiveDate, endDate, ctx.initialStub.getFloatingRate()));
     }
     if(ctx.finalStub != null) {
       LocalDate endDate = ctx.terminationDate;
       LocalDate startDate = ctx.endDate;
-      flows.add(calculateStubCashflow(ctx, endDate, startDate, ctx.finalStub.getFloatingRate()));
+      flows.add(calculateStubCashflow(ctx, startDate, endDate, ctx.finalStub.getFloatingRate()));
     }
+    flows = convertToPaymentFlows(ctx, flows, paymentDates);
     for(Cashflow flow : flows) {
       discountFlow(ctx, flow, leg);
     }
@@ -169,7 +173,7 @@ public class CashflowGenerator {
     return flows;
   }
 
-  private Cashflow calculateStubCashflow(StreamContext ctx, LocalDate endDate, LocalDate startDate, List<FloatingRate> stubRates) {
+  private Cashflow calculateStubCashflow(StreamContext ctx, LocalDate startDate, LocalDate endDate, List<FloatingRate> stubRates) {
     BusinessCenters centers = ctx.stream.getCalculationPeriodDates().getCalculationPeriodDatesAdjustments().getBusinessCenters();
     endDate = calendarManager.adjustDate(endDate, ctx.conventions[1], centers);
     double rate1Value = 0, rate2Value = 0;
@@ -243,17 +247,19 @@ public class CashflowGenerator {
       while(iter.hasNext()) {
         Cashflow flow = iter.next();
         if(flow.getDate().isBefore(paymentDate) || flow.getDate().equals(paymentDate)) {
-          double rate = flow.getRate();
-          if(spread != null) {
-            rate = rate + spread.doubleValue();
+          if(flow.getAmount() == 0) {
+            double rate = flow.getRate();
+            if(spread != null) {
+              rate = rate + spread.doubleValue();
+            }
+            flow.setAmount(notional * rate * flow.getDayCountFraction());
+            if(ctx.paying) {
+              //we're paying, so reverse values
+              flow.setAmount(-flow.getAmount());
+            }
           }
-          flow.setAmount(notional * rate * flow.getDayCountFraction());
           if(ctx.compoundingMethod == CompoundingMethodEnum.FLAT) {
             notional += flow.getAmount();
-          }
-          if(ctx.paying) {
-            //we're paying, so reverse values
-            flow.setAmount(-flow.getAmount());
           }
           payment.setAmount(payment.getAmount() + flow.getAmount());
           if(payment.getType() == null)
