@@ -53,7 +53,7 @@ public class CalendarTests {
     f.setRollConvention("EOM");
     f.setPeriod(PeriodEnum.M);
     f.setPeriodMultiplier(new BigInteger("1"));
-    List<LocalDate> dates = manager.getDatesInRange(new LocalDate(2011, 1, 31), new LocalDate(2011, 12, 31), f);
+    List<LocalDate> dates = manager.getDatesInRange(new LocalDate(2011, 1, 31), new LocalDate(2011, 12, 31), f, null);
     assertEquals(dates.size(), 12);
     assertEquals(dates.get(1), new LocalDate(2011, 2, 28));
     assertEquals(dates.get(2), new LocalDate(2011, 3, 31));
@@ -65,7 +65,7 @@ public class CalendarTests {
     f.setRollConvention("IMM");
     f.setPeriod(PeriodEnum.Y);
     f.setPeriodMultiplier(new BigInteger("1"));
-    List<LocalDate> dates = manager.getDatesInRange(new LocalDate(2010, 12, 19), new LocalDate(2022, 12, 21), f);
+    List<LocalDate> dates = manager.getDatesInRange(new LocalDate(2010, 12, 19), new LocalDate(2022, 12, 21), f, null);
     assertEquals(dates.get(1), new LocalDate(2011, 12, 21));
     assertEquals(dates.get(2), new LocalDate(2012, 12, 19));
     assertEquals(dates.get(3), new LocalDate(2013, 12, 18));
@@ -96,7 +96,7 @@ public class CalendarTests {
     interval.setPeriod(PeriodEnum.M);
     interval.setPeriodMultiplier(new BigInteger("3"));
     BusinessCenters[] centers = new BusinessCenters[]{getCenters("GBLO"), getCenters("GBLO"), getCenters("GBLO")};
-    List<LocalDate> dates = manager.getAdjustedDates(start, end, conventions, interval, centers);
+    List<LocalDate> dates = manager.getAdjustedDates(start, end, conventions, interval, centers, "5");
     Iterator<LocalDate> i = dates.iterator();
     assertEquals(i.next(), new LocalDate(2011, 2, 7));
     assertEquals(i.next(), new LocalDate(2011, 5, 5));
@@ -127,7 +127,7 @@ public class CalendarTests {
     interval.setPeriodMultiplier(new BigInteger("1"));
     BusinessDayConventionEnum[] conventions = new BusinessDayConventionEnum[]{MODFOLLOWING, MODFOLLOWING, MODFOLLOWING};
     BusinessCenters[] centers = new BusinessCenters[]{getCenters("EUTA"), getCenters("EUTA"), getCenters("EUTA")};
-    List<LocalDate> dates = manager.getAdjustedDates(new LocalDate(2011, 6, 1), new LocalDate(2012, 2, 1), conventions, interval, centers);
+    List<LocalDate> dates = manager.getAdjustedDates(new LocalDate(2011, 6, 1), new LocalDate(2012, 2, 1), conventions, interval, centers, null);
     assertEquals(dates.size(), 2);
     assertEquals(dates.get(0), new LocalDate(2011, 6, 1));
     //payment offset for this trade actually means payment is on 2/2, but we don't need to worry about that here

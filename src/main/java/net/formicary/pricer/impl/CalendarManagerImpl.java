@@ -106,11 +106,11 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
-  public List<LocalDate> getAdjustedDates(LocalDate start, LocalDate end, BusinessDayConventionEnum conventions[], Interval interval, BusinessCenters[] businessCenters) {
+  public List<LocalDate> getAdjustedDates(LocalDate start, LocalDate end, BusinessDayConventionEnum conventions[], Interval interval, BusinessCenters[] businessCenters, String rollConvention) {
     if(end == null) {
       throw new NullPointerException("end date is null");
     }
-    List<LocalDate> unadjustedDates = getDatesInRange(start, end, interval);
+    List<LocalDate> unadjustedDates = getDatesInRange(start, end, interval, rollConvention);
     if(unadjustedDates.get(unadjustedDates.size() - 1).isBefore(end)) {
       unadjustedDates.add(end);
     }
@@ -126,18 +126,7 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
-  public List<LocalDate> adjustDates(List<LocalDate> dates, BusinessDayConventionEnum conventions[], BusinessCenters[] businessCenters) {
-    List<LocalDate> adjusted = new ArrayList<LocalDate>(dates);
-    dates.set(0, adjustDate(dates.get(0), conventions[0], businessCenters[0]));
-    for(int i = 0; i < dates.size() - 1; i++) {
-      adjusted.set(i, adjustDate(dates.get(i), conventions[1], businessCenters[1]));
-    }
-    adjusted.set(dates.size() - 1, adjustDate(dates.get(dates.size() - 1), conventions[2], businessCenters[2]));
-    return adjusted;
-  }
-
-  @Override
-  public List<LocalDate> getDatesInRange(LocalDate start, LocalDate end, Interval interval) {
+  public List<LocalDate> getDatesInRange(LocalDate start, LocalDate end, Interval interval, String rollConvention) {
     List<LocalDate> unadjustedDates = new ArrayList<LocalDate>();
     if(interval.getPeriod() == PeriodEnum.T) {
       unadjustedDates.add(start);
@@ -145,23 +134,23 @@ public class CalendarManagerImpl implements CalendarManager {
       return unadjustedDates;
     }
     LocalDate current = new LocalDate(start);
-    String rollConvention = null;
     boolean isIMM = false;
     boolean isEOM = false;
     int rollDay = 0;
     if(interval instanceof CalculationPeriodFrequency) {
       CalculationPeriodFrequency f = (CalculationPeriodFrequency)interval;
       rollConvention = f.getRollConvention();
-      if(rollConvention.startsWith("IMM")) {
-        isIMM = true;
-      } else if(rollConvention.equals("EOM")) {
-        isEOM = true;
-      }
-      if(!isIMM && !isEOM) {
-        rollDay = Integer.parseInt(rollConvention);
-      }
-    } else if(interval.getPeriod() == PeriodEnum.M) {
-      rollDay = start.getDayOfMonth();
+    }
+    if(rollConvention == null) {
+      throw new IllegalArgumentException("No rollconvention specified");
+    }
+    if(rollConvention.startsWith("IMM")) {
+      isIMM = true;
+    } else if(rollConvention.equals("EOM")) {
+      isEOM = true;
+    }
+    if(!isIMM && !isEOM) {
+      rollDay = Integer.parseInt(rollConvention);
     }
     ReadablePeriod period = getPeriod(interval);
     while(current.isBefore(end) || current.equals(end)) {
