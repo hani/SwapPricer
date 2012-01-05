@@ -20,7 +20,6 @@ public class StreamContext {
   final CalculationPeriodFrequency interval;
   final LocalDate valuationDate;
   final LocalDate cutoffDate;
-  final LocalDate startDate;
   final LocalDate endDate;
   final BusinessDayConventionEnum[] conventions;
   final List<LocalDate> calculationDates;
@@ -46,8 +45,8 @@ public class StreamContext {
     this.valuationDate = valuationDate;
     this.cutoffDate = valuationDate.plusDays(3);
     this.isFixed = FpMLUtil.isFixedStream(leg);
-    startDate = FpMLUtil.getStartDate(valuationDate, leg);
     endDate = FpMLUtil.getEndDate(leg);
+    effectiveDate = DateUtil.getDate(leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
     conventions = FpMLUtil.getBusinessDayConventions(leg);
     paying = ((Party) leg.getPayerPartyReference().getHref()).getId().equals(ourName);
 
@@ -83,12 +82,11 @@ public class StreamContext {
     }
     checkForEndToEndIndexRoll = ("EURIBOR".equals(floatingIndexName) || "LIBOR".equals(floatingIndexName)) && maybeCheckForIndexEndToEnd;
 
-    LocalDate earliest = startDate;
-    calculationDates = calendarManager.getAdjustedDates(earliest, endDate, conventions, interval, calculationCenters);
+    LocalDate earliest = firstRegularPeriodStartDate == null ? effectiveDate : firstRegularPeriodStartDate;
+    calculationDates = calendarManager.getAdjustedDates(earliest, endDate, conventions, interval, calculationCenters, null);
     initialStub = FpMLUtil.getInitialStub(leg);
     finalStub = FpMLUtil.getFinalStub(leg);
 
-    effectiveDate = DateUtil.getDate(leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
     if(firstRegularPeriodStartDate != null && firstRegularPeriodStartDate.isAfter(cutoffDate) && initialStub == null) {
       //it's an imaginary stub! We have a hidden flow between effectivedate and calcperiodstart date
       if(!calculationDates.get(0).equals(effectiveDate))
