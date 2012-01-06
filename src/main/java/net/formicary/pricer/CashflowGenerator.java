@@ -236,7 +236,7 @@ public class CashflowGenerator {
               flow.setAmount(-flow.getAmount());
             }
           }
-          if(ctx.compoundingMethod == CompoundingMethodEnum.FLAT) {
+          if(ctx.compoundingMethod == CompoundingMethodEnum.FLAT || ctx.compoundingMethod == CompoundingMethodEnum.STRAIGHT) {
             //we use abs here since compounding is always positive
             notional += Math.abs(flow.getAmount());
           }

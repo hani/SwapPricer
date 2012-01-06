@@ -38,7 +38,7 @@ public class CashflowTests {
     generator = injector.getInstance(CashflowGenerator.class);
   }
 
-  @Test(dataProvider = "trades")
+  @Test(dataProvider = "singletrade")
   public void generateCashflows(String id) throws Exception {
     List<Cashflow> actualFlows;
     try {
@@ -69,6 +69,13 @@ public class CashflowTests {
       }
     }
     assertTrue(errors.length() == 0, "Rec failed for trade " + id + errors);
+  }
+
+  @DataProvider(name = "singletrade")
+  public Object[][] singleTrade() {
+    Object[][] data = new Object[1][];
+    data[0] = new Object[]{"LCH00001073244"};
+    return data;
   }
 
   @DataProvider(name = "trades")
@@ -102,12 +109,5 @@ public class CashflowTests {
       flows.add(flow);
     }
     return flows;
-  }
-
-  @DataProvider(name = "singletrade")
-  public Object[][] singleTrade() {
-    Object[][] data = new Object[1][];
-    data[0] = new Object[]{"LCH00000927730"};
-    return data;
   }
 }
