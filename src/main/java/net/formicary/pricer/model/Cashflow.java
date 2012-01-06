@@ -95,6 +95,10 @@ public class Cashflow implements Comparable<Cashflow>{
     this.dayCountFraction = dayCountFraction;
   }
 
+  public boolean isPay() {
+    return amount < 0;
+  }
+
   @Override
   public String toString() {
     return "Cashflow{" +

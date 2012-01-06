@@ -4,7 +4,11 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import net.formicary.pricer.impl.FpmlTradeStore;
 import net.formicary.pricer.model.Cashflow;
+import net.formicary.pricer.model.FlowType;
+import org.apache.commons.io.IOUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
@@ -12,11 +16,11 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import javax.xml.bind.JAXBException;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.io.*;
+import java.util.*;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 
 /**
  * @author hani
@@ -26,25 +30,50 @@ import java.util.List;
 @Test
 public class CashflowTests {
 
+  public static final String fpmlDir = "src/test/resources/fpml/";
   private CashflowGenerator generator;
   private TradeStore store;
   private static final Logger log = LoggerFactory.getLogger(CashflowTests.class);
 
   @BeforeClass
   public void init() throws JAXBException {
-    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule("src/test/resources/fpml"));
+    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule(fpmlDir));
     store = injector.getInstance(FpmlTradeStore.class);
     generator = injector.getInstance(CashflowGenerator.class);
   }
 
-  @Test(dataProvider = "singletrade")
-  public void generateFixedCashflows(String id) {
-    long now = System.currentTimeMillis();
-
-    List<Cashflow> flows = generator.generateCashflows(new LocalDate(2011, 11, 4), id);
-    log.info("Flows for {}: {}", id, flows);
-    log.info("Time to calculate flows for trade {}: {}ms", id, System.currentTimeMillis() - now);
-    //assertEquals(flows.size(), 6, flows.toString());
+  @Test(dataProvider = "trades")
+  public void generateCashflows(String id) throws Exception {
+    List<Cashflow> actualFlows;
+    try {
+      actualFlows = generator.generateCashflows(new LocalDate(2011, 11, 4), id);
+    } catch(Exception e) {
+      log.error("Error generating flows for trade {}", id);
+      throw e;
+    }
+    BufferedReader reader = new BufferedReader(new FileReader(fpmlDir + id + ".csv"));
+    List<String> lines = IOUtils.readLines(reader);
+    assertEquals(actualFlows.size(), lines.size());
+    List<Cashflow> expectedFlows = transform(lines);
+    Reconciler rec = new Reconciler(expectedFlows, actualFlows);
+    Iterator<FlowComparison> i = rec.getFlowComparisons().iterator();
+    StringBuilder errors = new StringBuilder();
+    while(i.hasNext()) {
+      FlowComparison next = i.next();
+      int diff = 0;
+      Cashflow actual = next.getMemberFlow();
+      Cashflow expected = next.getLchFlow();
+      if(actual != null && expected != null) {
+        diff = (int)(actual.getAmount() - expected.getAmount());
+        if(diff > 1) {
+          errors.append("\nAmount diff: " + diff + " for flow on date " + actual.getDate());
+        }
+      }
+      if(next.hasDateMismatch()) {
+        errors.append("Date break: ").append(next);
+      }
+    }
+    assertTrue(errors.length() == 0, "Rec failed for trade " + id + errors);
   }
 
   @DataProvider(name = "trades")
@@ -65,10 +94,25 @@ public class CashflowTests {
     return data;
   }
 
+  private List<Cashflow> transform(List<String> lines) {
+    DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy");
+    List<Cashflow> flows = new ArrayList<Cashflow>(lines.size());
+    for(String line : lines) {
+      String[] items = line.split("\t\t");
+      Cashflow flow = new Cashflow();
+      flow.setDate(formatter.parseLocalDate(items[0]));
+      flow.setNpv(Double.parseDouble(items[1]));
+      flow.setDiscountFactor(Double.parseDouble(items[3]));
+      flow.setAmount(Double.parseDouble(items[4]));
+      flows.add(flow);
+    }
+    return flows;
+  }
+
   @DataProvider(name = "singletrade")
   public Object[][] singleTrade() {
     Object[][] data = new Object[1][];
-    data[0] = new Object[]{"LCH00001074714"};
+    data[0] = new Object[]{"LCH00000927730"};
     return data;
   }
 }
