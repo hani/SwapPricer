@@ -9,7 +9,6 @@ import org.joda.time.LocalDate;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -21,7 +20,6 @@ import java.util.List;
  *         Time: 9:21 PM
  */
 public class CashflowGenerator {
-  private static final BigInteger ONE = new BigInteger("1");
   @Inject CurveManager curveManager;
   @Inject CalendarManager calendarManager;
   @Inject TradeStore tradeStore;
@@ -60,7 +58,6 @@ public class CashflowGenerator {
 
   private List<Cashflow> generateFloatingFlows(LocalDate valuationDate, InterestRateStream leg) {
     StreamContext ctx = new StreamContext(calendarManager, valuationDate, leg);
-    Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
     List<LocalDate> calculationDates = ctx.calculationDates;
     CalculationPeriodFrequency interval = ctx.interval;
     Interval paymentInterval = leg.getPaymentDates().getPaymentFrequency();
@@ -173,18 +170,13 @@ public class CashflowGenerator {
     endDate = calendarManager.adjustDate(endDate, ctx.conventions[1], centers);
     double rate1Value = 0, rate2Value = 0;
     if(stubRates.size() > 0) {
-      String tradeCurveTenor = ctx.interval.getPeriodMultiplier() + ctx.interval.getPeriod().value();
       FloatingRate rate1 = stubRates.get(0);
-      //I guess for stuff in the past we need to check the historic index?
-      //String index = getFloatingIndexName(rate1.getFloatingRateIndex().getValue());
-      //this is incorrect since we need to use the regular curve and NOT the stub tenor curve, whih is what LCH does
-      //what we do here is technically correct, just not how LCH prices their stubs
-      LocalDate rate1Date = calendarManager.applyInterval(startDate, rate1.getIndexTenor(), BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
-      rate1Value = curveManager.getInterpolatedForwardRate(rate1Date, ctx.currency, tradeCurveTenor);
+      LocalDate rate1EndDate = calendarManager.applyInterval(startDate, rate1.getIndexTenor(), BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
+      rate1Value = curveManager.getImpliedForwardRate(startDate, rate1EndDate, ctx.valuationDate, ctx.currency, ctx.interval);
       if(stubRates.size() == 2) {
         FloatingRate rate2 = stubRates.get(1);
-        LocalDate rate2Date = calendarManager.applyInterval(startDate, rate2.getIndexTenor(), BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
-        rate2Value = curveManager.getInterpolatedForwardRate(rate2Date, ctx.currency, tradeCurveTenor);
+        LocalDate rate2EndDate = calendarManager.applyInterval(startDate, rate2.getIndexTenor(), BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
+        rate2Value = curveManager.getImpliedForwardRate(startDate, rate2EndDate, ctx.valuationDate, ctx.currency, ctx.interval);
       }
     }
     double rateToUse = rate1Value;
