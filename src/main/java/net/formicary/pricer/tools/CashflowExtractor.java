@@ -28,20 +28,30 @@ public class CashflowExtractor {
         return name.endsWith(".xml");
       }
     });
+    BufferedReader reader = new BufferedReader(new FileReader(reportFile));
+    String header = reader.readLine();
+    int count = 1;
+    String line;
     Map<String, List<String>> tradeIds = new HashMap<String, List<String>>(files.length);
     for(String file : files) {
-      tradeIds.put(file.substring(0, file.lastIndexOf('.')), new ArrayList<String>());
+      ArrayList<String> list = new ArrayList<String>();
+      tradeIds.put(file.substring(0, file.lastIndexOf('.')), list);
     }
-    BufferedReader reader = new BufferedReader(new FileReader(reportFile));
-    String line;
-    int count = 1;
     while((line = reader.readLine()) != null) {
       for(Map.Entry<String, List<String>> entry : tradeIds.entrySet()) {
         if(line.contains(entry.getKey())) {
-          entry.getValue().add(line);
+          line = line.replace(" 00:00:00", "");
+          String[] items = line.split("\t");
+          StringBuilder sb = new StringBuilder();
+          sb.append(items[6]).append("\t\t");
+          sb.append(items[8]).append("\t\t");
+          sb.append(items[10]).append("\t\t");
+          sb.append(items[12]).append("\t\t");
+          sb.append(items[13]);
+          entry.getValue().add(sb.toString());
         }
       }
-      if(count++ % 20000 == 0) {
+      if(++count % 20000 == 0) {
         System.out.println("Processed " + count + " lines.");
       }
     }
