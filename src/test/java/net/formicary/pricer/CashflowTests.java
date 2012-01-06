@@ -1,10 +1,12 @@
 package net.formicary.pricer;
 
+import java.io.*;
+import java.util.*;
+import javax.xml.bind.JAXBException;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import net.formicary.pricer.impl.FpmlTradeStore;
 import net.formicary.pricer.model.Cashflow;
-import net.formicary.pricer.model.FlowType;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -15,12 +17,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import javax.xml.bind.JAXBException;
-import java.io.*;
-import java.util.*;
-
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author hani
@@ -32,13 +30,11 @@ public class CashflowTests {
 
   public static final String fpmlDir = "src/test/resources/fpml/";
   private CashflowGenerator generator;
-  private TradeStore store;
   private static final Logger log = LoggerFactory.getLogger(CashflowTests.class);
 
   @BeforeClass
   public void init() throws JAXBException {
     Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule(fpmlDir));
-    store = injector.getInstance(FpmlTradeStore.class);
     generator = injector.getInstance(CashflowGenerator.class);
   }
 
