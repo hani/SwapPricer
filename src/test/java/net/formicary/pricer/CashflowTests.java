@@ -60,13 +60,12 @@ public class CashflowTests {
     StringBuilder errors = new StringBuilder();
     while(i.hasNext()) {
       FlowComparison next = i.next();
-      int diff = 0;
       Cashflow actual = next.getMemberFlow();
       Cashflow expected = next.getLchFlow();
       if(actual != null && expected != null) {
-        diff = (int)(actual.getAmount() - expected.getAmount());
-        if(diff > 1) {
-          errors.append("\nAmount diff: " + diff + " for flow on date " + actual.getDate());
+        int diff = (int)(actual.getAmount() - expected.getAmount());
+        if(diff > 50) {
+          errors.append("\nAmount diff: " + diff + " for flow on date " + actual.getDate() + " side: " + actual.getType());
         }
       }
       if(next.hasDateMismatch()) {
