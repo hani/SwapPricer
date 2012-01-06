@@ -104,18 +104,13 @@ public class CashflowGenerator {
         Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, rate);
         flows.add(flow);
       } else {
-        LocalDate tenorEndDate = periodEndDate;
-//        if(ctx.checkForEndToEndIndexRoll) {
-//          Interval rollInterval = new Interval();
-//          rollInterval.setPeriod(PeriodEnum.D);
-//          rollInterval.setPeriodMultiplier(ONE);
-//          LocalDate rolled = calendarManager.applyInterval(periodStartDate, rollInterval, ctx.conventions[1], ctx.calculationCenters[1]);
-//          if(rolled.getMonthOfYear() != periodStartDate.getMonthOfYear()) {
-//            //need to roll the end date to the last of the month, since the start is at the end of a month and rate is end to end
-//            tenorEndDate = tenorEndDate.dayOfMonth().withMaximumValue();
-//            tenorEndDate = calendarManager.adjustDate(tenorEndDate, ctx.conventions[1], ctx.calculationCenters[1]);
-//          }
-//        }
+        //todo centers should be based on the index centers, and period start should be fixingdate + 2D (to handle case where periodstart is a bad date)
+        LocalDate tenorEndDate;
+        if(interval.getPeriod() == PeriodEnum.T) {
+          tenorEndDate = periodEndDate;
+        } else {
+          tenorEndDate = calendarManager.applyInterval(periodStartDate, interval, BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
+        }
         double impliedForwardRate = curveManager.getImpliedForwardRate(periodStartDate, tenorEndDate, valuationDate, ctx.currency, interval);
         Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, impliedForwardRate);
         flows.add(flow);
@@ -178,17 +173,18 @@ public class CashflowGenerator {
     endDate = calendarManager.adjustDate(endDate, ctx.conventions[1], centers);
     double rate1Value = 0, rate2Value = 0;
     if(stubRates.size() > 0) {
+      String tradeCurveTenor = ctx.interval.getPeriodMultiplier() + ctx.interval.getPeriod().value();
       FloatingRate rate1 = stubRates.get(0);
       //I guess for stuff in the past we need to check the historic index?
       //String index = getFloatingIndexName(rate1.getFloatingRateIndex().getValue());
-      String tenor1 = rate1.getIndexTenor().getPeriodMultiplier() + rate1.getIndexTenor().getPeriod().value();
       //this is incorrect since we need to use the regular curve and NOT the stub tenor curve, whih is what LCH does
       //what we do here is technically correct, just not how LCH prices their stubs
-      rate1Value = curveManager.getInterpolatedForwardRate(startDate, ctx.currency, tenor1);
+      LocalDate rate1Date = calendarManager.applyInterval(startDate, rate1.getIndexTenor(), BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
+      rate1Value = curveManager.getInterpolatedForwardRate(rate1Date, ctx.currency, tradeCurveTenor);
       if(stubRates.size() == 2) {
         FloatingRate rate2 = stubRates.get(1);
-        String tenor2 = rate2.getIndexTenor().getPeriodMultiplier() + rate1.getIndexTenor().getPeriod().value();
-        rate2Value = curveManager.getInterpolatedForwardRate(startDate, ctx.currency, tenor2);
+        LocalDate rate2Date = calendarManager.applyInterval(startDate, rate2.getIndexTenor(), BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
+        rate2Value = curveManager.getInterpolatedForwardRate(rate2Date, ctx.currency, tradeCurveTenor);
       }
     }
     double rateToUse = rate1Value;
@@ -207,14 +203,6 @@ public class CashflowGenerator {
       flow.setAmount(-flow.getAmount());
     }
     return flow;
-  }
-
-  private Cashflow calculateFinalStubCashflow(StreamContext ctx) {
-    //todo verify which business centers and conventions we use for stubs
-    BusinessCenters centers = ctx.stream.getCalculationPeriodDates().getCalculationPeriodDatesAdjustments().getBusinessCenters();
-    LocalDate endDate = ctx.terminationDate;
-    endDate = calendarManager.adjustDate(endDate, ctx.conventions[1], centers);
-    return getCashflow(ctx.endDate, endDate, ctx, 0);
   }
 
   private List<Cashflow> convertToPaymentFlows(StreamContext ctx, List<Cashflow> flows, List<LocalDate> paymentDates) {
