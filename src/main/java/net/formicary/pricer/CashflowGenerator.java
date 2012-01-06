@@ -1,18 +1,16 @@
 package net.formicary.pricer;
 
+import java.lang.Math;
+import java.math.BigDecimal;
+import java.util.*;
+import javax.inject.Inject;
+
 import net.formicary.pricer.model.Cashflow;
 import net.formicary.pricer.model.FlowType;
 import net.formicary.pricer.util.FpMLUtil;
 import org.fpml.spec503wd3.*;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
-
-import javax.inject.Inject;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * @author hani
@@ -239,7 +237,8 @@ public class CashflowGenerator {
             }
           }
           if(ctx.compoundingMethod == CompoundingMethodEnum.FLAT) {
-            notional += flow.getAmount();
+            //we use abs here since compounding is always positive
+            notional += Math.abs(flow.getAmount());
           }
           payment.setAmount(payment.getAmount() + flow.getAmount());
           if(payment.getType() == null)
