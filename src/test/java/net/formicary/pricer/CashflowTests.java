@@ -2,11 +2,9 @@ package net.formicary.pricer;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import hirondelle.date4j.DateTime;
 import net.formicary.pricer.model.Cashflow;
 import org.apache.commons.io.IOUtils;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
@@ -48,7 +46,7 @@ public class CashflowTests {
   public void generateCashflows(String id) throws Exception {
     List<Cashflow> actualFlows;
     try {
-      actualFlows = generator.generateCashflows(new LocalDate(2011, 11, 4), id);
+      actualFlows = generator.generateCashflows(DateTime.forDateOnly(2011, 11, 4), id);
     } catch(Exception e) {
       log.error("Error generating flows for trade {}", id);
       throw e;
@@ -103,12 +101,12 @@ public class CashflowTests {
   }
 
   private List<Cashflow> transform(List<String> lines) {
-    DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy");
     List<Cashflow> flows = new ArrayList<Cashflow>(lines.size());
     for(String line : lines) {
       String[] items = line.split("\t\t");
       Cashflow flow = new Cashflow();
-      flow.setDate(formatter.parseLocalDate(items[0]));
+      DateTime dt = DateTime.forDateOnly(Integer.parseInt(items[0].substring(6, 10)), Integer.parseInt(items[0].substring(3, 5)), Integer.parseInt(items[0].substring(0, 2)));
+      flow.setDate(dt);
       flow.setNpv(Double.parseDouble(items[1]));
       flow.setDiscountFactor(Double.parseDouble(items[3]));
       flow.setAmount(Double.parseDouble(items[4]));

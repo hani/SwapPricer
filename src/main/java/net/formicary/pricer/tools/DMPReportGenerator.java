@@ -2,13 +2,13 @@ package net.formicary.pricer.tools;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import hirondelle.date4j.DateTime;
 import javolution.text.TextBuilder;
 import javolution.text.TypeFormat;
 import net.formicary.pricer.CashflowGenerator;
 import net.formicary.pricer.PersistenceModule;
 import net.formicary.pricer.PricerModule;
 import net.formicary.pricer.model.Cashflow;
-import org.joda.time.LocalDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ public class DMPReportGenerator {
   private static final Logger log = LoggerFactory.getLogger(DMPReportGenerator.class);
 
   public void generateReport(String inputDir, String outputFile) throws IOException {
-    final LocalDate date = new LocalDate(2011, 11, 4);
+    final DateTime date = DateTime.forDateOnly(2011, 11, 4);
     List<String> files = new ArrayList<String>();
     File dir = new File(inputDir);
     if(!dir.exists() || !dir.isDirectory()) {

@@ -1,18 +1,20 @@
 package net.formicary.pricer.loader;
 
-import java.io.*;
-import java.util.*;
-
-import javax.inject.Inject;
-
 import com.google.inject.Guice;
+import hirondelle.date4j.DateTime;
 import net.formicary.pricer.HolidayManager;
 import net.formicary.pricer.PricerModule;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author hani
@@ -29,22 +31,22 @@ public class HolidayLoader {
     BufferedReader is = new BufferedReader(new FileReader("data/rep00006.txt"));
     is.readLine();
     String line;
-    DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
-    Map<String, Set<LocalDate>> allDates = new HashMap<String, Set<LocalDate>>();
+    Map<String, Set<DateTime>> allDates = new HashMap<String, Set<DateTime>>();
 
     int count = 0;
     while((line = is.readLine()) != null) {
       count++;
       String[] items = line.split("\t");
-      Set<LocalDate> dates = allDates.get(items[1]);
+      Set<DateTime> dates = allDates.get(items[1]);
       if(dates == null) {
-        dates = new HashSet<LocalDate>();
+        dates = new HashSet<DateTime>();
         allDates.put(items[1], dates);
       }
-      dates.add(LocalDate.parse(items[2], formatter));
+      String d = items[2];
+      dates.add(DateTime.forDateOnly(Integer.parseInt(d.substring(6, 10)), Integer.parseInt(d.substring(3, 5)), Integer.parseInt(d.substring(0, 2))));
     }
 
-    for(Map.Entry<String, Set<LocalDate>> entry : allDates.entrySet()) {
+    for(Map.Entry<String, Set<DateTime>> entry : allDates.entrySet()) {
       manager.registerHolidays(entry.getKey(), entry.getValue());
     }
 

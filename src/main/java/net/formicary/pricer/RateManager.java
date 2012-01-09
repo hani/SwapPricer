@@ -1,7 +1,7 @@
 package net.formicary.pricer;
 
+import hirondelle.date4j.DateTime;
 import org.fpml.spec503wd3.Interval;
-import org.joda.time.LocalDate;
 
 /**
  * @author hani
@@ -9,6 +9,6 @@ import org.joda.time.LocalDate;
  *         Time: 5:28 PM
  */
 public interface RateManager {
-  double getZeroRate(String indexName, String currency, Interval interval, LocalDate date);
-  double getDiscountFactor(String indexName, String currency, Interval interval, LocalDate date, LocalDate valuationDate);
+  double getZeroRate(String indexName, String currency, Interval interval, DateTime date);
+  double getDiscountFactor(String indexName, String currency, Interval interval, DateTime date, DateTime valuationDate);
 }

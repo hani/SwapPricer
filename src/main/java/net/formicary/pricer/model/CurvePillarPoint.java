@@ -1,6 +1,6 @@
 package net.formicary.pricer.model;
 
-import org.joda.time.LocalDate;
+import hirondelle.date4j.DateTime;
 
 /**
  * @author hani
@@ -9,8 +9,8 @@ import org.joda.time.LocalDate;
  */
 public class CurvePillarPoint implements Comparable<CurvePillarPoint> {
   private String curveName;
-  private LocalDate closeDate;
-  private LocalDate maturityDate;
+  private DateTime closeDate;
+  private DateTime maturityDate;
   private double accrualFactor;
   private double zeroRate;
   private double discountFactor;
@@ -18,7 +18,7 @@ public class CurvePillarPoint implements Comparable<CurvePillarPoint> {
   public CurvePillarPoint() {
   }
 
-  public CurvePillarPoint(String curveName, LocalDate maturityDate) {
+  public CurvePillarPoint(String curveName, DateTime maturityDate) {
     this.curveName = curveName;
     this.maturityDate = maturityDate;
   }
@@ -31,19 +31,19 @@ public class CurvePillarPoint implements Comparable<CurvePillarPoint> {
     this.curveName = curveName;
   }
 
-  public LocalDate getCloseDate() {
+  public DateTime getCloseDate() {
     return closeDate;
   }
 
-  public void setCloseDate(LocalDate closeDate) {
+  public void setCloseDate(DateTime closeDate) {
     this.closeDate = closeDate;
   }
 
-  public LocalDate getMaturityDate() {
+  public DateTime getMaturityDate() {
     return maturityDate;
   }
 
-  public void setMaturityDate(LocalDate maturityDate) {
+  public void setMaturityDate(DateTime maturityDate) {
     this.maturityDate = maturityDate;
   }
 

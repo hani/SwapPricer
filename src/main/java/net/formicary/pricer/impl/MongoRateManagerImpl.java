@@ -2,10 +2,10 @@ package net.formicary.pricer.impl;
 
 import com.google.code.morphia.Datastore;
 import com.google.code.morphia.query.Query;
+import hirondelle.date4j.DateTime;
 import net.formicary.pricer.model.Index;
 import org.fpml.spec503wd3.Interval;
 import org.fpml.spec503wd3.PeriodEnum;
-import org.joda.time.LocalDate;
 
 import javax.inject.Inject;
 
@@ -17,7 +17,7 @@ import javax.inject.Inject;
 public class MongoRateManagerImpl extends AbstractRateManager {
   @Inject private Datastore ds;
 
-  protected double getRate(String key, String indexName, String currency, Interval interval, LocalDate date) {
+  protected double getRate(String key, String indexName, String currency, Interval interval, DateTime date) {
     Query<Index> query = ds.createQuery(Index.class);
     query.field("currency").equal(currency);
     //hack, LCH rates are given to us in 12M vs 1Y

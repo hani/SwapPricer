@@ -3,8 +3,8 @@ package net.formicary.pricer.model;
 import com.google.code.morphia.annotations.Entity;
 import com.google.code.morphia.annotations.Id;
 import com.google.code.morphia.annotations.Indexes;
+import hirondelle.date4j.DateTime;
 import org.bson.types.ObjectId;
-import org.joda.time.LocalDate;
 
 /**
  * @author hani
@@ -21,8 +21,8 @@ public class Index {
   private String name;
   private String tenorUnit;
   private String tenorPeriod;
-  private LocalDate fixingDate;
-  private LocalDate effectiveDate;
+  private DateTime fixingDate;
+  private DateTime effectiveDate;
   private double rate;
   private String regulatoryBody;
 
@@ -66,19 +66,19 @@ public class Index {
     this.tenorPeriod = tenorPeriod;
   }
 
-  public LocalDate getFixingDate() {
+  public DateTime getFixingDate() {
     return fixingDate;
   }
 
-  public void setFixingDate(LocalDate fixingDate) {
+  public void setFixingDate(DateTime fixingDate) {
     this.fixingDate = fixingDate;
   }
 
-  public LocalDate getEffectiveDate() {
+  public DateTime getEffectiveDate() {
     return effectiveDate;
   }
 
-  public void setEffectiveDate(LocalDate effectiveDate) {
+  public void setEffectiveDate(DateTime effectiveDate) {
     this.effectiveDate = effectiveDate;
   }
 

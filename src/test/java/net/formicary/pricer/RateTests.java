@@ -2,9 +2,9 @@ package net.formicary.pricer;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import hirondelle.date4j.DateTime;
 import org.fpml.spec503wd3.Interval;
 import org.fpml.spec503wd3.PeriodEnum;
-import org.joda.time.LocalDate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -31,7 +31,7 @@ public class RateTests {
     Interval interval = new Interval();
     interval.setPeriod(PeriodEnum.M);
     interval.setPeriodMultiplier(new BigInteger("3"));
-    double rate = manager.getZeroRate("LIBOR", "USD", interval, new LocalDate(2011, 5, 3));
+    double rate = manager.getZeroRate("LIBOR", "USD", interval, DateTime.forDateOnly(2011, 5, 3));
     assertEquals(rate, 0.27225);
   }
 
@@ -40,6 +40,6 @@ public class RateTests {
     Interval interval = new Interval();
     interval.setPeriod(PeriodEnum.M);
     interval.setPeriodMultiplier(new BigInteger("1"));
-    manager.getZeroRate("LIBOR", "xxx", interval, new LocalDate(2010, 4, 27));
+    manager.getZeroRate("LIBOR", "xxx", interval, DateTime.forDateOnly(2010, 4, 27));
   }
 }

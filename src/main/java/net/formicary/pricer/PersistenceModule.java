@@ -11,11 +11,9 @@ import com.google.code.morphia.mapping.MappingException;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import com.mongodb.Mongo;
+import hirondelle.date4j.DateTime;
 import net.formicary.pricer.impl.MongoRateManagerImpl;
 import net.formicary.pricer.model.Index;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import java.net.UnknownHostException;
 
@@ -54,23 +52,23 @@ public class PersistenceModule extends AbstractModule {
   public class LocalDateConverter  extends TypeConverter implements SimpleValueConverter {
 
     public LocalDateConverter() {
-      super(LocalDate.class);
+      super(DateTime.class);
     }
 
     @Override
     public Object decode(Class targetClass, Object val, MappedField optionalExtraInfo) throws MappingException {
       if (val == null) return null;
 
-      if (val instanceof LocalDate)
+      if (val instanceof DateTime)
         return val;
-      DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMdd");
-      return formatter.parseLocalDate(val.toString());
+      String s = (String)val;
+      return DateTime.forDateOnly(Integer.parseInt(s.substring(0, 4)), Integer.parseInt(s.substring(4, 6)), Integer.parseInt(s.substring(6, 8)));
     }
 
     @Override
     public Object encode(Object value, MappedField optionalExtraInfo) {
-      DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMdd");
-      return formatter.print((LocalDate)value);
+      DateTime dt = (DateTime)value;
+      return dt.format("YYYYMMDD");
     }
   }
 }

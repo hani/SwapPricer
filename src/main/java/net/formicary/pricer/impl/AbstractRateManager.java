@@ -1,9 +1,8 @@
 package net.formicary.pricer.impl;
 
+import hirondelle.date4j.DateTime;
 import net.formicary.pricer.RateManager;
 import org.fpml.spec503wd3.Interval;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,9 +18,9 @@ public abstract class AbstractRateManager implements RateManager {
   private Map<String, Object> cache = new ConcurrentHashMap<String, Object>();
 
   @Override
-  public double getZeroRate(String indexName, String currency, Interval interval, LocalDate date) {
+  public double getZeroRate(String indexName, String currency, Interval interval, DateTime date) {
     //avoid date.toString as it's relatively expensive
-    String key = indexName + "-" + currency + "-" + date.getYear() + '-' + date.getDayOfYear() + '-' + date.getDayOfMonth() + "-" + interval.getPeriodMultiplier() + interval.getPeriod();
+    String key = indexName + "-" + currency + "-" + date.getYear() + '-' + date.getDayOfYear() + '-' + date.getDay() + "-" + interval.getPeriodMultiplier() + interval.getPeriod();
     if(caching) {
       Object value = cache.get(key);
       if(value != null) {
@@ -42,7 +41,7 @@ public abstract class AbstractRateManager implements RateManager {
     return rate;
   }
 
-  protected abstract double getRate(String key, String indexName, String currency, Interval interval, LocalDate date);
+  protected abstract double getRate(String key, String indexName, String currency, Interval interval, DateTime date);
 
   public boolean isCaching() {
     return caching;
@@ -53,9 +52,9 @@ public abstract class AbstractRateManager implements RateManager {
   }
 
   @Override
-  public double getDiscountFactor(String indexName, String currency, Interval interval, LocalDate date, LocalDate valuationDate) {
+  public double getDiscountFactor(String indexName, String currency, Interval interval, DateTime date, DateTime valuationDate) {
     double zero = getZeroRate(indexName, currency, interval, date) / 100;
-    double days = Days.daysBetween(date, valuationDate).getDays();
+    double days = date.numDaysFrom(valuationDate);
     return Math.exp(zero * -(days) / 365d);
   }
 }
