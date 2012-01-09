@@ -12,10 +12,9 @@ import java.util.TimeZone;
  * Building block class for a date-time, with no time zone.
  * This class is a hacked up/optimised version of date4j's DateTime, with the following changes:
  * <ul>
- *   <li>Remove convenient parsing/formatting methods, they are all quite expensive so the call
+ *   <li>Remove convenient parsing/formatting methods, they are all quite expensive so the caller
  *   should worry about them</li>
  *   <li>Get rid of all time handling, we work with dates only</li>
- *   <li>Not quite as immutable as the original (TODO explain where/why)</li>
  *   <li>Better caching of calculatations</li>
  * </ul>
  */
@@ -23,13 +22,13 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
 
   /* The following 7 items represent the parsed form of a DateTime. */
   /**  @serial */
-  private Integer fYear;
+  private int year;
   /**  @serial */
-  private Integer fMonth;
+  private int month;
   /**  @serial */
-  private Integer fDay;
+  private int day;
   /** @serial */
-  private int fHashCode;
+  private int hashCode;
   /** @serial */
   private int julianDayNumber;
 
@@ -104,9 +103,9 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
    @param aDay 1..31, cannot exceed the number of days in the given month/year, optional
    */
   public FastDate(Integer aYear, Integer aMonth, Integer aDay) {
-    fYear = aYear;
-    fMonth = aMonth;
-    fDay = aDay;
+    year = aYear;
+    month = aMonth;
+    day = aDay;
     validateState();
   }
 
@@ -157,17 +156,17 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
 
   /** Return the year, 1..9999. */
   public Integer getYear() {
-    return fYear;
+    return year;
   }
 
   /** Return the Month, 1..12. */
   public Integer getMonth() {
-    return fMonth;
+    return month;
   }
 
   /** Return the Day of the Month, 1..31. */
   public Integer getDay() {
-    return fDay;
+    return day;
   }
 
   /**
@@ -211,7 +210,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
    */
   public int getDayOfYear() {
     int k = isLeapYear() ? 1 : 2;
-    return ((275 * fMonth) / 9) - k * ((fMonth + 9) / 12) + fDay - 30;
+    return ((275 * month) / 9) - k * ((month + 9) / 12) + day - 30;
   }
 
   /**
@@ -219,7 +218,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
    <P>Requires year to be present; if not, a runtime exception is thrown.
    */
   public boolean isLeapYear() {
-    return isLeapYear(fYear);
+    return isLeapYear(year);
   }
 
   /**
@@ -227,7 +226,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
    <P>Requires year-month-day to be present; if not, a runtime exception is thrown.
    */
   public int getNumDaysInMonth() {
-    return getNumDaysInMonth(fYear, fMonth);
+    return getNumDaysInMonth(year, month);
   }
 
   /**
@@ -334,8 +333,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
   public FastDate plusDays(Integer aNumDays) {
     int thisJDAtNoon = getModifiedJulianDayNumber() + 1 + EPOCH_MODIFIED_JD;
     int resultJD = thisJDAtNoon + aNumDays;
-    FastDate datePortion = fromJulianDayNumberAtNoon(resultJD);
-    return new FastDate(datePortion.getYear(), datePortion.getMonth(), datePortion.getDay());
+    return fromJulianDayNumberAtNoon(resultJD);
   }
 
   /**
@@ -372,11 +370,11 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
    */
   public int compareTo(FastDate aThat) {
     if (this == aThat) return 0;
-    int compare = fYear < aThat.fYear ? -1 : fYear > aThat.fYear ? 1 : 0;
+    int compare = year < aThat.year ? -1 : year > aThat.year ? 1 : 0;
     if(compare != 0) return compare;
-    compare = fMonth < aThat.fMonth ? -1 : fMonth > aThat.fMonth ? 1 : 0;
+    compare = month < aThat.month ? -1 : month > aThat.month ? 1 : 0;
     if(compare != 0) return compare;
-    compare = fDay < aThat.fDay ? -1 : fDay > aThat.fDay ? 1 : 0;
+    compare = day < aThat.day ? -1 : day > aThat.day ? 1 : 0;
     return compare;
   }
 
@@ -387,22 +385,22 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
 
     FastDate fastDate = (FastDate) o;
 
-    if (!fDay.equals(fastDate.fDay)) return false;
-    if (!fMonth.equals(fastDate.fMonth)) return false;
-    if (!fYear.equals(fastDate.fYear)) return false;
+    if (day != fastDate.day) return false;
+    if (month != fastDate.month) return false;
+    if (year != fastDate.year) return false;
 
     return true;
   }
 
   @Override
   public int hashCode() {
-    if(fHashCode != 0) {
-      return fHashCode;
+    if(hashCode > 0) {
+      return hashCode;
     }
-    fHashCode = fYear.hashCode();
-    fHashCode = 31 * fHashCode + fMonth.hashCode();
-    fHashCode = 31 * fHashCode + fDay.hashCode();
-    return fHashCode;
+    hashCode = year;
+    hashCode = 31 * hashCode + month;
+    hashCode = 31 * hashCode + day;
+    return hashCode;
   }
 
   /**
@@ -427,7 +425,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
    <PRE>Y:2001 M:1 D:31 h:13 m:null s:59 f:123456789</PRE>
    */
   @Override public String toString() {
-    return fYear + "-" + fMonth + "-" + fDay;
+    return year + "-" + month + "-" + day;
   }
 
   static final class ItemOutOfRange extends RuntimeException {
@@ -513,18 +511,18 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
     if(julianDayNumber != 0) {
       return julianDayNumber;
     }
-    int y = fYear;
-    int m = fMonth;
-    int d = fDay;
+    int y = year;
+    int m = month;
+    int d = day;
     julianDayNumber = (1461 * (y + 4800 + (m - 14) / 12)) / 4 + (367 * (m - 2 - 12 * ((m - 14) / 12))) / 12 - (3 * ((y + 4900 + (m - 14) / 12) / 100)) / 4 + d - 32075;
     return julianDayNumber;
   }
 
   private void validateState() {
-    checkRange(fYear, 1, 9999, "Year");
-    checkRange(fMonth, 1, 12, "Month");
-    checkRange(fDay, 1, 31, "Day");
-    checkNumDaysInMonth(fYear, fMonth, fDay);
+    checkRange(year, 1, 9999, "Year");
+    checkRange(month, 1, 12, "Month");
+    checkRange(day, 1, 31, "Day");
+    checkNumDaysInMonth(year, month, day);
   }
 
   private void checkRange(Integer aValue, int aMin, int aMax, String aName) {
@@ -556,7 +554,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
   }
 
   private FastDate getStartEndDateTime(Integer aDay) {
-    return new FastDate(fYear, fMonth, aDay);
+    return new FastDate(year, month, aDay);
   }
 
   /**
