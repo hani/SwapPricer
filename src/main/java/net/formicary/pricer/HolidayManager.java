@@ -7,6 +7,7 @@ import org.fpml.spec503wd3.BusinessDayConventionEnum;
 
 import javax.inject.Singleton;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,7 +22,15 @@ public class HolidayManager {
   private Map<String, Set<DateTime>> holidays = new HashMap<String, Set<DateTime>>();
 
   public void registerHolidays(String key, Set<DateTime> value) {
-    holidays.put(key, value);
+    //to speed up lookups, we store both the no-time and the time version of the date
+   //this saves us having to call .truncate on passed in dates, so holiday lookups don't
+    //end up creating extra crap
+    Set<DateTime> set = new HashSet<DateTime>(value.size() * 2);
+    set.addAll(value);
+    for (DateTime dateTime : value) {
+      set.add(new DateTime(dateTime.getYear(), dateTime.getMonth(), dateTime.getDay(), 0, 0, 0, null));
+    }
+    holidays.put(key, set);
   }
 
   public boolean isNonWorkingDay(String value, DateTime date) {

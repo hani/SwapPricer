@@ -84,6 +84,16 @@ public class CalendarTests {
     assertTrue(f.startsWith("0.24166666"), f);
   }
 
+  public void applyIntervalWithModFollowing() {
+    DateTime date = DateTime.forDateOnly(2015, 5, 29);
+    CalculationPeriodFrequency interval = new CalculationPeriodFrequency();
+    interval.setPeriod(PeriodEnum.M);
+    interval.setPeriodMultiplier(new BigInteger("3"));
+    interval.setRollConvention("29");
+    DateTime actual = manager.applyInterval(date, interval, MODFOLLOWING, getCenters("USNY", "GBLO"));
+    assertEquals(actual.truncate(DateTime.Unit.DAY), DateTime.forDateOnly(2015, 8, 28));
+  }
+
   public void multipleCalendars() {
     assertEquals(manager.adjustDate(DateTime.forDateOnly(2011, 5, 30), PRECEDING, getCenters("GBLO", "USNY")), DateTime.forDateOnly(2011, 5, 27));
   }
