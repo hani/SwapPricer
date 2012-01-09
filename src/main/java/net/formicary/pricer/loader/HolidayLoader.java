@@ -28,7 +28,7 @@ public class HolidayLoader {
   @Inject
   public HolidayLoader(HolidayManager manager) throws IOException {
     long now = System.currentTimeMillis();
-    BufferedReader is = new BufferedReader(new FileReader("data/rep00006.txt"));
+    BufferedReader is = new BufferedReader(new FileReader("staticdata/rep00006.txt"));
     is.readLine();
     String line;
     Map<String, Set<DateTime>> allDates = new HashMap<String, Set<DateTime>>();
