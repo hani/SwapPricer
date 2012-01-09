@@ -2,6 +2,8 @@ package net.formicary.pricer.tools;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import javolution.text.TextBuilder;
+import javolution.text.TypeFormat;
 import net.formicary.pricer.CashflowGenerator;
 import net.formicary.pricer.PersistenceModule;
 import net.formicary.pricer.PricerModule;
@@ -15,7 +17,10 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -84,12 +89,14 @@ public class DMPReportGenerator {
   }
 
   private void writeCashflows(BufferedOutputStream os, String id, List<Cashflow> cashflows) throws IOException {
+    TextBuilder sb = TextBuilder.newInstance();
     for (Cashflow cashflow : cashflows) {
-      StringBuilder sb = new StringBuilder();
-      sb.append(id).append(",");
-      sb.append(cashflow.getNpv()).append(",");
+      sb.clear();
+      sb.append(id);
+      sb.append(',');
+      TypeFormat.format(cashflow.getNpv(), sb).append(",");
       sb.append(cashflow.getDate()).append(",");
-      sb.append(cashflow.getAmount());
+      TypeFormat.format(cashflow.getAmount(), sb);
       sb.append('\n');
       os.write(sb.toString().getBytes());
     }

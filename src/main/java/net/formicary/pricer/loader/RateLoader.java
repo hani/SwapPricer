@@ -2,6 +2,7 @@ package net.formicary.pricer.loader;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import javolution.text.TypeFormat;
 import net.formicary.pricer.PersistenceModule;
 import net.formicary.pricer.model.Index;
 import org.joda.time.LocalDate;
@@ -41,7 +42,7 @@ public abstract class RateLoader {
       index.setFixingDate(fixingDate);
       index.setEffectiveDate(formatter.parseLocalDate(items[5]));
       try {
-        index.setRate(Double.parseDouble(items[6]));
+        index.setRate(TypeFormat.parseDouble(items[6]));
         index.setRegulatoryBody(items[7]);
         save(index);
         if(++count % 20000 == 0) {

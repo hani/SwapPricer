@@ -1,5 +1,6 @@
 package net.formicary.pricer.impl;
 
+import javolution.text.TypeFormat;
 import net.formicary.pricer.CurveManager;
 import net.formicary.pricer.model.CurvePillarPoint;
 import org.apache.commons.io.FileUtils;
@@ -74,9 +75,9 @@ public class CurveManagerImpl implements CurveManager {
     p.setCurveName(data[0]);
     p.setCloseDate(LocalDate.parse(data[1].substring(0, data[1].indexOf(' ')), DATE_FORMAT));
     p.setMaturityDate(LocalDate.parse(data[2].substring(0, data[2].indexOf(' ')), DATE_FORMAT));
-    p.setAccrualFactor(Double.parseDouble(data[3]));
-    p.setZeroRate(Double.parseDouble(data[4]));
-    p.setDiscountFactor(Double.parseDouble(data[5]));
+    p.setAccrualFactor(TypeFormat.parseDouble(data[3]));
+    p.setZeroRate(TypeFormat.parseDouble(data[4]));
+    p.setDiscountFactor(TypeFormat.parseDouble(data[5]));
     return p;
   }
 
