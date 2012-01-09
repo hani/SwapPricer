@@ -125,6 +125,17 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/0c1e9413a92eda14bccecda90a1bad09/org.apache.commons/commons-math/2.2/jar/commons-math-2.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/0c1e9413a92eda14bccecda90a1bad09/org.apache.commons/commons-math/2.2/source/commons-math-2.2-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/0c1e9413a92eda14bccecda90a1bad09/javax.inject/javax.inject/1/jar/javax.inject-1.jar!/" />
         </CLASSES>
         <JAVADOC />
