@@ -1,6 +1,5 @@
 package net.formicary.pricer.loader;
 
-import com.google.code.morphia.Datastore;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import net.formicary.pricer.PersistenceModule;
@@ -11,7 +10,6 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -21,10 +19,8 @@ import java.io.IOException;
  *         Date: 10/13/11
  *         Time: 7:34 AM
  */
-public class RateLoader {
+public abstract class RateLoader {
   private static final Logger log = LoggerFactory.getLogger(RateLoader.class);
-
-  @Inject Datastore ds;
 
   public void importHistoricRates(String fileName) throws IOException {
     long now = System.currentTimeMillis();
@@ -47,7 +43,7 @@ public class RateLoader {
       try {
         index.setRate(Double.parseDouble(items[6]));
         index.setRegulatoryBody(items[7]);
-        ds.save(index);
+        save(index);
         if(++count % 20000 == 0) {
           log.info("Saved " + count  + " rates");
         }
@@ -57,6 +53,8 @@ public class RateLoader {
     }
     log.info("Initialised historic rates in " + (System.currentTimeMillis() - now) + "ms with " + count + " rates");
   }
+
+  protected abstract void save(Index index);
 
   public static void main(String[] args) throws IOException {
     Injector i = Guice.createInjector(new PersistenceModule("src/test/resources/fpml"));

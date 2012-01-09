@@ -11,7 +11,7 @@ import com.google.code.morphia.mapping.MappingException;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import com.mongodb.Mongo;
-import net.formicary.pricer.impl.RateManagerImpl;
+import net.formicary.pricer.impl.MongoRateManagerImpl;
 import net.formicary.pricer.model.Index;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -47,7 +47,7 @@ public class PersistenceModule extends AbstractModule {
     } catch(UnknownHostException e) {
       addError(e);
     }
-    bind(RateManager.class).to(RateManagerImpl.class);
+    bind(RateManager.class).to(MongoRateManagerImpl.class);
     //bind(TradeStore.class).to(FpmlJAXBTradeStore.class);
   }
 
