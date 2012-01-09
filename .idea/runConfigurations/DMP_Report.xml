@@ -3,7 +3,7 @@
     <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
     <option name="MAIN_CLASS_NAME" value="net.formicary.pricer.tools.DMPReportGenerator" />
     <option name="VM_PARAMETERS" value="" />
-    <option name="PROGRAM_PARAMETERS" value="src/test/resources/fpml build/upload.txt" />
+    <option name="PROGRAM_PARAMETERS" value="&quot;C:\Documents and Settings\hsuleiman\My Documents\Downloads\eurfpml&quot; build/upload.txt" />
     <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
     <option name="ALTERNATIVE_JRE_PATH" value="" />

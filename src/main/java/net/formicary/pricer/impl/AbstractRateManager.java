@@ -7,6 +7,8 @@ import org.fpml.spec503wd3.Interval;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.apache.commons.math.util.FastMath.exp;
+
 /**
  * @author hani
  *         Date: 10/14/11
@@ -55,6 +57,6 @@ public abstract class AbstractRateManager implements RateManager {
   public double getDiscountFactor(String indexName, String currency, Interval interval, DateTime date, DateTime valuationDate) {
     double zero = getZeroRate(indexName, currency, interval, date) / 100;
     double days = date.numDaysFrom(valuationDate);
-    return Math.exp(zero * -(days) / 365d);
+    return exp(zero * -(days) / 365d);
   }
 }

@@ -15,6 +15,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.*;
 
+import static org.apache.commons.math.util.FastMath.exp;
+
 /**
  * @author hani
  *         Date: 10/11/11
@@ -107,7 +109,7 @@ public class CurveManagerImpl implements CurveManager {
       interpolatedZeroRate = getInterpolatedDiscountRate(flowDate, ccy, val);
     }
     double days = valuationDate.numDaysFrom(flowDate);
-    return Math.exp(interpolatedZeroRate * -(days) / 365d);
+    return exp(interpolatedZeroRate * -(days) / 365d);
   }
 
   @Override
