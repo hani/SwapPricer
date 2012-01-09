@@ -1,6 +1,6 @@
 package net.formicary.pricer.model;
 
-import hirondelle.date4j.DateTime;
+import net.formicary.pricer.util.FastDate;
 
 /**
  * @author hani
@@ -9,8 +9,8 @@ import hirondelle.date4j.DateTime;
  */
 public class CurvePillarPoint implements Comparable<CurvePillarPoint> {
   private String curveName;
-  private DateTime closeDate;
-  private DateTime maturityDate;
+  private FastDate closeDate;
+  private FastDate maturityDate;
   private double accrualFactor;
   private double zeroRate;
   private double discountFactor;
@@ -18,7 +18,7 @@ public class CurvePillarPoint implements Comparable<CurvePillarPoint> {
   public CurvePillarPoint() {
   }
 
-  public CurvePillarPoint(String curveName, DateTime maturityDate) {
+  public CurvePillarPoint(String curveName, FastDate maturityDate) {
     this.curveName = curveName;
     this.maturityDate = maturityDate;
   }
@@ -31,19 +31,19 @@ public class CurvePillarPoint implements Comparable<CurvePillarPoint> {
     this.curveName = curveName;
   }
 
-  public DateTime getCloseDate() {
+  public FastDate getCloseDate() {
     return closeDate;
   }
 
-  public void setCloseDate(DateTime closeDate) {
+  public void setCloseDate(FastDate closeDate) {
     this.closeDate = closeDate;
   }
 
-  public DateTime getMaturityDate() {
+  public FastDate getMaturityDate() {
     return maturityDate;
   }
 
-  public void setMaturityDate(DateTime maturityDate) {
+  public void setMaturityDate(FastDate maturityDate) {
     this.maturityDate = maturityDate;
   }
 

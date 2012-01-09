@@ -11,9 +11,10 @@ import com.google.code.morphia.mapping.MappingException;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import com.mongodb.Mongo;
-import hirondelle.date4j.DateTime;
+import javolution.text.TextBuilder;
 import net.formicary.pricer.impl.MongoRateManagerImpl;
 import net.formicary.pricer.model.Index;
+import net.formicary.pricer.util.FastDate;
 
 import java.net.UnknownHostException;
 
@@ -52,23 +53,33 @@ public class PersistenceModule extends AbstractModule {
   public class LocalDateConverter  extends TypeConverter implements SimpleValueConverter {
 
     public LocalDateConverter() {
-      super(DateTime.class);
+      super(FastDate.class);
     }
 
     @Override
     public Object decode(Class targetClass, Object val, MappedField optionalExtraInfo) throws MappingException {
       if (val == null) return null;
 
-      if (val instanceof DateTime)
+      if (val instanceof FastDate)
         return val;
       String s = (String)val;
-      return DateTime.forDateOnly(Integer.parseInt(s.substring(0, 4)), Integer.parseInt(s.substring(4, 6)), Integer.parseInt(s.substring(6, 8)));
+      return new FastDate(Integer.parseInt(s.substring(0, 4)), Integer.parseInt(s.substring(4, 6)), Integer.parseInt(s.substring(6, 8)));
     }
 
     @Override
     public Object encode(Object value, MappedField optionalExtraInfo) {
-      DateTime dt = (DateTime)value;
-      return dt.format("YYYYMMDD");
+      FastDate dt = (FastDate)value;
+      TextBuilder sb = new TextBuilder();
+      sb.append(dt.getYear());
+      if(dt.getMonth() < 10) {
+        sb.append('0');
+      }
+      sb.append(dt.getMonth());
+      if(dt.getDay() < 10) {
+        sb.append('0');
+      }
+      sb.append(dt.getDay());
+      return sb.toString();
     }
   }
 }

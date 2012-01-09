@@ -1,6 +1,5 @@
 package net.formicary.pricer.util;
 
-import hirondelle.date4j.DateTime;
 import net.formicary.pricer.model.DayCountFraction;
 import org.fpml.spec503wd3.*;
 
@@ -99,7 +98,7 @@ public class FpMLUtil {
     return getStub(leg, "finalStub");
   }
 
-  public static DateTime getEndDate(InterestRateStream leg) {
+  public static FastDate getEndDate(InterestRateStream leg) {
     //if we have a stub, then our end is from this date
     XMLGregorianCalendar cal = leg.getCalculationPeriodDates().getLastRegularPeriodEndDate();
     //no stub, just use the termination date
@@ -107,13 +106,13 @@ public class FpMLUtil {
     return DateUtil.getDate(cal);
   }
 
-  public static DateTime getStartDate(DateTime valuationDate, InterestRateStream leg) {
+  public static FastDate getStartDate(FastDate valuationDate, InterestRateStream leg) {
     XMLGregorianCalendar cal = leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate();
     if(cal != null) {
       return DateUtil.getDate(cal);
     }
 
-    DateTime effectiveDate = DateUtil.getDate(leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
+    FastDate effectiveDate = DateUtil.getDate(leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
     return effectiveDate;
   }
 

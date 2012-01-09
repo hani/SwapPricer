@@ -1,9 +1,9 @@
 package net.formicary.pricer.loader;
 
 import com.google.inject.Guice;
-import hirondelle.date4j.DateTime;
 import net.formicary.pricer.HolidayManager;
 import net.formicary.pricer.PricerModule;
+import net.formicary.pricer.util.FastDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,22 +31,22 @@ public class HolidayLoader {
     BufferedReader is = new BufferedReader(new FileReader("staticdata/rep00006.txt"));
     is.readLine();
     String line;
-    Map<String, Set<DateTime>> allDates = new HashMap<String, Set<DateTime>>();
+    Map<String, Set<FastDate>> allDates = new HashMap<String, Set<FastDate>>();
 
     int count = 0;
     while((line = is.readLine()) != null) {
       count++;
       String[] items = line.split("\t");
-      Set<DateTime> dates = allDates.get(items[1]);
+      Set<FastDate> dates = allDates.get(items[1]);
       if(dates == null) {
-        dates = new HashSet<DateTime>();
+        dates = new HashSet<FastDate>();
         allDates.put(items[1], dates);
       }
       String d = items[2];
-      dates.add(DateTime.forDateOnly(Integer.parseInt(d.substring(6, 10)), Integer.parseInt(d.substring(3, 5)), Integer.parseInt(d.substring(0, 2))));
+      dates.add(new FastDate(Integer.parseInt(d.substring(6, 10)), Integer.parseInt(d.substring(3, 5)), Integer.parseInt(d.substring(0, 2))));
     }
 
-    for(Map.Entry<String, Set<DateTime>> entry : allDates.entrySet()) {
+    for(Map.Entry<String, Set<FastDate>> entry : allDates.entrySet()) {
       manager.registerHolidays(entry.getKey(), entry.getValue());
     }
 

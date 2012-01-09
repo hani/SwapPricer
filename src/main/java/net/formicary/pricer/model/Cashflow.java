@@ -1,6 +1,6 @@
 package net.formicary.pricer.model;
 
-import hirondelle.date4j.DateTime;
+import net.formicary.pricer.util.FastDate;
 
 /**
  * @author hani
@@ -10,7 +10,7 @@ import hirondelle.date4j.DateTime;
 public class Cashflow implements Comparable<Cashflow>{
   private String tradeId;
   private double npv;
-  private DateTime date;
+  private FastDate date;
   private FlowType type;
   private double discountFactor;
   private double rate;
@@ -20,7 +20,7 @@ public class Cashflow implements Comparable<Cashflow>{
   public Cashflow() {
   }
 
-  public Cashflow(double npv, DateTime date) {
+  public Cashflow(double npv, FastDate date) {
     this.npv = npv;
     this.date = date;
   }
@@ -57,11 +57,11 @@ public class Cashflow implements Comparable<Cashflow>{
     this.npv = npv;
   }
 
-  public DateTime getDate() {
+  public FastDate getDate() {
     return date;
   }
 
-  public void setDate(DateTime date) {
+  public void setDate(FastDate date) {
     this.date = date;
   }
 

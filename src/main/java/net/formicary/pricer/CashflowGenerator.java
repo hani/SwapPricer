@@ -1,8 +1,8 @@
 package net.formicary.pricer;
 
-import hirondelle.date4j.DateTime;
 import net.formicary.pricer.model.Cashflow;
 import net.formicary.pricer.model.FlowType;
+import net.formicary.pricer.util.FastDate;
 import net.formicary.pricer.util.FpMLUtil;
 import org.fpml.spec503wd3.*;
 
@@ -25,7 +25,7 @@ public class CashflowGenerator {
   @Inject TradeStore tradeStore;
   @Inject RateManager rateManager;
 
-  public List<Cashflow> generateCashflows(DateTime valuationDate, String id) {
+  public List<Cashflow> generateCashflows(FastDate valuationDate, String id) {
     Swap swap = tradeStore.getTrade(id);
 
     List<Cashflow> flows = new ArrayList<Cashflow>();
@@ -56,19 +56,19 @@ public class CashflowGenerator {
     }
   }
 
-  private List<Cashflow> generateFloatingFlows(DateTime valuationDate, InterestRateStream leg) {
+  private List<Cashflow> generateFloatingFlows(FastDate valuationDate, InterestRateStream leg) {
     StreamContext ctx = new StreamContext(calendarManager, valuationDate, leg);
-    List<DateTime> calculationDates = ctx.calculationDates;
+    List<FastDate> calculationDates = ctx.calculationDates;
     CalculationPeriodFrequency interval = ctx.interval;
     Interval paymentInterval = leg.getPaymentDates().getPaymentFrequency();
-    DateTime paymentStartDate = ctx.effectiveDate;
+    FastDate paymentStartDate = ctx.effectiveDate;
     if(interval.getPeriod() == paymentInterval.getPeriod() && interval.getPeriodMultiplier().equals(paymentInterval.getPeriodMultiplier())) {
       paymentInterval = interval;
       if(ctx.firstRegularPeriodStartDate != null)
         paymentStartDate = ctx.firstRegularPeriodStartDate;
     }
 
-    List<DateTime> paymentDates = calendarManager.getAdjustedDates(paymentStartDate, ctx.endDate, ctx.conventions, paymentInterval, FpMLUtil.getBusinessCenters(leg), interval.getRollConvention());
+    List<FastDate> paymentDates = calendarManager.getAdjustedDates(paymentStartDate, ctx.endDate, ctx.conventions, paymentInterval, FpMLUtil.getBusinessCenters(leg), interval.getRollConvention());
     if(ctx.lastRegularPeriodEndDate != null && ctx.lastRegularPeriodEndDate.lt(ctx.terminationDate)) {
       paymentDates.add(ctx.terminationDate);
     }
@@ -84,12 +84,12 @@ public class CashflowGenerator {
     }
     //we want the last payment thats before the cutoff date, that's when our calculations start
 
-    List<DateTime> fixingDates = calendarManager.getFixingDates(calculationDates, leg.getResetDates().getFixingDates());
+    List<FastDate> fixingDates = calendarManager.getFixingDates(calculationDates, leg.getResetDates().getFixingDates());
     List<Cashflow> flows = new ArrayList<Cashflow>();
     for(int i = nextPaymentIndex; i < calculationDates.size(); i++) {
-      DateTime periodEndDate = calculationDates.get(i);
-      DateTime fixingDate = fixingDates.get(i -1);
-      DateTime periodStartDate = calculationDates.get(i - 1);
+      FastDate periodEndDate = calculationDates.get(i);
+      FastDate fixingDate = fixingDates.get(i -1);
+      FastDate periodStartDate = calculationDates.get(i - 1);
       //todo need to figure out how to handle this
  //     BigDecimal initialFloatingRate = FpMLUtil.getInitialFloatingRate(calculation);
 //      if(i == nextPaymentIndex && initialFloatingRate != null) {
@@ -102,7 +102,7 @@ public class CashflowGenerator {
         flows.add(flow);
       } else {
         //todo centers should be based on the index centers, and period start should be fixingdate + 2D (to handle case where periodstart is a bad date)
-        DateTime tenorEndDate;
+        FastDate tenorEndDate;
         if(interval.getPeriod() == PeriodEnum.T) {
           tenorEndDate = periodEndDate;
         } else {
@@ -116,12 +116,12 @@ public class CashflowGenerator {
     //we have all the calculated cashflows, we next need to check the payment dates
     //shortcut case, we have the same schedules
     if(ctx.initialStub != null && ctx.firstRegularPeriodStartDate.gt(ctx.cutoffDate)) {
-      DateTime endDate = ctx.firstRegularPeriodStartDate;
+      FastDate endDate = ctx.firstRegularPeriodStartDate;
       flows.add(0, calculateStubCashflow(ctx, ctx.effectiveDate, endDate, ctx.initialStub.getFloatingRate()));
     }
     if(ctx.finalStub != null) {
-      DateTime endDate = ctx.terminationDate;
-      DateTime startDate = ctx.endDate;
+      FastDate endDate = ctx.terminationDate;
+      FastDate startDate = ctx.endDate;
       flows.add(calculateStubCashflow(ctx, startDate, endDate, ctx.finalStub.getFloatingRate()));
     }
     flows = convertToPaymentFlows(ctx, flows, paymentDates);
@@ -131,15 +131,15 @@ public class CashflowGenerator {
     return flows;
   }
 
-  private List<Cashflow> generateFixedFlows(DateTime valuationDate, InterestRateStream leg) {
+  private List<Cashflow> generateFixedFlows(FastDate valuationDate, InterestRateStream leg) {
     StreamContext ctx = new StreamContext(calendarManager, valuationDate, leg);
-    List<DateTime> calculationDates = ctx.calculationDates;
+    List<FastDate> calculationDates = ctx.calculationDates;
     List<Cashflow> flows = new ArrayList<Cashflow>();
     Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
     if(calculation != null) {
       BigDecimal rate = calculation.getFixedRateSchedule().getInitialValue();
       for(int i = 1; i < calculationDates.size(); i++) {
-        DateTime paymentDate = calculationDates.get(i);
+        FastDate paymentDate = calculationDates.get(i);
         if(paymentDate.gt(ctx.cutoffDate)) {
           Cashflow flow = getCashflow(calculationDates.get(i - 1), paymentDate, ctx, rate.doubleValue());
           flows.add(flow);
@@ -165,25 +165,25 @@ public class CashflowGenerator {
     return flows;
   }
 
-  private Cashflow calculateStubCashflow(StreamContext ctx, DateTime startDate, DateTime endDate, List<FloatingRate> stubRates) {
+  private Cashflow calculateStubCashflow(StreamContext ctx, FastDate startDate, FastDate endDate, List<FloatingRate> stubRates) {
     BusinessCenters centers = ctx.stream.getCalculationPeriodDates().getCalculationPeriodDatesAdjustments().getBusinessCenters();
     endDate = calendarManager.adjustDate(endDate, ctx.conventions[1], centers);
     double rate1Value = 0, rate2Value = 0;
     if(stubRates.size() > 0) {
       FloatingRate rate1 = stubRates.get(0);
-      DateTime rate1EndDate = calendarManager.applyInterval(startDate, rate1.getIndexTenor(), BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
+      FastDate rate1EndDate = calendarManager.applyInterval(startDate, rate1.getIndexTenor(), BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
       rate1Value = curveManager.getImpliedForwardRate(startDate, rate1EndDate, ctx.valuationDate, ctx.currency, ctx.interval);
       if(stubRates.size() == 2) {
         FloatingRate rate2 = stubRates.get(1);
-        DateTime rate2EndDate = calendarManager.applyInterval(startDate, rate2.getIndexTenor(), BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
+        FastDate rate2EndDate = calendarManager.applyInterval(startDate, rate2.getIndexTenor(), BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
         rate2Value = curveManager.getImpliedForwardRate(startDate, rate2EndDate, ctx.valuationDate, ctx.currency, ctx.interval);
       }
     }
     double rateToUse = rate1Value;
     if(stubRates.size() == 2) {
       int periodLength = startDate.numDaysFrom(endDate);
-      DateTime tenor1End = calendarManager.applyInterval(startDate, stubRates.get(0).getIndexTenor(), ctx.conventions[1], centers);
-      DateTime tenor2End = calendarManager.applyInterval(startDate, stubRates.get(1).getIndexTenor(), ctx.conventions[1], centers);
+      FastDate tenor1End = calendarManager.applyInterval(startDate, stubRates.get(0).getIndexTenor(), ctx.conventions[1], centers);
+      FastDate tenor2End = calendarManager.applyInterval(startDate, stubRates.get(1).getIndexTenor(), ctx.conventions[1], centers);
       int rate1Period = startDate.numDaysFrom(tenor1End);
       int rate2Period = startDate.numDaysFrom(tenor2End);
       rateToUse = rate1Value + (periodLength - rate1Period) * (rate2Value - rate1Value)/(rate2Period - rate1Period);
@@ -197,7 +197,7 @@ public class CashflowGenerator {
     return flow;
   }
 
-  private List<Cashflow> convertToPaymentFlows(StreamContext ctx, List<Cashflow> flows, List<DateTime> paymentDates) {
+  private List<Cashflow> convertToPaymentFlows(StreamContext ctx, List<Cashflow> flows, List<FastDate> paymentDates) {
     List<Cashflow> paymentFlows = new ArrayList<Cashflow>();
     int start = Collections.binarySearch(paymentDates, ctx.cutoffDate.plusDays(1));
     BigDecimal spread = FpMLUtil.getSpread(ctx.stream.getCalculationPeriodAmount().getCalculation());
@@ -206,7 +206,7 @@ public class CashflowGenerator {
     if(start < 0) start = -(start + 1);
     //rule out flows before the last payment
     if(start > 0) {
-      DateTime lastHistoricPayment = paymentDates.get(start - 1);
+      FastDate lastHistoricPayment = paymentDates.get(start - 1);
       Iterator<Cashflow> i = flows.iterator();
       while (i.hasNext()) {
         Cashflow flow = i.next();
@@ -220,7 +220,7 @@ public class CashflowGenerator {
     }
     for(int i = start; i < paymentDates.size(); i++) {
       Cashflow payment = new Cashflow();
-      DateTime paymentDate = paymentDates.get(i);
+      FastDate paymentDate = paymentDates.get(i);
       payment.setDate(paymentDate);
       double notional = ctx.notional;
       Iterator<Cashflow> iter = flows.iterator();
@@ -257,7 +257,7 @@ public class CashflowGenerator {
     return paymentFlows;
   }
 
-  private Cashflow getCashflow(DateTime periodStart, DateTime periodEnd, StreamContext ctx, double rate) {
+  private Cashflow getCashflow(FastDate periodStart, FastDate periodEnd, StreamContext ctx, double rate) {
     Cashflow flow = new Cashflow();
     double dayCountFraction = calendarManager.getDayCountFraction(periodStart, periodEnd, FpMLUtil.getDayCountFraction(ctx.fraction.getValue()));
     flow.setDayCountFraction(dayCountFraction);

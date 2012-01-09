@@ -1,9 +1,9 @@
 package net.formicary.pricer.impl;
 
-import hirondelle.date4j.DateTime;
 import net.formicary.pricer.CalendarManager;
 import net.formicary.pricer.HolidayManager;
 import net.formicary.pricer.model.DayCountFraction;
+import net.formicary.pricer.util.FastDate;
 import org.fpml.spec503wd3.*;
 import org.fpml.spec503wd3.Interval;
 
@@ -13,7 +13,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import static hirondelle.date4j.DateTime.DayOverflow.*;
+import static net.formicary.pricer.util.FastDate.DayOverflow.*;
 
 /**
  * @author hani
@@ -26,7 +26,7 @@ public class CalendarManagerImpl implements CalendarManager {
   private HolidayManager holidayManager;
 
   @Override
-  public double getDayCountFraction(DateTime start, DateTime end, DayCountFraction dayCountFraction) {
+  public double getDayCountFraction(FastDate start, FastDate end, DayCountFraction dayCountFraction) {
     switch(dayCountFraction) {
       case ONE:
         return 1;
@@ -59,7 +59,7 @@ public class CalendarManagerImpl implements CalendarManager {
           return start.numDaysFrom(end) / 365d;
         }
         //one of the start or end is in a leap year, so we work out the number of days separately
-        DateTime yearSwitchOver = DateTime.forDateOnly(endYear, 1, 1);
+        FastDate yearSwitchOver = new FastDate(endYear, 1, 1);
         double startFraction = start.numDaysFrom(yearSwitchOver) / (isStartInLeapYear ? 366d : 365d);
         double endFraction = yearSwitchOver.numDaysFrom(end) / (isEndInLeapYear ? 366d : 365d);
         return startFraction + endFraction;
@@ -70,12 +70,12 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
-  public List<DateTime> getFixingDates(List<DateTime> dates, final RelativeDateOffset fixingOffset) {
-    List<DateTime> fixingDates = new ArrayList<DateTime>();
+  public List<FastDate> getFixingDates(List<FastDate> dates, final RelativeDateOffset fixingOffset) {
+    List<FastDate> fixingDates = new ArrayList<FastDate>();
     if(fixingOffset.getPeriod() != PeriodEnum.D) {
       throw new UnsupportedOperationException("Fixing dates only supports day periods");
     }
-    for(DateTime date : dates) {
+    for(FastDate date : dates) {
       //move by fixing offset, we only count business days
       int offset = fixingOffset.getPeriodMultiplier().intValue();
 //      if(offset == 0) {
@@ -99,7 +99,7 @@ public class CalendarManagerImpl implements CalendarManager {
     return fixingDates;
   }
 
-  private boolean isNonWorkingDay(DateTime date, BusinessCenters businessCenters) {
+  private boolean isNonWorkingDay(FastDate date, BusinessCenters businessCenters) {
     for(BusinessCenter s : businessCenters.getBusinessCenter()) {
         if(holidayManager.isNonWorkingDay(s.getValue(), date)) {
           return true;
@@ -109,11 +109,11 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
-  public List<DateTime> getAdjustedDates(DateTime start, DateTime end, BusinessDayConventionEnum conventions[], Interval interval, BusinessCenters[] businessCenters, String rollConvention) {
+  public List<FastDate> getAdjustedDates(FastDate start, FastDate end, BusinessDayConventionEnum conventions[], Interval interval, BusinessCenters[] businessCenters, String rollConvention) {
     if(end == null) {
       throw new NullPointerException("end date is null");
     }
-    List<DateTime> unadjustedDates = getDatesInRange(start, end, interval, rollConvention);
+    List<FastDate> unadjustedDates = getDatesInRange(start, end, interval, rollConvention);
     if(unadjustedDates.get(unadjustedDates.size() - 1).lt(end)) {
       unadjustedDates.add(end);
     }
@@ -129,14 +129,15 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
-  public List<DateTime> getDatesInRange(DateTime start, DateTime end, Interval interval, String rollConvention) {
-    List<DateTime> unadjustedDates = new ArrayList<DateTime>();
+  public List<FastDate> getDatesInRange(FastDate start, FastDate end, Interval interval, String rollConvention) {
+    List<FastDate> unadjustedDates = new ArrayList<FastDate>();
     if(interval.getPeriod() == PeriodEnum.T) {
       unadjustedDates.add(start);
       unadjustedDates.add(end);
       return unadjustedDates;
     }
-    DateTime current = DateTime.forDateOnly(start.getYear(), start.getMonth(), start.getDay());
+    FastDate current = new FastDate(start.getYear(),
+        start.getMonth(), start.getDay());
     boolean isIMM = false;
     boolean isEOM = false;
     int rollDay = 0;
@@ -160,7 +161,7 @@ public class CalendarManagerImpl implements CalendarManager {
       current = plus(current, interval.getPeriod(), interval.getPeriodMultiplier());
       if(rollDay > 0 && current.getDay() != rollDay) {
         try {
-          current = DateTime.forDateOnly(current.getYear(), current.getMonth(), rollDay);
+          current = new FastDate(current.getYear(), current.getMonth(), rollDay);
         } catch (Exception e) {
           //can't do stuff like feb 29 on a non-leap year etc, it's ok.
         }
@@ -180,7 +181,7 @@ public class CalendarManagerImpl implements CalendarManager {
         //we have the first weds, we want the third, so move forward twice
         current = current.plusDays(14);
         if("IMMCAD".equals(rollConvention)) {
-          current = current.minusDays(2);
+          current = current.plusDays(-2);
         } else if("IMMNZD".equals(rollConvention)) {
           throw new UnsupportedOperationException("IMMNZD is not supported yet");
         } else if("IMMAUD".equals(rollConvention)) {
@@ -188,14 +189,11 @@ public class CalendarManagerImpl implements CalendarManager {
         }
       }
     }
-    for(int i = 0; i < unadjustedDates.size(); i++) {
-      unadjustedDates.set(i, unadjustedDates.get(i).truncate(DateTime.Unit.DAY));
-    }
     return unadjustedDates;
   }
 
   @Override
-  public DateTime applyDayInterval(DateTime date, Interval interval, BusinessCenters businessCenters) {
+  public FastDate applyDayInterval(FastDate date, Interval interval, BusinessCenters businessCenters) {
     //move by fixing offset, we only count business days
     if(interval instanceof Offset) {
       if(((Offset)interval).getDayType() != DayTypeEnum.BUSINESS) {
@@ -221,32 +219,32 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
-  public DateTime applyInterval(DateTime date, Interval interval, BusinessDayConventionEnum convention, BusinessCenters centers) {
+  public FastDate applyInterval(FastDate date, Interval interval, BusinessDayConventionEnum convention, BusinessCenters centers) {
     PeriodEnum period = interval.getPeriod();
     date = plus(date, period, interval.getPeriodMultiplier());
     return adjustDate(date, convention, centers);
   }
 
-  private DateTime plus(DateTime date, PeriodEnum period, BigInteger periodMultiplier) {
+  private FastDate plus(FastDate date, PeriodEnum period, BigInteger periodMultiplier) {
     switch (period) {
       case D:
-        date = date.plus(0, 0, periodMultiplier.intValue(), 0, 0, 0, Spillover);
+        date = date.plus(0, 0, periodMultiplier.intValue(), Spillover);
         break;
       case W:
-        date = date.plus(0, 0, 7 * periodMultiplier.intValue(), 0, 0, 0, Spillover);
+        date = date.plus(0, 0, 7 * periodMultiplier.intValue(), Spillover);
         break;
       case M:
-        date = date.plus(0, periodMultiplier.intValue(), 0, 0, 0, 0, LastDay);
+        date = date.plus(0, periodMultiplier.intValue(), 0, LastDay);
         break;
       case Y:
-        date = date.plus(periodMultiplier.intValue(), 0, 0, 0, 0, 0, LastDay);
+        date = date.plus(periodMultiplier.intValue(), 0, 0, LastDay);
         break;
     }
     return date;
   }
 
   @Override
-  public DateTime adjustDate(DateTime date, BusinessDayConventionEnum convention, BusinessCenters businessCenters) {
+  public FastDate adjustDate(FastDate date, BusinessDayConventionEnum convention, BusinessCenters businessCenters) {
     if(convention == BusinessDayConventionEnum.NONE) {
       return date;
     }

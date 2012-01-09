@@ -1,7 +1,7 @@
 package net.formicary.pricer;
 
-import hirondelle.date4j.DateTime;
 import net.formicary.pricer.util.DateUtil;
+import net.formicary.pricer.util.FastDate;
 import net.formicary.pricer.util.FpMLUtil;
 import org.fpml.spec503wd3.*;
 
@@ -18,29 +18,29 @@ public class StreamContext {
   final StubValue initialStub;
   final StubValue finalStub;
   final CalculationPeriodFrequency interval;
-  final DateTime valuationDate;
-  final DateTime cutoffDate;
-  final DateTime endDate;
+  final FastDate valuationDate;
+  final FastDate cutoffDate;
+  final FastDate endDate;
   final BusinessDayConventionEnum[] conventions;
-  final List<DateTime> calculationDates;
+  final List<FastDate> calculationDates;
   final InterestRateStream stream;
   final String currency;
   final double notional;
   final boolean paying;
   final CompoundingMethodEnum compoundingMethod;
   final DayCountFraction fraction;
-  final DateTime firstRegularPeriodStartDate;
+  final FastDate firstRegularPeriodStartDate;
   //we'll always pretend to be partyA from the LCH pov, to match the dmp tool
   private String ourName = "partyA";
-  final DateTime lastRegularPeriodEndDate;
-  final DateTime effectiveDate;
-  final DateTime terminationDate;
+  final FastDate lastRegularPeriodEndDate;
+  final FastDate effectiveDate;
+  final FastDate terminationDate;
   final BigDecimal knownAmount;
   final String floatingIndexName;
   final boolean checkForEndToEndIndexRoll;
   final BusinessCenters[] calculationCenters;
 
-  public StreamContext(CalendarManager calendarManager, DateTime valuationDate, InterestRateStream leg) {
+  public StreamContext(CalendarManager calendarManager, FastDate valuationDate, InterestRateStream leg) {
     this.stream = leg;
     this.valuationDate = valuationDate;
     this.cutoffDate = valuationDate.plusDays(3);
@@ -82,7 +82,7 @@ public class StreamContext {
     }
     checkForEndToEndIndexRoll = ("EURIBOR".equals(floatingIndexName) || "LIBOR".equals(floatingIndexName)) && maybeCheckForIndexEndToEnd;
 
-    DateTime earliest = firstRegularPeriodStartDate == null ? effectiveDate : firstRegularPeriodStartDate;
+    FastDate earliest = firstRegularPeriodStartDate == null ? effectiveDate : firstRegularPeriodStartDate;
     calculationDates = calendarManager.getAdjustedDates(earliest, endDate, conventions, interval, calculationCenters, null);
     initialStub = FpMLUtil.getInitialStub(leg);
     finalStub = FpMLUtil.getFinalStub(leg);

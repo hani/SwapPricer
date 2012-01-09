@@ -1,6 +1,6 @@
 package net.formicary.pricer;
 
-import hirondelle.date4j.DateTime;
+import net.formicary.pricer.util.FastDate;
 import org.fpml.spec503wd3.Interval;
 
 /**
@@ -9,6 +9,6 @@ import org.fpml.spec503wd3.Interval;
  *         Time: 5:28 PM
  */
 public interface RateManager {
-  double getZeroRate(String indexName, String currency, Interval interval, DateTime date);
-  double getDiscountFactor(String indexName, String currency, Interval interval, DateTime date, DateTime valuationDate);
+  double getZeroRate(String indexName, String currency, Interval interval, FastDate date);
+  double getDiscountFactor(String indexName, String currency, Interval interval, FastDate date, FastDate valuationDate);
 }

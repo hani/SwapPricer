@@ -70,15 +70,6 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/4a569daaf3e8717b5049c514e6950704/date4j/date4j/1.2.0/jar/date4j-1.2.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/0c1e9413a92eda14bccecda90a1bad09/org.codehaus.woodstox/woodstox-core-asl/4.1.2/jar/woodstox-core-asl-4.1.2.jar!/" />
         </CLASSES>
         <JAVADOC />

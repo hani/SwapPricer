@@ -1,9 +1,9 @@
 package net.formicary.pricer.impl;
 
-import hirondelle.date4j.DateTime;
 import javolution.text.TypeFormat;
 import net.formicary.pricer.CurveManager;
 import net.formicary.pricer.model.CurvePillarPoint;
+import net.formicary.pricer.util.FastDate;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.fpml.spec503wd3.Interval;
@@ -73,9 +73,9 @@ public class CurveManagerImpl implements CurveManager {
     CurvePillarPoint p = new CurvePillarPoint();
     p.setCurveName(data[0]);
     String close = data[1].substring(0, data[1].indexOf(' '));
-    p.setCloseDate(DateTime.forDateOnly(Integer.parseInt(close.substring(6, 10)), Integer.parseInt(close.substring(3, 5)), Integer.parseInt(close.substring(0, 2))));
+    p.setCloseDate(new FastDate(Integer.parseInt(close.substring(6, 10)), Integer.parseInt(close.substring(3, 5)), Integer.parseInt(close.substring(0, 2))));
     String maturity = data[2].substring(0, data[2].indexOf(' '));
-    p.setMaturityDate(DateTime.forDateOnly(Integer.parseInt(maturity.substring(6, 10)), Integer.parseInt(maturity.substring(3, 5)), Integer.parseInt(maturity.substring(0, 2))));
+    p.setMaturityDate(new FastDate(Integer.parseInt(maturity.substring(6, 10)), Integer.parseInt(maturity.substring(3, 5)), Integer.parseInt(maturity.substring(0, 2))));
     p.setAccrualFactor(TypeFormat.parseDouble(data[3]));
     p.setZeroRate(TypeFormat.parseDouble(data[4]));
     p.setDiscountFactor(TypeFormat.parseDouble(data[5]));
@@ -100,7 +100,7 @@ public class CurveManagerImpl implements CurveManager {
   }
 
   @Override
-  public double getDiscountFactor(DateTime flowDate, DateTime valuationDate, String ccy, Interval tenor, boolean isFixed) {
+  public double getDiscountFactor(FastDate flowDate, FastDate valuationDate, String ccy, Interval tenor, boolean isFixed) {
     //LCH uses OIS rate for futured fixed flows
     double interpolatedZeroRate;
     if(isFixed) {
@@ -114,18 +114,18 @@ public class CurveManagerImpl implements CurveManager {
   }
 
   @Override
-  public double getInterpolatedForwardRate(DateTime date, String ccy, String tenor) {
+  public double getInterpolatedForwardRate(FastDate date, String ccy, String tenor) {
     String curve = getForwardCurve(ccy, tenor);
     return getInterpolatedRate(date, ccy, curve);
   }
 
   @Override
-  public double getInterpolatedDiscountRate(DateTime date, String ccy, String tenor) {
+  public double getInterpolatedDiscountRate(FastDate date, String ccy, String tenor) {
     String curve = getDiscountCurve(ccy, tenor);
     return getInterpolatedRate(date, ccy, curve);
   }
 
-  public double getInterpolatedRate(DateTime date, String ccy, String curve) {
+  public double getInterpolatedRate(FastDate date, String ccy, String curve) {
 //    String key = ccy + curve + date.getYear() + '-' + date.getDayOfYear() + '-' + date.getDayOfMonth();
 //    Object value = cache.get(key);
 //    if(value != null) {
@@ -167,7 +167,7 @@ public class CurveManagerImpl implements CurveManager {
   }
 
   @Override
-  public double getImpliedForwardRate(DateTime start, DateTime end, DateTime valuationDate, String ccy, Interval tenor) {
+  public double getImpliedForwardRate(FastDate start, FastDate end, FastDate valuationDate, String ccy, Interval tenor) {
     String val = tenor.getPeriodMultiplier() + tenor.getPeriod().value();
     double startRate = getInterpolatedForwardRate(start, ccy, val);
     //all LCH curves are quoted /365

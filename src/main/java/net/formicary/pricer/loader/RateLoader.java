@@ -2,10 +2,10 @@ package net.formicary.pricer.loader;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import hirondelle.date4j.DateTime;
 import javolution.text.TypeFormat;
 import net.formicary.pricer.PersistenceModule;
 import net.formicary.pricer.model.Index;
+import net.formicary.pricer.util.FastDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +35,9 @@ public abstract class RateLoader {
       index.setName(items[1]);
       index.setTenorUnit(items[2]);
       index.setTenorPeriod(items[3]);
-      DateTime fixingDate = DateTime.forDateOnly(Integer.parseInt(items[4].substring(6, 10)), Integer.parseInt(items[4].substring(3, 5)), Integer.parseInt(items[4].substring(0, 2)));
+      FastDate fixingDate = new FastDate(Integer.parseInt(items[4].substring(6, 10)), Integer.parseInt(items[4].substring(3, 5)), Integer.parseInt(items[4].substring(0, 2)));
       index.setFixingDate(fixingDate);
-      index.setEffectiveDate(DateTime.forDateOnly(Integer.parseInt(items[5].substring(6, 10)), Integer.parseInt(items[5].substring(3, 5)), Integer.parseInt(items[5].substring(0, 2))));
+      index.setEffectiveDate(new FastDate(Integer.parseInt(items[5].substring(6, 10)), Integer.parseInt(items[5].substring(3, 5)), Integer.parseInt(items[5].substring(0, 2))));
       try {
         index.setRate(TypeFormat.parseDouble(items[6]));
         index.setRegulatoryBody(items[7]);

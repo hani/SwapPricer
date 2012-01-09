@@ -1,13 +1,12 @@
 package net.formicary.pricer;
 
-import hirondelle.date4j.DateTime;
+import net.formicary.pricer.util.FastDate;
 import org.fpml.spec503wd3.BusinessCenter;
 import org.fpml.spec503wd3.BusinessCenters;
 import org.fpml.spec503wd3.BusinessDayConventionEnum;
 
 import javax.inject.Singleton;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -19,30 +18,22 @@ import java.util.Set;
 @Singleton
 public class HolidayManager {
 
-  private Map<String, Set<DateTime>> holidays = new HashMap<String, Set<DateTime>>();
+  private Map<String, Set<FastDate>> holidays = new HashMap<String, Set<FastDate>>();
 
-  public void registerHolidays(String key, Set<DateTime> value) {
-    //to speed up lookups, we store both the no-time and the time version of the date
-   //this saves us having to call .truncate on passed in dates, so holiday lookups don't
-    //end up creating extra crap
-    Set<DateTime> set = new HashSet<DateTime>(value.size() * 2);
-    set.addAll(value);
-    for (DateTime dateTime : value) {
-      set.add(new DateTime(dateTime.getYear(), dateTime.getMonth(), dateTime.getDay(), 0, 0, 0, null));
-    }
-    holidays.put(key, set);
+  public void registerHolidays(String key, Set<FastDate> value) {
+    holidays.put(key, value);
   }
 
-  public boolean isNonWorkingDay(String value, DateTime date) {
+  public boolean isNonWorkingDay(String value, FastDate date) {
     int dayOfWeek = date.getWeekDay();
     //weekend check, we only support western weekends for now, so no middle east stuff to worry about yet
     if(dayOfWeek == 1 || dayOfWeek == 7) return true;
     return holidays.get(value).contains(date);
   }
 
-  public DateTime adjustDate(DateTime date, BusinessDayConventionEnum convention, BusinessCenters businessCenters) {
+  public FastDate adjustDate(FastDate date, BusinessDayConventionEnum convention, BusinessCenters businessCenters) {
     if(convention == BusinessDayConventionEnum.NONE) return date;
-    DateTime current = date;
+    FastDate current = date;
     if(businessCenters != null) {
       for(BusinessCenter center : businessCenters.getBusinessCenter()) {
         while(isNonWorkingDay(center.getValue(), current)) {
@@ -53,7 +44,7 @@ public class HolidayManager {
     return current;
   }
 
-  private DateTime adjustDate(DateTime date, BusinessDayConventionEnum convention, String value) {
+  private FastDate adjustDate(FastDate date, BusinessDayConventionEnum convention, String value) {
     switch(convention) {
       case NONE:
       case NOT_APPLICABLE:
@@ -66,7 +57,7 @@ public class HolidayManager {
         int stepToUse = 1;
         return move(date, value, stepToUse);
       case PRECEDING:
-        return date.minusDays(1);
+        return date.plusDays(-1);
       case MODPRECEDING:
         stepToUse = 1;
         return move(date, value, stepToUse);
@@ -77,7 +68,7 @@ public class HolidayManager {
     }
   }
 
-  private DateTime move(DateTime date, String value, int stepToUse) {
+  private FastDate move(FastDate date, String value, int stepToUse) {
     final int month = date.getMonth();
     while (isNonWorkingDay(value, date)) {
         date = date.plusDays(stepToUse);

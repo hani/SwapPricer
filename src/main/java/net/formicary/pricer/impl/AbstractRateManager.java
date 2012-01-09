@@ -1,7 +1,7 @@
 package net.formicary.pricer.impl;
 
-import hirondelle.date4j.DateTime;
 import net.formicary.pricer.RateManager;
+import net.formicary.pricer.util.FastDate;
 import org.fpml.spec503wd3.Interval;
 
 import java.util.Map;
@@ -20,7 +20,7 @@ public abstract class AbstractRateManager implements RateManager {
   private Map<String, Object> cache = new ConcurrentHashMap<String, Object>();
 
   @Override
-  public double getZeroRate(String indexName, String currency, Interval interval, DateTime date) {
+  public double getZeroRate(String indexName, String currency, Interval interval, FastDate date) {
     //avoid date.toString as it's relatively expensive
     String key = indexName + "-" + currency + "-" + date.getYear() + '-' + date.getDayOfYear() + '-' + date.getDay() + "-" + interval.getPeriodMultiplier() + interval.getPeriod();
     if(caching) {
@@ -43,7 +43,7 @@ public abstract class AbstractRateManager implements RateManager {
     return rate;
   }
 
-  protected abstract double getRate(String key, String indexName, String currency, Interval interval, DateTime date);
+  protected abstract double getRate(String key, String indexName, String currency, Interval interval, FastDate date);
 
   public boolean isCaching() {
     return caching;
@@ -54,7 +54,7 @@ public abstract class AbstractRateManager implements RateManager {
   }
 
   @Override
-  public double getDiscountFactor(String indexName, String currency, Interval interval, DateTime date, DateTime valuationDate) {
+  public double getDiscountFactor(String indexName, String currency, Interval interval, FastDate date, FastDate valuationDate) {
     double zero = getZeroRate(indexName, currency, interval, date) / 100;
     double days = date.numDaysFrom(valuationDate);
     return exp(zero * -(days) / 365d);
