@@ -19,20 +19,23 @@ import java.util.concurrent.ConcurrentHashMap;
  *         Time: 5:30 PM
  */
 public class RateManagerImpl implements RateManager {
-  @Inject Datastore ds;
+  @Inject private Datastore ds;
   private static final Object NOT_FOUND = new Object();
+  private boolean caching = true;
   private Map<String, Object> cache = new ConcurrentHashMap<String, Object>();
 
   @Override
   public double getZeroRate(String indexName, String currency, Interval interval, LocalDate date) {
     //avoid date.toString as it's relatively expensive
     String key = indexName + "-" + currency + "-" + date.getYear() + '-' + date.getDayOfYear() + '-' + date.getDayOfMonth() + "-" + interval.getPeriodMultiplier() + interval.getPeriod();
-    Object value = cache.get(key);
-    if(value != null) {
-      if(value == NOT_FOUND) {
-        throw new IllegalArgumentException("No " + indexName + " rate found for " + currency + " " + interval.getPeriodMultiplier() + interval.getPeriod() + " on " + date);
+    if(caching) {
+      Object value = cache.get(key);
+      if(value != null) {
+        if(value == NOT_FOUND) {
+          throw new IllegalArgumentException("No " + indexName + " rate found for " + currency + " " + interval.getPeriodMultiplier() + interval.getPeriod() + " on " + date);
+        }
+        return (Double)value;
       }
-      return (Double)value;
     }
     Query<Index> query = ds.createQuery(Index.class);
     query.field("currency").equal(currency);
@@ -48,11 +51,21 @@ public class RateManagerImpl implements RateManager {
     query.field("name").equal(indexName);
     Index index = query.get();
     if(index == null) {
-      cache.put(key, NOT_FOUND);
+      if(caching)
+        cache.put(key, NOT_FOUND);
       throw new IllegalArgumentException("No " + indexName + " rate found for " + currency + " " + interval.getPeriodMultiplier() + interval.getPeriod() + " on " + date);
     }
-    cache.put(key, index.getRate());
+    if(caching)
+      cache.put(key, index.getRate());
     return index.getRate();
+  }
+
+  public boolean isCaching() {
+    return caching;
+  }
+
+  public void setCaching(boolean caching) {
+    this.caching = caching;
   }
 
   @Override
