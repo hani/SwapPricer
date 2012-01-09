@@ -32,7 +32,7 @@ public class CurveManagerImpl implements CurveManager {
   //a map of currency -> (tenor -> forward,discount) curves
   private Map<String, Map<String, String[]>> mapping = new HashMap<String, Map<String, String[]>>();
   //a map of curve -> list of pillar points
-  private String curveDir = "curvedata";
+  private String curveDir = "staticdata";
   private Map<String, List<CurvePillarPoint>> curveData = new HashMap<String, List<CurvePillarPoint>>();
 //  private static final Object NOT_FOUND = new Object();
 //  private Map<String, Object> cache = new ConcurrentHashMap<String, Object>();
@@ -46,7 +46,8 @@ public class CurveManagerImpl implements CurveManager {
     String[] files = dir.list(new FilenameFilter() {
       @Override
       public boolean accept(File dir, String name) {
-        return name.toLowerCase().endsWith(".txt");
+        String s = name.toLowerCase();
+        return s.endsWith(".txt") && s.contains("00100");
       }
     });
     for(String file : files) {

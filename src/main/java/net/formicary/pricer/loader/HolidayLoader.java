@@ -1,10 +1,5 @@
 package net.formicary.pricer.loader;
 
-import java.io.*;
-import java.util.*;
-
-import javax.inject.Inject;
-
 import com.google.inject.Guice;
 import net.formicary.pricer.HolidayManager;
 import net.formicary.pricer.PricerModule;
@@ -13,6 +8,15 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author hani
@@ -26,7 +30,7 @@ public class HolidayLoader {
   @Inject
   public HolidayLoader(HolidayManager manager) throws IOException {
     long now = System.currentTimeMillis();
-    BufferedReader is = new BufferedReader(new FileReader("data/rep00006.txt"));
+    BufferedReader is = new BufferedReader(new FileReader("staticdata/rep00006.txt"));
     is.readLine();
     String line;
     DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
