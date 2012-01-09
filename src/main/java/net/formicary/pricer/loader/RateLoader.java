@@ -1,8 +1,5 @@
 package net.formicary.pricer.loader;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import net.formicary.pricer.PersistenceModule;
 import net.formicary.pricer.model.Index;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -55,9 +52,4 @@ public abstract class RateLoader {
   }
 
   protected abstract void save(Index index);
-
-  public static void main(String[] args) throws IOException {
-    Injector i = Guice.createInjector(new PersistenceModule("src/test/resources/fpml"));
-    i.getInstance(RateLoader.class).importHistoricRates(args[0]);
-  }
 }

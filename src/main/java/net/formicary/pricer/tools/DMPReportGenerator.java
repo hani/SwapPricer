@@ -3,7 +3,7 @@ package net.formicary.pricer.tools;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import net.formicary.pricer.CashflowGenerator;
-import net.formicary.pricer.PersistenceModule;
+import net.formicary.pricer.JedisPersistenceModule;
 import net.formicary.pricer.PricerModule;
 import net.formicary.pricer.model.Cashflow;
 import org.joda.time.LocalDate;
@@ -15,7 +15,10 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -96,7 +99,7 @@ public class DMPReportGenerator {
   }
 
   public static void main(final String[] args) throws IOException {
-    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule(args[0]));
+    Injector injector = Guice.createInjector(new PricerModule(), new JedisPersistenceModule(args[0]));
     DMPReportGenerator reporter = injector.getInstance(DMPReportGenerator.class);
     reporter.generateReport(args[0], args[1]);
   }

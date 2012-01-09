@@ -40,7 +40,7 @@ public class CashflowTests {
 
   @BeforeClass
   public void init() throws JAXBException {
-    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule(fpmlDir));
+    Injector injector = Guice.createInjector(new PricerModule(), new MongoPersistenceModule(fpmlDir));
     generator = injector.getInstance(CashflowGenerator.class);
   }
 

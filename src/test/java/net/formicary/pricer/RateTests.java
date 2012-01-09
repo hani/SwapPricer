@@ -23,7 +23,7 @@ public class RateTests {
 
   @BeforeClass
   public void init() {
-    Injector injector = Guice.createInjector(new PersistenceModule("src/test/resources/fpml"));
+    Injector injector = Guice.createInjector(new MongoPersistenceModule("src/test/resources/fpml"));
     manager = injector.getInstance(RateManager.class);
   }
 

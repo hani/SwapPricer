@@ -24,13 +24,13 @@ import java.net.UnknownHostException;
  *         Date: 10/13/11
  *         Time: 8:02 AM
  */
-public class PersistenceModule extends AbstractModule {
+public class MongoPersistenceModule extends AbstractModule {
   private String fpmlDir;
   static {
     MorphiaLoggerFactory.registerLogger(SLF4JLogrImplFactory.class);
   }
 
-  public PersistenceModule(String fpmlDir) {
+  public MongoPersistenceModule(String fpmlDir) {
     this.fpmlDir = fpmlDir;
   }
 
