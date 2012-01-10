@@ -70,8 +70,9 @@ public class CashflowGenerator {
     }
     int nextPaymentIndex = Collections.binarySearch(paymentDates, ctx.cutoffDate.plusDays(1));
     if(nextPaymentIndex == 0) {
-      //hrm this is weird, lets flag it for now
-      throw new RuntimeException("Unexpected next payment index");
+      //we have a trade that starts 'now' effectively, so the first date we calculate is actually the start date
+      //and we can move to the next one which will be the first pauyment
+      nextPaymentIndex = 1;
     }
     else if(nextPaymentIndex < 0) {
       nextPaymentIndex = -(nextPaymentIndex + 1);
@@ -93,7 +94,9 @@ public class CashflowGenerator {
 //          flows.add(flow);
 //      }
       if(fixingDate.lteq(valuationDate) && interval.getPeriod() != PeriodEnum.T) {
-        double rate = rateManager.getZeroRate(ctx.floatingIndexName, ctx.currency, interval, fixingDate) / 100;
+        String tenor = ctx.calculationTenor;
+        if(ctx.isOIS) tenor = "1D";
+        double rate = rateManager.getZeroRate(ctx.floatingIndexName, ctx.currency, tenor, fixingDate) / 100;
         Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, rate);
         flows.add(flow);
       } else {
