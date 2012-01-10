@@ -1,12 +1,12 @@
 package net.formicary.pricer;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import net.formicary.pricer.util.DateUtil;
 import net.formicary.pricer.util.FastDate;
 import net.formicary.pricer.util.FpMLUtil;
 import org.fpml.spec503wd3.*;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * @author hani
@@ -18,6 +18,8 @@ public class StreamContext {
   final StubValue initialStub;
   final StubValue finalStub;
   final CalculationPeriodFrequency interval;
+  final String calculationTenor;
+  final String paymentTenor;
   final FastDate valuationDate;
   final FastDate cutoffDate;
   final FastDate endDate;
@@ -75,6 +77,8 @@ public class StreamContext {
       calculationCenters[0] = calculationCenters[1];
     }
     interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
+    calculationTenor = interval.getPeriodMultiplier() + interval.getPeriod().value();
+    paymentTenor = leg.getPaymentDates().getPaymentFrequency().getPeriodMultiplier() + leg.getPaymentDates().getPaymentFrequency().getPeriod().value();
     String rollConvention = interval.getRollConvention();
     boolean maybeCheckForIndexEndToEnd = rollConvention.equals("EOM");
     if(!maybeCheckForIndexEndToEnd) {

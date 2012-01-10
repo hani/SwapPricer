@@ -1,18 +1,15 @@
 package net.formicary.pricer;
 
+import java.lang.Math;
+import java.math.BigDecimal;
+import java.util.*;
+import javax.inject.Inject;
+
 import net.formicary.pricer.model.Cashflow;
 import net.formicary.pricer.model.FlowType;
 import net.formicary.pricer.util.FastDate;
 import net.formicary.pricer.util.FpMLUtil;
 import org.fpml.spec503wd3.*;
-
-import javax.inject.Inject;
-import java.lang.Math;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * @author hani
@@ -85,7 +82,7 @@ public class CashflowGenerator {
     //we want the last payment thats before the cutoff date, that's when our calculations start
 
     List<FastDate> fixingDates = calendarManager.getFixingDates(calculationDates, leg.getResetDates().getFixingDates());
-    List<Cashflow> flows = new ArrayList<Cashflow>();
+    List<Cashflow> flows = new ArrayList<Cashflow>(calculationDates.size() - nextPaymentIndex + 2);
     for(int i = nextPaymentIndex; i < calculationDates.size(); i++) {
       FastDate periodEndDate = calculationDates.get(i);
       FastDate fixingDate = fixingDates.get(i -1);
@@ -108,7 +105,7 @@ public class CashflowGenerator {
         } else {
           tenorEndDate = calendarManager.applyInterval(periodStartDate, interval, BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
         }
-        double impliedForwardRate = curveManager.getImpliedForwardRate(periodStartDate, tenorEndDate, valuationDate, ctx.currency, interval);
+        double impliedForwardRate = curveManager.getImpliedForwardRate(periodStartDate, tenorEndDate, valuationDate, ctx.currency, ctx.calculationTenor);
         Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, impliedForwardRate);
         flows.add(flow);
       }
@@ -126,7 +123,7 @@ public class CashflowGenerator {
     }
     flows = convertToPaymentFlows(ctx, flows, paymentDates);
     for(Cashflow flow : flows) {
-      discountFlow(ctx, flow, leg);
+      discountFlow(ctx, flow);
     }
     return flows;
   }
@@ -134,7 +131,7 @@ public class CashflowGenerator {
   private List<Cashflow> generateFixedFlows(FastDate valuationDate, InterestRateStream leg) {
     StreamContext ctx = new StreamContext(calendarManager, valuationDate, leg);
     List<FastDate> calculationDates = ctx.calculationDates;
-    List<Cashflow> flows = new ArrayList<Cashflow>();
+    List<Cashflow> flows = new ArrayList<Cashflow>(calculationDates.size());
     Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
     if(calculation != null) {
       BigDecimal rate = calculation.getFixedRateSchedule().getInitialValue();
@@ -160,7 +157,7 @@ public class CashflowGenerator {
           flow.setAmount(-flow.getAmount());
         }
       }
-      discountFlow(ctx, flow, leg);
+      discountFlow(ctx, flow);
     }
     return flows;
   }
@@ -172,11 +169,11 @@ public class CashflowGenerator {
     if(stubRates.size() > 0) {
       FloatingRate rate1 = stubRates.get(0);
       FastDate rate1EndDate = calendarManager.applyInterval(startDate, rate1.getIndexTenor(), BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
-      rate1Value = curveManager.getImpliedForwardRate(startDate, rate1EndDate, ctx.valuationDate, ctx.currency, ctx.interval);
+      rate1Value = curveManager.getImpliedForwardRate(startDate, rate1EndDate, ctx.valuationDate, ctx.currency, ctx.calculationTenor);
       if(stubRates.size() == 2) {
         FloatingRate rate2 = stubRates.get(1);
         FastDate rate2EndDate = calendarManager.applyInterval(startDate, rate2.getIndexTenor(), BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
-        rate2Value = curveManager.getImpliedForwardRate(startDate, rate2EndDate, ctx.valuationDate, ctx.currency, ctx.interval);
+        rate2Value = curveManager.getImpliedForwardRate(startDate, rate2EndDate, ctx.valuationDate, ctx.currency, ctx.calculationTenor);
       }
     }
     double rateToUse = rate1Value;
@@ -198,7 +195,7 @@ public class CashflowGenerator {
   }
 
   private List<Cashflow> convertToPaymentFlows(StreamContext ctx, List<Cashflow> flows, List<FastDate> paymentDates) {
-    List<Cashflow> paymentFlows = new ArrayList<Cashflow>();
+    List<Cashflow> paymentFlows = new ArrayList<Cashflow>(paymentDates.size());
     int start = Collections.binarySearch(paymentDates, ctx.cutoffDate.plusDays(1));
     BigDecimal spread = FpMLUtil.getSpread(ctx.stream.getCalculationPeriodAmount().getCalculation());
     //if start >= 0, then we have a payment on the cutoff day, so we go from start to end
@@ -267,9 +264,9 @@ public class CashflowGenerator {
     return flow;
   }
 
-  private void discountFlow(StreamContext ctx, Cashflow flow, InterestRateStream leg) {
+  private void discountFlow(StreamContext ctx, Cashflow flow) {
     String currency = ctx.currency;
-    double discountFactor = curveManager.getDiscountFactor(flow.getDate(), ctx.valuationDate, currency, leg.getPaymentDates().getPaymentFrequency(), ctx.isFixed);
+    double discountFactor = curveManager.getDiscountFactor(flow.getDate(), ctx.valuationDate, currency, ctx.paymentTenor, ctx.isFixed);
     flow.setDiscountFactor(discountFactor);
     flow.setNpv(discountFactor * flow.getAmount());
   }

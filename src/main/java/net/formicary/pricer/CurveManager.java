@@ -1,7 +1,6 @@
 package net.formicary.pricer;
 
 import net.formicary.pricer.util.FastDate;
-import org.fpml.spec503wd3.Interval;
 
 /**
  * @author hani
@@ -13,6 +12,6 @@ public interface CurveManager {
   public String getDiscountCurve(String cc, String tenor);
   double getInterpolatedDiscountRate(FastDate date, String ccy, String tenor);
   double getInterpolatedForwardRate(FastDate date, String ccy, String tenor);
-  double getDiscountFactor(FastDate flowDate, FastDate valuationDate, String ccy, Interval tenor, boolean isFixed);
-  double getImpliedForwardRate(FastDate start, FastDate end, FastDate valuationDate, String ccy, Interval tenor);
+  double getDiscountFactor(FastDate flowDate, FastDate valuationDate, String ccy, String tenor, boolean isFixed);
+  double getImpliedForwardRate(FastDate start, FastDate end, FastDate valuationDate, String ccy, String tenor);
 }

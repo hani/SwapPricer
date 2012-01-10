@@ -11,7 +11,6 @@ import net.formicary.pricer.model.CurvePillarPoint;
 import net.formicary.pricer.util.FastDate;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.fpml.spec503wd3.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,14 +99,13 @@ public class CurveManagerImpl implements CurveManager {
   }
 
   @Override
-  public double getDiscountFactor(FastDate flowDate, FastDate valuationDate, String ccy, Interval tenor, boolean isFixed) {
+  public double getDiscountFactor(FastDate flowDate, FastDate valuationDate, String ccy, String tenor, boolean isFixed) {
     //LCH uses OIS rate for futured fixed flows
     double interpolatedZeroRate;
     if(isFixed) {
       interpolatedZeroRate = getInterpolatedForwardRate(flowDate, ccy, "OIS");
     } else {
-      String val = tenor.getPeriodMultiplier() + tenor.getPeriod().value();
-      interpolatedZeroRate = getInterpolatedDiscountRate(flowDate, ccy, val);
+      interpolatedZeroRate = getInterpolatedDiscountRate(flowDate, ccy, tenor);
     }
     double days = valuationDate.numDaysFrom(flowDate);
     return exp(interpolatedZeroRate * -(days) / 365d);
@@ -167,13 +165,12 @@ public class CurveManagerImpl implements CurveManager {
   }
 
   @Override
-  public double getImpliedForwardRate(FastDate start, FastDate end, FastDate valuationDate, String ccy, Interval tenor) {
-    String val = tenor.getPeriodMultiplier() + tenor.getPeriod().value();
-    double startRate = getInterpolatedForwardRate(start, ccy, val);
+  public double getImpliedForwardRate(FastDate start, FastDate end, FastDate valuationDate, String ccy, String tenor) {
+    double startRate = getInterpolatedForwardRate(start, ccy, tenor);
     //all LCH curves are quoted /365
     double startDf = exp(startRate * -(valuationDate.numDaysFrom(start)) / 365d);
-    double endRate = getInterpolatedForwardRate(end, ccy, val);
-    double endDf = exp(endRate * - (valuationDate.numDaysFrom(end))/ 365d);
+    double endRate = getInterpolatedForwardRate(end, ccy, tenor);
+    double endDf = exp(endRate * -(valuationDate.numDaysFrom(end)) / 365d);
     double forwardRate = ((startDf/endDf) - 1) * (360d/start.numDaysFrom(end));
     return forwardRate;
   }

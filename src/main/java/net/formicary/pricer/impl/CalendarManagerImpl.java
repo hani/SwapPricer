@@ -1,19 +1,19 @@
 package net.formicary.pricer.impl;
 
+import java.lang.Math;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import javax.inject.Inject;
+
 import net.formicary.pricer.CalendarManager;
 import net.formicary.pricer.HolidayManager;
 import net.formicary.pricer.model.DayCountFraction;
 import net.formicary.pricer.util.FastDate;
 import org.fpml.spec503wd3.*;
-import org.fpml.spec503wd3.Interval;
 
-import javax.inject.Inject;
-import java.lang.Math;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-
-import static net.formicary.pricer.util.FastDate.DayOverflow.*;
+import static net.formicary.pricer.util.FastDate.DayOverflow.LastDay;
+import static net.formicary.pricer.util.FastDate.DayOverflow.Spillover;
 
 /**
  * @author hani
@@ -71,7 +71,7 @@ public class CalendarManagerImpl implements CalendarManager {
 
   @Override
   public List<FastDate> getFixingDates(List<FastDate> dates, final RelativeDateOffset fixingOffset) {
-    List<FastDate> fixingDates = new ArrayList<FastDate>();
+    List<FastDate> fixingDates = new ArrayList<FastDate>(dates.size());
     if(fixingOffset.getPeriod() != PeriodEnum.D) {
       throw new UnsupportedOperationException("Fixing dates only supports day periods");
     }
@@ -130,7 +130,7 @@ public class CalendarManagerImpl implements CalendarManager {
 
   @Override
   public List<FastDate> getDatesInRange(FastDate start, FastDate end, Interval interval, String rollConvention) {
-    List<FastDate> unadjustedDates = new ArrayList<FastDate>();
+    List<FastDate> unadjustedDates = new ArrayList<FastDate>(40);
     if(interval.getPeriod() == PeriodEnum.T) {
       unadjustedDates.add(start);
       unadjustedDates.add(end);
