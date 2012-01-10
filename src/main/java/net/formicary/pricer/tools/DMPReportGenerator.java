@@ -95,12 +95,11 @@ public class DMPReportGenerator {
       sb.append(',');
       TypeFormat.format(cashflow.getNpv(), sb).append(",");
       FastDate d = cashflow.getDate();
-      TypeFormat.format(d.getYear(), sb).append('/');
-      TypeFormat.format(d.getMonth(), sb).append('/');
-      TypeFormat.format(d.getDay(), sb).append('/');
+      TypeFormat.format(d.getYear(), sb).append('-');
+      TypeFormat.format(d.getMonth(), sb).append('-');
+      TypeFormat.format(d.getDay(), sb);
       sb.append(",");
       TypeFormat.format(cashflow.getAmount(), sb);
-      sb.append('\n');
       sb.println(os);
     }
   }
