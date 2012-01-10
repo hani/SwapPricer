@@ -1,12 +1,11 @@
 package net.formicary.pricer;
 
+import java.io.IOException;
+
 import net.formicary.pricer.impl.CurveManagerImpl;
-import org.fpml.spec503wd3.Interval;
-import org.joda.time.LocalDate;
+import net.formicary.pricer.util.FastDate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import java.io.IOException;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -35,13 +34,13 @@ public class CurveTests {
   }
 
   public void calculateDiscountRate() {
-    double rate = manager.getInterpolatedForwardRate(new LocalDate(2011, 8, 5), "EUR", "OIS");
+    double rate = manager.getInterpolatedForwardRate(new FastDate(2011, 8, 5), "EUR", "OIS");
     assertTrue(Double.toString(rate).startsWith("0.009043552774336"), Double.toString(rate));
   }
 
   public void calculateDiscountFactor() {
     //fixed rates don't actually care about the interval since the curve mapping is always OIS
-    double df = manager.getDiscountFactor(new LocalDate(2011, 8, 5), new LocalDate(2011, 5, 25), "EUR", new Interval(), true);
+    double df = manager.getDiscountFactor(new FastDate(2011, 8, 5), new FastDate(2011, 5, 25), "EUR", null, true);
     assertTrue(Double.toString(df).startsWith("0.9982176565659857"), Double.toString(df));
   }
 }

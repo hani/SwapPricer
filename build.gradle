@@ -19,17 +19,18 @@ repositories {
 }
 
 dependencies {
+  compile 'javolution:javolution:5.5.1'
   compile 'com.google.code.morphia:morphia:0.99'
   compile 'com.google.code.morphia:morphia-logging-slf4j:0.99'
   compile 'org.mongodb:mongo-java-driver:2.7.2'
   compile 'redis.clients:jedis:2.0.0'
 //  compile 'org.perf4j:perf4j:0.9.16'
   compile 'com.google.inject:guice:3.0'
-  compile 'joda-time:joda-time:2.0'
   compile 'org.codehaus.woodstox:woodstox-core-asl:4.1.2'
   compile 'commons-io:commons-io:2.0.1'
   compile 'org.fpml:confirmation-extension:5.0.3wd3'
   compile 'org.slf4j:slf4j-api:1.6.4'
+  compile 'org.apache.commons:commons-math:2.2'
   runtime 'ch.qos.logback:logback-classic:1.0.0'
   testCompile 'org.testng:testng:6.2'
   testCompile('org.cdmckay.coffeedom:coffeedom:1.0.0') {transitive = false}

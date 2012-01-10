@@ -1,15 +1,14 @@
 package net.formicary.pricer.util;
 
-import net.formicary.pricer.model.DayCountFraction;
-import org.fpml.spec503wd3.*;
-import org.joda.time.LocalDate;
-
-import javax.xml.bind.JAXBElement;
-import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.xml.bind.JAXBElement;
+import javax.xml.datatype.XMLGregorianCalendar;
+
+import net.formicary.pricer.model.DayCountFraction;
+import org.fpml.spec503wd3.*;
 
 import static net.formicary.pricer.model.DayCountFraction.*;
 
@@ -99,7 +98,7 @@ public class FpMLUtil {
     return getStub(leg, "finalStub");
   }
 
-  public static LocalDate getEndDate(InterestRateStream leg) {
+  public static FastDate getEndDate(InterestRateStream leg) {
     //if we have a stub, then our end is from this date
     XMLGregorianCalendar cal = leg.getCalculationPeriodDates().getLastRegularPeriodEndDate();
     //no stub, just use the termination date
@@ -107,13 +106,13 @@ public class FpMLUtil {
     return DateUtil.getDate(cal);
   }
 
-  public static LocalDate getStartDate(LocalDate valuationDate, InterestRateStream leg) {
+  public static FastDate getStartDate(FastDate valuationDate, InterestRateStream leg) {
     XMLGregorianCalendar cal = leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate();
     if(cal != null) {
       return DateUtil.getDate(cal);
     }
 
-    LocalDate effectiveDate = DateUtil.getDate(leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
+    FastDate effectiveDate = DateUtil.getDate(leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
     return effectiveDate;
   }
 
@@ -125,19 +124,19 @@ public class FpMLUtil {
     return null;
   }
 
-  public static BigDecimal getSpread(Calculation calculation) {
+  public static double getSpread(Calculation calculation) {
     JAXBElement<FloatingRateCalculation> fc = (JAXBElement<FloatingRateCalculation>) calculation.getRateCalculation();
     if(fc != null) {
       List<SpreadSchedule> spreadSchedule = fc.getValue().getSpreadSchedule();
       if(spreadSchedule.size() == 0) {
-        return null;
+        return 0;
       }
       if(spreadSchedule.size() > 1) {
         throw new UnsupportedOperationException("Multiple spreadschedule not supported yet");
       }
-      return spreadSchedule.get(0).getInitialValue();
+      return spreadSchedule.get(0).getInitialValue().doubleValue();
     }
-    return null;
+    return 0;
   }
 
   public static String getFloatingIndexName(Calculation calculation) {

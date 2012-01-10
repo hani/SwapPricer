@@ -1,7 +1,7 @@
 package net.formicary.pricer;
 
+import net.formicary.pricer.util.FastDate;
 import org.fpml.spec503wd3.Interval;
-import org.joda.time.LocalDate;
 
 /**
  * @author hani
@@ -9,6 +9,6 @@ import org.joda.time.LocalDate;
  *         Time: 5:28 PM
  */
 public interface RateManager {
-  double getZeroRate(String indexName, String currency, Interval interval, LocalDate date);
-  double getDiscountFactor(String indexName, String currency, Interval interval, LocalDate date, LocalDate valuationDate);
+  double getZeroRate(String indexName, String currency, Interval interval, FastDate date);
+  double getDiscountFactor(String indexName, String currency, Interval interval, FastDate date, FastDate valuationDate);
 }

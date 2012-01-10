@@ -1,7 +1,5 @@
 package net.formicary.pricer.util;
 
-import org.joda.time.LocalDate;
-
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -21,9 +19,9 @@ public class DateUtil {
     }
   }
 
-  public static LocalDate getDate(XMLGregorianCalendar cal) {
+  public static FastDate getDate(XMLGregorianCalendar cal) {
     if(cal == null) return null;
-    return new LocalDate(cal.getYear(), cal.getMonth(), cal.getDay());
+    return new FastDate(cal.getYear(), cal.getMonth(), cal.getDay());
   }
 
   public static XMLGregorianCalendar getCalendar(String s) {

@@ -15,6 +15,17 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/0c1e9413a92eda14bccecda90a1bad09/javolution/javolution/5.5.1/bundle/javolution-5.5.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/0c1e9413a92eda14bccecda90a1bad09/javolution/javolution/5.5.1/source/javolution-5.5.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/7c90674e1df62f3cb7d9b57c0a40e35a/com.google.code.morphia/morphia/0.99/jar/morphia-0.99.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -70,17 +81,6 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/0c1e9413a92eda14bccecda90a1bad09/joda-time/joda-time/2.0/jar/joda-time-2.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/0c1e9413a92eda14bccecda90a1bad09/joda-time/joda-time/2.0/source/joda-time-2.0-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/0c1e9413a92eda14bccecda90a1bad09/org.codehaus.woodstox/woodstox-core-asl/4.1.2/jar/woodstox-core-asl-4.1.2.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -119,6 +119,17 @@
         <JAVADOC />
         <SOURCES>
           <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/0c1e9413a92eda14bccecda90a1bad09/org.slf4j/slf4j-api/1.6.4/source/slf4j-api-1.6.4-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/0c1e9413a92eda14bccecda90a1bad09/org.apache.commons/commons-math/2.2/jar/commons-math-2.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/0c1e9413a92eda14bccecda90a1bad09/org.apache.commons/commons-math/2.2/source/commons-math-2.2-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

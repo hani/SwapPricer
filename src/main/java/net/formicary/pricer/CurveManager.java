@@ -1,7 +1,6 @@
 package net.formicary.pricer;
 
-import org.fpml.spec503wd3.Interval;
-import org.joda.time.LocalDate;
+import net.formicary.pricer.util.FastDate;
 
 /**
  * @author hani
@@ -11,8 +10,8 @@ import org.joda.time.LocalDate;
 public interface CurveManager {
   public String getForwardCurve(String ccy, String tenor);
   public String getDiscountCurve(String cc, String tenor);
-  double getInterpolatedDiscountRate(LocalDate date, String ccy, String tenor);
-  double getInterpolatedForwardRate(LocalDate date, String ccy, String tenor);
-  double getDiscountFactor(LocalDate flowDate, LocalDate valuationDate, String ccy, Interval tenor, boolean isFixed);
-  double getImpliedForwardRate(LocalDate start, LocalDate end, LocalDate valuationDate, String ccy, Interval tenor);
+  double getInterpolatedDiscountRate(FastDate date, String ccy, String tenor);
+  double getInterpolatedForwardRate(FastDate date, String ccy, String tenor);
+  double getDiscountFactor(FastDate flowDate, FastDate valuationDate, String ccy, String tenor, boolean isFixed);
+  double getImpliedForwardRate(FastDate start, FastDate end, FastDate valuationDate, String ccy, String tenor);
 }

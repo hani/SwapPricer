@@ -1,14 +1,14 @@
 package net.formicary.pricer.loader;
 
+import java.io.IOException;
+import javax.inject.Inject;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import net.formicary.pricer.JedisPersistenceModule;
 import net.formicary.pricer.model.Index;
-import org.joda.time.LocalDate;
+import net.formicary.pricer.util.FastDate;
 import redis.clients.jedis.Jedis;
-
-import javax.inject.Inject;
-import java.io.IOException;
 
 /**
  * @author hsuleiman
@@ -19,9 +19,9 @@ public class JedisRateLoader extends RateLoader {
   @Inject private Jedis ds;
 
   protected void save(Index index) {
-    LocalDate date = index.getFixingDate();
+    FastDate date = index.getFixingDate();
     String key = index.getName() + "-" + index.getCurrency() + "-" + date.getYear()
-        + '-' + date.getDayOfYear() + '-' + date.getDayOfMonth() + "-" + index.getTenorUnit() + index.getTenorPeriod();
+        + '-' + date.getDayOfYear() + '-' + date.getDay() + "-" + index.getTenorUnit() + index.getTenorPeriod();
     ds.set(key, Double.toString(index.getRate()));
   }
 

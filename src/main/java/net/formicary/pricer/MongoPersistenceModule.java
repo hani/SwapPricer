@@ -11,11 +11,10 @@ import com.google.code.morphia.mapping.MappingException;
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import com.mongodb.Mongo;
+import javolution.text.TextBuilder;
 import net.formicary.pricer.impl.MongoRateManagerImpl;
 import net.formicary.pricer.model.Index;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import net.formicary.pricer.util.FastDate;
 
 import java.net.UnknownHostException;
 
@@ -54,23 +53,33 @@ public class MongoPersistenceModule extends AbstractModule {
   public class LocalDateConverter  extends TypeConverter implements SimpleValueConverter {
 
     public LocalDateConverter() {
-      super(LocalDate.class);
+      super(FastDate.class);
     }
 
     @Override
     public Object decode(Class targetClass, Object val, MappedField optionalExtraInfo) throws MappingException {
       if (val == null) return null;
 
-      if (val instanceof LocalDate)
+      if (val instanceof FastDate)
         return val;
-      DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMdd");
-      return formatter.parseLocalDate(val.toString());
+      String s = (String)val;
+      return new FastDate(Integer.parseInt(s.substring(0, 4)), Integer.parseInt(s.substring(4, 6)), Integer.parseInt(s.substring(6, 8)));
     }
 
     @Override
     public Object encode(Object value, MappedField optionalExtraInfo) {
-      DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyyMMdd");
-      return formatter.print((LocalDate)value);
+      FastDate dt = (FastDate)value;
+      TextBuilder sb = new TextBuilder();
+      sb.append(dt.getYear());
+      if(dt.getMonth() < 10) {
+        sb.append('0');
+      }
+      sb.append(dt.getMonth());
+      if(dt.getDay() < 10) {
+        sb.append('0');
+      }
+      sb.append(dt.getDay());
+      return sb.toString();
     }
   }
 }

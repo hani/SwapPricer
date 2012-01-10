@@ -2,9 +2,9 @@ package net.formicary.pricer.impl;
 
 import javax.inject.Singleton;
 
+import net.formicary.pricer.util.FastDate;
 import net.formicary.pricer.util.FastNumbers;
 import org.fpml.spec503wd3.Interval;
-import org.joda.time.LocalDate;
 import redis.clients.jedis.Jedis;
 
 /**
@@ -21,7 +21,7 @@ public class JedisRateManagerImpl extends AbstractRateManager {
     }
   };
 
-  protected double getRate(String key, String indexName, String currency, Interval interval, LocalDate date) {
+  protected double getRate(String key, String indexName, String currency, Interval interval, FastDate date) {
     String value = threadLocal.get().get(key);
     if(value == null) {
       return 0;

@@ -1,12 +1,11 @@
 package net.formicary.pricer;
 
+import java.util.List;
+
 import net.formicary.pricer.util.DateUtil;
+import net.formicary.pricer.util.FastDate;
 import net.formicary.pricer.util.FpMLUtil;
 import org.fpml.spec503wd3.*;
-import org.joda.time.LocalDate;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * @author hani
@@ -18,29 +17,31 @@ public class StreamContext {
   final StubValue initialStub;
   final StubValue finalStub;
   final CalculationPeriodFrequency interval;
-  final LocalDate valuationDate;
-  final LocalDate cutoffDate;
-  final LocalDate endDate;
+  final String calculationTenor;
+  final String paymentTenor;
+  final FastDate valuationDate;
+  final FastDate cutoffDate;
+  final FastDate endDate;
   final BusinessDayConventionEnum[] conventions;
-  final List<LocalDate> calculationDates;
+  final List<FastDate> calculationDates;
   final InterestRateStream stream;
   final String currency;
   final double notional;
   final boolean paying;
   final CompoundingMethodEnum compoundingMethod;
   final DayCountFraction fraction;
-  LocalDate firstRegularPeriodStartDate;
+  final FastDate firstRegularPeriodStartDate;
   //we'll always pretend to be partyA from the LCH pov, to match the dmp tool
   private String ourName = "partyA";
-  final LocalDate lastRegularPeriodEndDate;
-  final LocalDate effectiveDate;
-  final LocalDate terminationDate;
-  final BigDecimal knownAmount;
+  final FastDate lastRegularPeriodEndDate;
+  final FastDate effectiveDate;
+  final FastDate terminationDate;
+  final double knownAmount;
   final String floatingIndexName;
   final boolean checkForEndToEndIndexRoll;
   final BusinessCenters[] calculationCenters;
 
-  public StreamContext(CalendarManager calendarManager, LocalDate valuationDate, InterestRateStream leg) {
+  public StreamContext(CalendarManager calendarManager, FastDate valuationDate, InterestRateStream leg) {
     this.stream = leg;
     this.valuationDate = valuationDate;
     this.cutoffDate = valuationDate.plusDays(3);
@@ -62,9 +63,9 @@ public class StreamContext {
 
     AmountSchedule knownAmountSchedule = leg.getCalculationPeriodAmount().getKnownAmountSchedule();
     if(knownAmountSchedule != null) {
-      knownAmount = knownAmountSchedule.getInitialValue();
+      knownAmount = knownAmountSchedule.getInitialValue().doubleValue();
     } else {
-      knownAmount = null;
+      knownAmount = 0;
     }
     firstRegularPeriodStartDate =  DateUtil.getDate(leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate());
     lastRegularPeriodEndDate = DateUtil.getDate(leg.getCalculationPeriodDates().getLastRegularPeriodEndDate());
@@ -75,6 +76,8 @@ public class StreamContext {
       calculationCenters[0] = calculationCenters[1];
     }
     interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
+    calculationTenor = interval.getPeriodMultiplier() + interval.getPeriod().value();
+    paymentTenor = leg.getPaymentDates().getPaymentFrequency().getPeriodMultiplier() + leg.getPaymentDates().getPaymentFrequency().getPeriod().value();
     String rollConvention = interval.getRollConvention();
     boolean maybeCheckForIndexEndToEnd = rollConvention.equals("EOM");
     if(!maybeCheckForIndexEndToEnd) {
@@ -82,12 +85,12 @@ public class StreamContext {
     }
     checkForEndToEndIndexRoll = ("EURIBOR".equals(floatingIndexName) || "LIBOR".equals(floatingIndexName)) && maybeCheckForIndexEndToEnd;
 
-    LocalDate earliest = firstRegularPeriodStartDate == null ? effectiveDate : firstRegularPeriodStartDate;
+    FastDate earliest = firstRegularPeriodStartDate == null ? effectiveDate : firstRegularPeriodStartDate;
     calculationDates = calendarManager.getAdjustedDates(earliest, endDate, conventions, interval, calculationCenters, null);
     initialStub = FpMLUtil.getInitialStub(leg);
     finalStub = FpMLUtil.getFinalStub(leg);
 
-    if(firstRegularPeriodStartDate != null && firstRegularPeriodStartDate.isAfter(cutoffDate) && initialStub == null) {
+    if(firstRegularPeriodStartDate != null && firstRegularPeriodStartDate.gt(cutoffDate) && initialStub == null) {
       //it's an imaginary stub! We have a hidden flow between effectivedate and calcperiodstart date
       if(!calculationDates.get(0).equals(effectiveDate))
         calculationDates.add(0, calendarManager.adjustDate(effectiveDate, conventions[1], calculationCenters[1]));
@@ -96,7 +99,7 @@ public class StreamContext {
     terminationDate = DateUtil.getDate(leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());
     if(lastRegularPeriodEndDate != null && finalStub == null) {
       //add a final period
-      if(terminationDate.isAfter(lastRegularPeriodEndDate))
+      if(terminationDate.gt(lastRegularPeriodEndDate))
         calculationDates.add(calendarManager.adjustDate(terminationDate, conventions[2], calculationCenters[2]));
     }
     //stubs can only be on floating side right? Otherwise it'd be a fake stub handled above

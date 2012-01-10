@@ -1,12 +1,13 @@
 package net.formicary.pricer.impl;
 
-import net.formicary.pricer.RateManager;
-import org.fpml.spec503wd3.Interval;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import net.formicary.pricer.RateManager;
+import net.formicary.pricer.util.FastDate;
+import org.fpml.spec503wd3.Interval;
+
+import static org.apache.commons.math.util.FastMath.exp;
 
 /**
  * @author hani
@@ -15,13 +16,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class AbstractRateManager implements RateManager {
   private static final Object NOT_FOUND = new Object();
-  private boolean caching = true;
+  private boolean caching = false;
   private Map<String, Object> cache = new ConcurrentHashMap<String, Object>();
 
   @Override
-  public double getZeroRate(String indexName, String currency, Interval interval, LocalDate date) {
+  public double getZeroRate(String indexName, String currency, Interval interval, FastDate date) {
     //avoid date.toString as it's relatively expensive
-    String key = indexName + "-" + currency + "-" + date.getYear() + '-' + date.getDayOfYear() + '-' + date.getDayOfMonth() + "-" + interval.getPeriodMultiplier() + interval.getPeriod();
+    String key = indexName + '-' + currency + '-' + date.getYear() + '-' + date.getDayOfYear() + '-' + date.getDay() + "-" + interval.getPeriodMultiplier() + interval.getPeriod();
     if(caching) {
       Object value = cache.get(key);
       if(value != null) {
@@ -42,7 +43,7 @@ public abstract class AbstractRateManager implements RateManager {
     return rate;
   }
 
-  protected abstract double getRate(String key, String indexName, String currency, Interval interval, LocalDate date);
+  protected abstract double getRate(String key, String indexName, String currency, Interval interval, FastDate date);
 
   public boolean isCaching() {
     return caching;
@@ -53,9 +54,9 @@ public abstract class AbstractRateManager implements RateManager {
   }
 
   @Override
-  public double getDiscountFactor(String indexName, String currency, Interval interval, LocalDate date, LocalDate valuationDate) {
+  public double getDiscountFactor(String indexName, String currency, Interval interval, FastDate date, FastDate valuationDate) {
     double zero = getZeroRate(indexName, currency, interval, date) / 100;
-    double days = Days.daysBetween(date, valuationDate).getDays();
-    return Math.exp(zero * -(days) / 365d);
+    double days = date.numDaysFrom(valuationDate);
+    return exp(zero * -(days) / 365d);
   }
 }
