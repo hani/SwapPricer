@@ -381,9 +381,14 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (o == null) return false;
 
-    FastDate fastDate = (FastDate) o;
+    FastDate fastDate;
+    try {
+      fastDate = (FastDate) o;
+    } catch(ClassCastException e) {
+      return false;
+    }
 
     if (day != fastDate.day) return false;
     if (month != fastDate.month) return false;

@@ -45,8 +45,8 @@ public class DMPReportGenerator {
         return name.startsWith("LCH") && name.endsWith(".xml");
       }
     }));
-    final BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(outputFile, false));
-    os.write("LchTradeId,NpvAmount,CashflowDate,CashflowAmount\n".getBytes());
+    final BufferedWriter os = new BufferedWriter(new FileWriter(outputFile, false));
+    os.write("LchTradeId,NpvAmount,CashflowDate,CashflowAmount\n");
     final AtomicInteger failures = new AtomicInteger(0);
     CompletionService<List<Cashflow>> service = new ExecutorCompletionService<List<Cashflow>>(executor);
     long now  = System.currentTimeMillis();
@@ -87,7 +87,7 @@ public class DMPReportGenerator {
     os.close();
   }
 
-  private void writeCashflows(BufferedOutputStream os, String id, List<Cashflow> cashflows) throws IOException {
+  private void writeCashflows(Writer os, String id, List<Cashflow> cashflows) throws IOException {
     TextBuilder sb = TextBuilder.newInstance();
     for (Cashflow cashflow : cashflows) {
       sb.clear();
@@ -101,7 +101,7 @@ public class DMPReportGenerator {
       sb.append(",");
       TypeFormat.format(cashflow.getAmount(), sb);
       sb.append('\n');
-      os.write(sb.toString().getBytes());
+      sb.println(os);
     }
   }
 
