@@ -1,25 +1,19 @@
 package net.formicary.pricer;
 
+import java.io.*;
+import java.util.*;
+import javax.xml.bind.JAXBException;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import hirondelle.date4j.DateTime;
 import net.formicary.pricer.model.Cashflow;
+import net.formicary.pricer.util.FastDate;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import javax.xml.bind.JAXBException;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -46,7 +40,7 @@ public class CashflowTests {
   public void generateCashflows(String id) throws Exception {
     List<Cashflow> actualFlows;
     try {
-      actualFlows = generator.generateCashflows(DateTime.forDateOnly(2011, 11, 4), id);
+      actualFlows = generator.generateCashflows(new FastDate(2011, 11, 4), id);
     } catch(Exception e) {
       log.error("Error generating flows for trade {}", id);
       throw e;
@@ -105,7 +99,7 @@ public class CashflowTests {
     for(String line : lines) {
       String[] items = line.split("\t\t");
       Cashflow flow = new Cashflow();
-      DateTime dt = DateTime.forDateOnly(Integer.parseInt(items[0].substring(6, 10)), Integer.parseInt(items[0].substring(3, 5)), Integer.parseInt(items[0].substring(0, 2)));
+      FastDate dt = new FastDate(Integer.parseInt(items[0].substring(6, 10)), Integer.parseInt(items[0].substring(3, 5)), Integer.parseInt(items[0].substring(0, 2)));
       flow.setDate(dt);
       flow.setNpv(Double.parseDouble(items[1]));
       flow.setDiscountFactor(Double.parseDouble(items[3]));
