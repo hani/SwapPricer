@@ -1,5 +1,13 @@
 package net.formicary.pricer.tools;
 
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import javax.inject.Inject;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import javolution.text.TextBuilder;
@@ -11,17 +19,6 @@ import net.formicary.pricer.model.Cashflow;
 import net.formicary.pricer.util.FastDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author hsuleiman
@@ -77,6 +74,8 @@ public class DMPReportGenerator {
         List<Cashflow> cashflows = service.take().get();
         if(cashflows != null) {
           writeCashflows(os, cashflows.get(0).getTradeId(), cashflows);
+          //help the gc
+          cashflows.clear();
         }
       } catch(Exception e) {
         log.error("Error writing cashflow", e);
