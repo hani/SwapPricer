@@ -1,7 +1,6 @@
 package net.formicary.pricer;
 
 import java.lang.Math;
-import java.math.BigDecimal;
 import java.util.*;
 import javax.inject.Inject;
 
@@ -25,7 +24,7 @@ public class CashflowGenerator {
   public List<Cashflow> generateCashflows(FastDate valuationDate, String id) {
     Swap swap = tradeStore.getTrade(id);
 
-    List<Cashflow> flows = new ArrayList<Cashflow>();
+    List<Cashflow> flows = new ArrayList<Cashflow>(80);
     for(InterestRateStream stream : swap.getSwapStream()) {
       if(FpMLUtil.isFixedStream(stream)) {
         List<Cashflow> fixed = generateFixedFlows(valuationDate, stream);
@@ -134,17 +133,17 @@ public class CashflowGenerator {
     List<Cashflow> flows = new ArrayList<Cashflow>(calculationDates.size());
     Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
     if(calculation != null) {
-      BigDecimal rate = calculation.getFixedRateSchedule().getInitialValue();
+      double rate = calculation.getFixedRateSchedule().getInitialValue().doubleValue();
       for(int i = 1; i < calculationDates.size(); i++) {
         FastDate paymentDate = calculationDates.get(i);
         if(paymentDate.gt(ctx.cutoffDate)) {
-          Cashflow flow = getCashflow(calculationDates.get(i - 1), paymentDate, ctx, rate.doubleValue());
+          Cashflow flow = getCashflow(calculationDates.get(i - 1), paymentDate, ctx, rate);
           flows.add(flow);
         }
       }
-    } else if (ctx.knownAmount != null) {
+    } else if (ctx.knownAmount != 0) {
       Cashflow flow = new Cashflow();
-      flow.setAmount(ctx.knownAmount.doubleValue());
+      flow.setAmount(ctx.knownAmount);
       flow.setDate(ctx.endDate);
       flows.add(flow);
     }
@@ -197,7 +196,7 @@ public class CashflowGenerator {
   private List<Cashflow> convertToPaymentFlows(StreamContext ctx, List<Cashflow> flows, List<FastDate> paymentDates) {
     List<Cashflow> paymentFlows = new ArrayList<Cashflow>(paymentDates.size());
     int start = Collections.binarySearch(paymentDates, ctx.cutoffDate.plusDays(1));
-    BigDecimal spread = FpMLUtil.getSpread(ctx.stream.getCalculationPeriodAmount().getCalculation());
+    double spread = FpMLUtil.getSpread(ctx.stream.getCalculationPeriodAmount().getCalculation());
     //if start >= 0, then we have a payment on the cutoff day, so we go from start to end
     //if start < 0, then we reverse it to find the right index to start at, then go to the end
     if(start < 0) start = -(start + 1);
@@ -226,9 +225,7 @@ public class CashflowGenerator {
         if(flow.getDate().lteq(paymentDate)) {
           if(flow.getAmount() == 0) {
             double rate = flow.getRate();
-            if(spread != null) {
-              rate = rate + spread.doubleValue();
-            }
+            rate = rate + spread;
             flow.setAmount(notional * rate * flow.getDayCountFraction());
             if(ctx.paying) {
               //we're paying, so reverse values

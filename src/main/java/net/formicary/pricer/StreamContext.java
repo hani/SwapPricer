@@ -1,6 +1,5 @@
 package net.formicary.pricer;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import net.formicary.pricer.util.DateUtil;
@@ -37,7 +36,7 @@ public class StreamContext {
   final FastDate lastRegularPeriodEndDate;
   final FastDate effectiveDate;
   final FastDate terminationDate;
-  final BigDecimal knownAmount;
+  final double knownAmount;
   final String floatingIndexName;
   final boolean checkForEndToEndIndexRoll;
   final BusinessCenters[] calculationCenters;
@@ -64,9 +63,9 @@ public class StreamContext {
 
     AmountSchedule knownAmountSchedule = leg.getCalculationPeriodAmount().getKnownAmountSchedule();
     if(knownAmountSchedule != null) {
-      knownAmount = knownAmountSchedule.getInitialValue();
+      knownAmount = knownAmountSchedule.getInitialValue().doubleValue();
     } else {
-      knownAmount = null;
+      knownAmount = 0;
     }
     firstRegularPeriodStartDate =  DateUtil.getDate(leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate());
     lastRegularPeriodEndDate = DateUtil.getDate(leg.getCalculationPeriodDates().getLastRegularPeriodEndDate());
