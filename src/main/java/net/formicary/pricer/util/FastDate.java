@@ -102,7 +102,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
    @param aMonth 1..12 , optional
    @param aDay 1..31, cannot exceed the number of days in the given month/year, optional
    */
-  public FastDate(Integer aYear, Integer aMonth, Integer aDay) {
+  public FastDate(int aYear, int aMonth, int aDay) {
     year = aYear;
     month = aMonth;
     day = aDay;
@@ -138,9 +138,9 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
    <P>Requires year-month-day to be present; if not, a runtime exception is thrown.
    */
   public long getMilliseconds(TimeZone aTimeZone){
-    Integer year = getYear();
-    Integer month = getMonth();
-    Integer day = getDay();
+    int year = getYear();
+    int month = getMonth();
+    int day = getDay();
 
     Calendar calendar = new GregorianCalendar(aTimeZone);
     calendar.set(Calendar.YEAR, year);
@@ -155,17 +155,17 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
   }
 
   /** Return the year, 1..9999. */
-  public Integer getYear() {
+  public int getYear() {
     return year;
   }
 
   /** Return the Month, 1..12. */
-  public Integer getMonth() {
+  public int getMonth() {
     return month;
   }
 
   /** Return the Day of the Month, 1..31. */
-  public Integer getDay() {
+  public int getDay() {
     return day;
   }
 
@@ -188,7 +188,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
 
    <P>Requires year-month-day to be present; if not, a runtime exception is thrown.
    */
-  public Integer getModifiedJulianDayNumber() {
+  public int getModifiedJulianDayNumber() {
     return calculateJulianDayNumberAtNoon() - 1 - EPOCH_MODIFIED_JD;
   }
 
@@ -197,7 +197,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
    Returns 1..7 for Sunday..Saturday.
    <P>Requires year-month-day to be present; if not, a runtime exception is thrown.
    */
-  public Integer getWeekDay() {
+  public int getWeekDay() {
     int dayNumber = calculateJulianDayNumberAtNoon() + 1;
     int index = dayNumber % 7;
     return index + 1;
@@ -234,7 +234,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
    <P>The single parameter to this method defines first day of week number 1.
    <P>Requires year-month-day to be present; if not, a runtime exception is thrown.
    */
-  public Integer getWeekIndex(FastDate aStartingFromDate) {
+  public int getWeekIndex(FastDate aStartingFromDate) {
     int diff = getModifiedJulianDayNumber() - aStartingFromDate.getModifiedJulianDayNumber();
     return (diff / 7) + 1; // integer division
   }
@@ -294,7 +294,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
   /**
    Create a new <tt>FastDate</tt> by adding an interval to this one.
 
-   <P>See {@link #plusDays(Integer)} as well.
+   <P>See {@link #plusDays(int)} as well.
 
    <P>Changes are always applied by this class <i>in order of decreasing units of time</i>:
    years first, then months, and so on. After changing both the year and month, a check on the month-day combination is made before
@@ -319,7 +319,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
    @param aNumMonths positive, required, in range 0...9999
    @param aNumDays positive, required, in range 0...9999
    */
-  public FastDate plus(Integer aNumYears, Integer aNumMonths, Integer aNumDays, DayOverflow aDayOverflow) {
+  public FastDate plus(int aNumYears, int aNumMonths, int aNumDays, DayOverflow aDayOverflow) {
     DateTimeInterval interval = new DateTimeInterval(this, aDayOverflow);
     return interval.plus(aNumYears, aNumMonths, aNumDays);
   }
@@ -330,7 +330,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
    <P>Requires year-month-day to be present; if not, a runtime exception is thrown.
    @param aNumDays can be either sign; if negative, then the days are subtracted.
    */
-  public FastDate plusDays(Integer aNumDays) {
+  public FastDate plusDays(int aNumDays) {
     int thisJDAtNoon = getModifiedJulianDayNumber() + 1 + EPOCH_MODIFIED_JD;
     int resultJD = thisJDAtNoon + aNumDays;
     return fromJulianDayNumberAtNoon(resultJD);
@@ -441,9 +441,9 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
    absent. WRONG - should be public??
    Package-private, needed for interval calcs.
    */
-  static Integer getNumDaysInMonth(Integer aYear, Integer aMonth) {
-    Integer result = null;
-    if (aYear != null && aMonth != null) {
+  static int getNumDaysInMonth(int aYear, int aMonth) {
+    int result = 0;
+    if (aYear != 0 && aMonth != 0) {
       if (aMonth == 1) {
         result = 31;
       }
@@ -525,15 +525,15 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
     checkNumDaysInMonth(year, month, day);
   }
 
-  private void checkRange(Integer aValue, int aMin, int aMax, String aName) {
-    if(aValue != null){
+  private void checkRange(int aValue, int aMin, int aMax, String aName) {
+    if(aValue != 0){
       if (aValue < aMin || aValue > aMax){
         throw new ItemOutOfRange(aName + " is not in the range " + aMin + ".." + aMax + ". Value is:" + aValue);
       }
     }
   }
 
-  private void checkNumDaysInMonth(Integer aYear, Integer aMonth, Integer aDay) {
+  private void checkNumDaysInMonth(int aYear, int aMonth, int aDay) {
     if (aDay > getNumDaysInMonth(aYear, aMonth)) {
       throw new ItemOutOfRange("The day-of-the-month value '" + aDay + "' exceeds the number of days in the month: " + getNumDaysInMonth(aYear, aMonth));
     }
@@ -553,7 +553,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
     return result;
   }
 
-  private FastDate getStartEndDateTime(Integer aDay) {
+  private FastDate getStartEndDateTime(int aDay) {
     return new FastDate(year, month, aDay);
   }
 
