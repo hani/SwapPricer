@@ -1,15 +1,14 @@
 package net.formicary.pricer.impl.parsers;
 
-import net.formicary.pricer.impl.FpmlContext;
-import net.formicary.pricer.impl.NodeParser;
-import org.fpml.spec503wd3.*;
-
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import javax.xml.bind.JAXBElement;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
+import net.formicary.pricer.impl.FpmlContext;
+import net.formicary.pricer.impl.NodeParser;
+import org.fpml.spec503wd3.*;
 
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
@@ -45,7 +44,7 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
   public CalculationPeriodAmount parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
     CalculationPeriodAmount cpa = new CalculationPeriodAmount();
 
-    String initialValue = "0";
+    String initialValue = null;
     Currency currency = null;
 
     while (reader.hasNext()) {

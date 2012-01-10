@@ -1,21 +1,18 @@
 package net.formicary.pricer.impl;
 
-import net.formicary.pricer.TradeStore;
-import net.formicary.pricer.impl.parsers.*;
-import org.fpml.spec503wd3.Swap;
-
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+
+import net.formicary.pricer.TradeStore;
+import net.formicary.pricer.impl.parsers.*;
+import org.fpml.spec503wd3.Swap;
 
 import static javax.xml.stream.XMLStreamConstants.END_DOCUMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
@@ -34,6 +31,8 @@ public class FpmlTradeStore implements TradeStore {
 
   public FpmlTradeStore() {
     factory = XMLInputFactory.newFactory();
+    factory.setProperty(XMLInputFactory.IS_COALESCING, false);
+    factory.setProperty(XMLInputFactory.IS_VALIDATING, false);
     parsers.put("calculationPeriodDates", new CalculationPeriodDatesParser());
     parsers.put("calculationPeriodAmount", new CalculationPeriodAmountParser());
     parsers.put("resetDates", new ResetDatesParser());
@@ -77,6 +76,7 @@ public class FpmlTradeStore implements TradeStore {
         }
       }
     }
+    reader.close();
     is.close();
     swap.getSwapStream().addAll(ctx.getStreams());
     return swap;
