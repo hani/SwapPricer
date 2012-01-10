@@ -11,6 +11,10 @@ import static net.formicary.pricer.util.FastDate.DayOverflow.Spillover;
  */
 final class DateTimeInterval {
 
+  public static final String YEAR = "Year";
+  public static final String MONTH = "Month";
+  public static final String DAY = "Day";
+
   DateTimeInterval(FastDate aFrom, FastDate.DayOverflow aMonthOverflow){
     fFrom = aFrom;
     fYear =  fFrom.getYear();
@@ -46,9 +50,9 @@ final class DateTimeInterval {
     fMonthIncr = aMonth;
     fDayIncr = aDay;
 
-    checkRange(fYearIncr, "Year");
-    checkRange(fMonthIncr, "Month");
-    checkRange(fDayIncr, "Day");
+    checkRange(fYearIncr, YEAR);
+    checkRange(fMonthIncr, MONTH);
+    checkRange(fDayIncr, DAY);
 
     changeYear();
     changeMonth();
