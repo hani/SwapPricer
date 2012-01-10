@@ -13,14 +13,13 @@ import org.bson.types.ObjectId;
  */
 @Entity
 @Indexes({
-    @com.google.code.morphia.annotations.Index("name, currency, tenorUnit, tenorPeriod, fixingDate")
+    @com.google.code.morphia.annotations.Index("name, currency, tenor, fixingDate")
 })
 public class Index {
   @Id private ObjectId id;
   private String currency;
   private String name;
-  private String tenorUnit;
-  private String tenorPeriod;
+  private String tenor;
   private FastDate fixingDate;
   private FastDate effectiveDate;
   private double rate;
@@ -50,20 +49,12 @@ public class Index {
     this.name = name;
   }
 
-  public String getTenorUnit() {
-    return tenorUnit;
+  public String getTenor() {
+    return tenor;
   }
 
-  public void setTenorUnit(String tenorUnit) {
-    this.tenorUnit = tenorUnit;
-  }
-
-  public String getTenorPeriod() {
-    return tenorPeriod;
-  }
-
-  public void setTenorPeriod(String tenorPeriod) {
-    this.tenorPeriod = tenorPeriod;
+  public void setTenor(String tenor) {
+    this.tenor = tenor;
   }
 
   public FastDate getFixingDate() {
@@ -104,8 +95,7 @@ public class Index {
       "id=" + id +
       ", currency='" + currency + '\'' +
       ", name='" + name + '\'' +
-      ", tenorUnit='" + tenorUnit + '\'' +
-      ", tenorPeriod='" + tenorPeriod + '\'' +
+      ", tenor='" + tenor + '\'' +
       ", fixingDate=" + fixingDate +
       '}';
   }

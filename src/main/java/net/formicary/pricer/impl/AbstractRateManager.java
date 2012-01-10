@@ -1,11 +1,10 @@
 package net.formicary.pricer.impl;
 
-import net.formicary.pricer.RateManager;
-import net.formicary.pricer.util.FastDate;
-import org.fpml.spec503wd3.Interval;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import net.formicary.pricer.RateManager;
+import net.formicary.pricer.util.FastDate;
 
 import static org.apache.commons.math.util.FastMath.exp;
 
@@ -20,30 +19,30 @@ public abstract class AbstractRateManager implements RateManager {
   private Map<String, Object> cache = new ConcurrentHashMap<String, Object>();
 
   @Override
-  public double getZeroRate(String indexName, String currency, Interval interval, FastDate date) {
+  public double getZeroRate(String indexName, String currency, String tenor, FastDate date) {
     //avoid date.toString as it's relatively expensive
-    String key = indexName + "-" + currency + "-" + date.getYear() + '-' + date.getDayOfYear() + '-' + date.getDay() + "-" + interval.getPeriodMultiplier() + interval.getPeriod();
+    String key = indexName + "-" + currency + "-" + date.getYear() + '-' + date.getDayOfYear() + '-' + date.getDay() + "-" + tenor;
     if(caching) {
       Object value = cache.get(key);
       if(value != null) {
         if(value == NOT_FOUND) {
-          throw new IllegalArgumentException("No " + indexName + " rate found for " + currency + " " + interval.getPeriodMultiplier() + interval.getPeriod() + " on " + date);
+          throw new IllegalArgumentException("No " + indexName + " rate found for " + currency + " " + tenor + " on " + date);
         }
         return (Double)value;
       }
     }
-    double rate = getRate(key, indexName, currency, interval, date);
+    double rate = getRate(key, indexName, currency, tenor, date);
     if(rate == 0) {
       if(caching)
         cache.put(key, NOT_FOUND);
-      throw new IllegalArgumentException("No " + indexName + " rate found for " + currency + " " + interval.getPeriodMultiplier() + interval.getPeriod() + " on " + date);
+      throw new IllegalArgumentException("No " + indexName + " rate found for " + currency + " " + tenor + " on " + date);
     }
     if(caching)
       cache.put(key, rate);
     return rate;
   }
 
-  protected abstract double getRate(String key, String indexName, String currency, Interval interval, FastDate date);
+  protected abstract double getRate(String key, String indexName, String currency, String tenor, FastDate date);
 
   public boolean isCaching() {
     return caching;
@@ -54,8 +53,8 @@ public abstract class AbstractRateManager implements RateManager {
   }
 
   @Override
-  public double getDiscountFactor(String indexName, String currency, Interval interval, FastDate date, FastDate valuationDate) {
-    double zero = getZeroRate(indexName, currency, interval, date) / 100;
+  public double getDiscountFactor(String indexName, String currency, String tenor, FastDate date, FastDate valuationDate) {
+    double zero = getZeroRate(indexName, currency, tenor, date) / 100;
     double days = date.numDaysFrom(valuationDate);
     return exp(zero * -(days) / 365d);
   }

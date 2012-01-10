@@ -9,6 +9,6 @@ import org.fpml.spec503wd3.Interval;
  *         Time: 5:28 PM
  */
 public interface RateManager {
-  double getZeroRate(String indexName, String currency, Interval interval, FastDate date);
-  double getDiscountFactor(String indexName, String currency, Interval interval, FastDate date, FastDate valuationDate);
+  double getZeroRate(String indexName, String currency, String tenor, FastDate date);
+  double getDiscountFactor(String indexName, String currency, String tenor, FastDate date, FastDate valuationDate);
 }

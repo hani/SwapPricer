@@ -40,6 +40,7 @@ public class StreamContext {
   final String floatingIndexName;
   final boolean checkForEndToEndIndexRoll;
   final BusinessCenters[] calculationCenters;
+  final boolean isOIS;
 
   public StreamContext(CalendarManager calendarManager, FastDate valuationDate, InterestRateStream leg) {
     this.stream = leg;
@@ -52,7 +53,9 @@ public class StreamContext {
     paying = ((Party) leg.getPayerPartyReference().getHref()).getId().equals(ourName);
 
     Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
-    floatingIndexName = FpMLUtil.getFloatingIndexName(calculation);
+    String[] floatingIndexName = FpMLUtil.getFloatingIndexName(calculation);
+    this.floatingIndexName = floatingIndexName[0];
+    isOIS = floatingIndexName[1] != null && floatingIndexName[1].contains("OIS-COMPOUND");
     if(calculation != null) {
       fraction = calculation.getDayCountFraction();
       compoundingMethod = calculation.getCompoundingMethod();

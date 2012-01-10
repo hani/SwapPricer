@@ -19,6 +19,8 @@ import static net.formicary.pricer.model.DayCountFraction.*;
  */
 public class FpMLUtil {
   private static final Map<String, DayCountFraction> fractionMapping = new HashMap<String, DayCountFraction>();
+  private static final String[] EMPTY = new String[2];
+
   static {
     fractionMapping.put("1/1", ONE);
     fractionMapping.put("ACT/ACT.ISDA", ACT);
@@ -139,19 +141,26 @@ public class FpMLUtil {
     return 0;
   }
 
-  public static String getFloatingIndexName(Calculation calculation) {
-    if(calculation == null) return null;
+  /**
+   * Split up the floating index name into the index name + source, so we can spot OIS trades
+   * @return never returns null, if it's a fixed side then we return an array of two null strings
+   */
+  public static String[] getFloatingIndexName(Calculation calculation) {
+    if(calculation == null) return EMPTY;
     JAXBElement<? extends Rate> rateCalculation = calculation.getRateCalculation();
-    if(rateCalculation == null) return null;
+    if(rateCalculation == null) return EMPTY;
     FloatingRateCalculation floatingCalc = (FloatingRateCalculation) rateCalculation.getValue();
-    if(floatingCalc == null || floatingCalc.getFloatingRateIndex() == null) return null;
+    if(floatingCalc == null || floatingCalc.getFloatingRateIndex() == null) return EMPTY;
     String index = floatingCalc.getFloatingRateIndex().getValue();
     return getFloatingIndexName(index);
   }
 
-  public  static String getFloatingIndexName(String index) {
+  public  static String[] getFloatingIndexName(String index) {
+    String[] names = new String[2];
     int dash = index.indexOf('-') + 1;
-    index = index.substring(dash, index.indexOf('-', dash));
-    return index;
+    int dash2 = index.indexOf('-', dash);
+    names[0] = index.substring(dash, dash2);
+    names[1] = index.substring(dash2);
+    return names;
   }
 }
