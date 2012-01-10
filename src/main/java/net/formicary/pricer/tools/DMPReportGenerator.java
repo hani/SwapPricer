@@ -8,7 +8,7 @@ import net.formicary.pricer.CashflowGenerator;
 import net.formicary.pricer.PersistenceModule;
 import net.formicary.pricer.PricerModule;
 import net.formicary.pricer.model.Cashflow;
-import org.joda.time.LocalDate;
+import net.formicary.pricer.util.FastDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ public class DMPReportGenerator {
   private static final Logger log = LoggerFactory.getLogger(DMPReportGenerator.class);
 
   public void generateReport(String inputDir, String outputFile) throws IOException {
-    final LocalDate date = new LocalDate(2011, 11, 4);
+    final FastDate date = new FastDate(2011, 11, 4);
     List<String> files = new ArrayList<String>();
     File dir = new File(inputDir);
     if(!dir.exists() || !dir.isDirectory()) {
@@ -95,7 +95,11 @@ public class DMPReportGenerator {
       sb.append(id);
       sb.append(',');
       TypeFormat.format(cashflow.getNpv(), sb).append(",");
-      sb.append(cashflow.getDate()).append(",");
+      FastDate d = cashflow.getDate();
+      TypeFormat.format(d.getYear(), sb).append('/');
+      TypeFormat.format(d.getMonth(), sb).append('/');
+      TypeFormat.format(d.getDay(), sb).append('/');
+      sb.append(",");
       TypeFormat.format(cashflow.getAmount(), sb);
       sb.append('\n');
       os.write(sb.toString().getBytes());

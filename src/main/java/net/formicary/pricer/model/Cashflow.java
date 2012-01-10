@@ -1,6 +1,6 @@
 package net.formicary.pricer.model;
 
-import org.joda.time.LocalDate;
+import net.formicary.pricer.util.FastDate;
 
 /**
  * @author hani
@@ -10,7 +10,7 @@ import org.joda.time.LocalDate;
 public class Cashflow implements Comparable<Cashflow>{
   private String tradeId;
   private double npv;
-  private LocalDate date;
+  private FastDate date;
   private FlowType type;
   private double discountFactor;
   private double rate;
@@ -20,7 +20,7 @@ public class Cashflow implements Comparable<Cashflow>{
   public Cashflow() {
   }
 
-  public Cashflow(double npv, LocalDate date) {
+  public Cashflow(double npv, FastDate date) {
     this.npv = npv;
     this.date = date;
   }
@@ -57,11 +57,11 @@ public class Cashflow implements Comparable<Cashflow>{
     this.npv = npv;
   }
 
-  public LocalDate getDate() {
+  public FastDate getDate() {
     return date;
   }
 
-  public void setDate(LocalDate date) {
+  public void setDate(FastDate date) {
     this.date = date;
   }
 

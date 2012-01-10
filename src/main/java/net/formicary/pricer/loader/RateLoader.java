@@ -5,9 +5,7 @@ import com.google.inject.Injector;
 import javolution.text.TypeFormat;
 import net.formicary.pricer.PersistenceModule;
 import net.formicary.pricer.model.Index;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import net.formicary.pricer.util.FastDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +26,6 @@ public abstract class RateLoader {
     BufferedReader is = new BufferedReader(new FileReader(fileName));
     is.readLine();
     String line;
-    DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
     int count = 0;
     while((line = is.readLine()) != null) {
       String[] items = line.split("\t");
@@ -38,9 +35,9 @@ public abstract class RateLoader {
       index.setName(items[1]);
       index.setTenorUnit(items[2]);
       index.setTenorPeriod(items[3]);
-      LocalDate fixingDate = formatter.parseLocalDate(items[4]);
+      FastDate fixingDate = new FastDate(Integer.parseInt(items[4].substring(6, 10)), Integer.parseInt(items[4].substring(3, 5)), Integer.parseInt(items[4].substring(0, 2)));
       index.setFixingDate(fixingDate);
-      index.setEffectiveDate(formatter.parseLocalDate(items[5]));
+      index.setEffectiveDate(new FastDate(Integer.parseInt(items[5].substring(6, 10)), Integer.parseInt(items[5].substring(3, 5)), Integer.parseInt(items[5].substring(0, 2))));
       try {
         index.setRate(TypeFormat.parseDouble(items[6]));
         index.setRegulatoryBody(items[7]);

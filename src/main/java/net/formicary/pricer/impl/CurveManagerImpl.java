@@ -1,22 +1,19 @@
 package net.formicary.pricer.impl;
 
-import javolution.text.TypeFormat;
-import net.formicary.pricer.CurveManager;
-import net.formicary.pricer.model.CurvePillarPoint;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.fpml.spec503wd3.Interval;
-import org.joda.time.Days;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.*;
+
+import javolution.text.TypeFormat;
+import net.formicary.pricer.CurveManager;
+import net.formicary.pricer.model.CurvePillarPoint;
+import net.formicary.pricer.util.FastDate;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.fpml.spec503wd3.Interval;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.apache.commons.math.util.FastMath.exp;
 
@@ -28,7 +25,6 @@ import static org.apache.commons.math.util.FastMath.exp;
 public class CurveManagerImpl implements CurveManager {
   private static final Logger log = LoggerFactory.getLogger(CurveManagerImpl.class);
   //this is ok since we only use it when reading in the curve data, so no multithreaded access
-  private static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("dd/MM/yyyy");
   //a map of currency -> (tenor -> forward,discount) curves
   private Map<String, Map<String, String[]>> mapping = new HashMap<String, Map<String, String[]>>();
   //a map of curve -> list of pillar points
@@ -76,8 +72,10 @@ public class CurveManagerImpl implements CurveManager {
   private CurvePillarPoint getPillar(String[] data) {
     CurvePillarPoint p = new CurvePillarPoint();
     p.setCurveName(data[0]);
-    p.setCloseDate(LocalDate.parse(data[1].substring(0, data[1].indexOf(' ')), DATE_FORMAT));
-    p.setMaturityDate(LocalDate.parse(data[2].substring(0, data[2].indexOf(' ')), DATE_FORMAT));
+    String close = data[1].substring(0, data[1].indexOf(' '));
+    p.setCloseDate(new FastDate(Integer.parseInt(close.substring(6, 10)), Integer.parseInt(close.substring(3, 5)), Integer.parseInt(close.substring(0, 2))));
+    String maturity = data[2].substring(0, data[2].indexOf(' '));
+    p.setMaturityDate(new FastDate(Integer.parseInt(maturity.substring(6, 10)), Integer.parseInt(maturity.substring(3, 5)), Integer.parseInt(maturity.substring(0, 2))));
     p.setAccrualFactor(TypeFormat.parseDouble(data[3]));
     p.setZeroRate(TypeFormat.parseDouble(data[4]));
     p.setDiscountFactor(TypeFormat.parseDouble(data[5]));
@@ -102,7 +100,7 @@ public class CurveManagerImpl implements CurveManager {
   }
 
   @Override
-  public double getDiscountFactor(LocalDate flowDate, LocalDate valuationDate, String ccy, Interval tenor, boolean isFixed) {
+  public double getDiscountFactor(FastDate flowDate, FastDate valuationDate, String ccy, Interval tenor, boolean isFixed) {
     //LCH uses OIS rate for futured fixed flows
     double interpolatedZeroRate;
     if(isFixed) {
@@ -111,23 +109,23 @@ public class CurveManagerImpl implements CurveManager {
       String val = tenor.getPeriodMultiplier() + tenor.getPeriod().value();
       interpolatedZeroRate = getInterpolatedDiscountRate(flowDate, ccy, val);
     }
-    double days = Days.daysBetween(valuationDate, flowDate).getDays();
+    double days = valuationDate.numDaysFrom(flowDate);
     return exp(interpolatedZeroRate * -(days) / 365d);
   }
 
   @Override
-  public double getInterpolatedForwardRate(LocalDate date, String ccy, String tenor) {
+  public double getInterpolatedForwardRate(FastDate date, String ccy, String tenor) {
     String curve = getForwardCurve(ccy, tenor);
     return getInterpolatedRate(date, ccy, curve);
   }
 
   @Override
-  public double getInterpolatedDiscountRate(LocalDate date, String ccy, String tenor) {
+  public double getInterpolatedDiscountRate(FastDate date, String ccy, String tenor) {
     String curve = getDiscountCurve(ccy, tenor);
     return getInterpolatedRate(date, ccy, curve);
   }
 
-  public double getInterpolatedRate(LocalDate date, String ccy, String curve) {
+  public double getInterpolatedRate(FastDate date, String ccy, String curve) {
 //    String key = ccy + curve + date.getYear() + '-' + date.getDayOfYear() + '-' + date.getDayOfMonth();
 //    Object value = cache.get(key);
 //    if(value != null) {
@@ -159,8 +157,8 @@ public class CurveManagerImpl implements CurveManager {
       int endIndex = -(index + 1);
       CurvePillarPoint end = points.get(endIndex);
       CurvePillarPoint start = points.get(endIndex - 1);
-      double daysFromStartToNow = Days.daysBetween(start.getMaturityDate(), date).getDays();
-      double totalDays = Days.daysBetween(start.getMaturityDate(), end.getMaturityDate()).getDays();
+      double daysFromStartToNow =  start.getMaturityDate().numDaysFrom(date);
+      double totalDays = start.getMaturityDate().numDaysFrom(end.getMaturityDate());
       //linear interpolation, nothing fancy
       double interpRate = start.getZeroRate() + daysFromStartToNow * (end.getZeroRate() - start.getZeroRate()) / totalDays;
 //      cache.put(key, interpRate);
@@ -169,14 +167,14 @@ public class CurveManagerImpl implements CurveManager {
   }
 
   @Override
-  public double getImpliedForwardRate(LocalDate start, LocalDate end, LocalDate valuationDate, String ccy, Interval tenor) {
+  public double getImpliedForwardRate(FastDate start, FastDate end, FastDate valuationDate, String ccy, Interval tenor) {
     String val = tenor.getPeriodMultiplier() + tenor.getPeriod().value();
     double startRate = getInterpolatedForwardRate(start, ccy, val);
     //all LCH curves are quoted /365
-    double startDf = Math.exp(startRate * -(Days.daysBetween(valuationDate, start).getDays()) / 365d);
+    double startDf = exp(startRate * -(valuationDate.numDaysFrom(start)) / 365d);
     double endRate = getInterpolatedForwardRate(end, ccy, val);
-    double endDf = Math.exp(endRate * - (Days.daysBetween(valuationDate, end).getDays())/ 365d);
-    double forwardRate = ((startDf/endDf) - 1) * (360d/Days.daysBetween(start, end).getDays());
+    double endDf = exp(endRate * - (valuationDate.numDaysFrom(end))/ 365d);
+    double forwardRate = ((startDf/endDf) - 1) * (360d/start.numDaysFrom(end));
     return forwardRate;
   }
 

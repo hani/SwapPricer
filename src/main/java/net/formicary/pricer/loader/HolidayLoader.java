@@ -3,9 +3,7 @@ package net.formicary.pricer.loader;
 import com.google.inject.Guice;
 import net.formicary.pricer.HolidayManager;
 import net.formicary.pricer.PricerModule;
-import org.joda.time.LocalDate;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+import net.formicary.pricer.util.FastDate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,22 +31,22 @@ public class HolidayLoader {
     BufferedReader is = new BufferedReader(new FileReader("staticdata/rep00006.txt"));
     is.readLine();
     String line;
-    DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
-    Map<String, Set<LocalDate>> allDates = new HashMap<String, Set<LocalDate>>();
+    Map<String, Set<FastDate>> allDates = new HashMap<String, Set<FastDate>>();
 
     int count = 0;
     while((line = is.readLine()) != null) {
       count++;
       String[] items = line.split("\t");
-      Set<LocalDate> dates = allDates.get(items[1]);
+      Set<FastDate> dates = allDates.get(items[1]);
       if(dates == null) {
-        dates = new HashSet<LocalDate>();
+        dates = new HashSet<FastDate>();
         allDates.put(items[1], dates);
       }
-      dates.add(LocalDate.parse(items[2], formatter));
+      String d = items[2];
+      dates.add(new FastDate(Integer.parseInt(d.substring(6, 10)), Integer.parseInt(d.substring(3, 5)), Integer.parseInt(d.substring(0, 2))));
     }
 
-    for(Map.Entry<String, Set<LocalDate>> entry : allDates.entrySet()) {
+    for(Map.Entry<String, Set<FastDate>> entry : allDates.entrySet()) {
       manager.registerHolidays(entry.getKey(), entry.getValue());
     }
 

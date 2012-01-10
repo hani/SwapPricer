@@ -3,14 +3,17 @@ package net.formicary.pricer.impl;
 import net.formicary.pricer.CalendarManager;
 import net.formicary.pricer.HolidayManager;
 import net.formicary.pricer.model.DayCountFraction;
+import net.formicary.pricer.util.FastDate;
 import org.fpml.spec503wd3.*;
 import org.fpml.spec503wd3.Interval;
-import org.joda.time.*;
 
 import javax.inject.Inject;
 import java.lang.Math;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+
+import static net.formicary.pricer.util.FastDate.DayOverflow.*;
 
 /**
  * @author hani
@@ -23,28 +26,28 @@ public class CalendarManagerImpl implements CalendarManager {
   private HolidayManager holidayManager;
 
   @Override
-  public double getDayCountFraction(LocalDate start, LocalDate end, DayCountFraction dayCountFraction) {
+  public double getDayCountFraction(FastDate start, FastDate end, DayCountFraction dayCountFraction) {
     switch(dayCountFraction) {
       case ONE:
         return 1;
       case THIRTY_360:
         //ISDA defs section 4.1.6f
-        int d1 = start.getDayOfMonth();
-        int d2 = end.getDayOfMonth();
+        int d1 = start.getDay();
+        int d2 = end.getDay();
         if(d1 == 31) d1 = 30;
         if(d2 == 31 && d1 > 29) d2 = 30;
-        return ((360d * (end.getYear() - start.getYear())) + (30d * (end.getMonthOfYear() - start.getMonthOfYear())) + (d2 - d1)) / 360d;
+        return ((360d * (end.getYear() - start.getYear())) + (30d * (end.getMonth() - start.getMonth())) + (d2 - d1)) / 360d;
       case ACT_360:
-        return Days.daysBetween(start, end).getDays() / 360d;
+        return start.numDaysFrom(end) / 360d;
       case ACT_365:
-        return Days.daysBetween(start, end).getDays() / 365d;
+        return start.numDaysFrom(end) / 365d;
       case THIRTYE_360:
         //ISDA defs section 4.1.6g
-        d1 = start.getDayOfMonth();
-        d2 = end.getDayOfMonth();
+        d1 = start.getDay();
+        d2 = end.getDay();
         if(d1 == 31) d1 = 30;
         if(d2 == 31) d2 = 30;
-        return ((360d * (end.getYear() - start.getYear())) + (30d * (end.getMonthOfYear() - start.getMonthOfYear()))
+        return ((360d * (end.getYear() - start.getYear())) + (30d * (end.getMonth() - start.getMonth()))
           + (d2 - d1)) / 360d;
       case ACT:
         //note that we don't handle periods that span >2 years, should flag it as an error really so it's easier to spot
@@ -53,12 +56,12 @@ public class CalendarManagerImpl implements CalendarManager {
         int endYear = end.getYear();
         boolean isEndInLeapYear = endYear % 4 == 0;
         if(!isStartInLeapYear && !isEndInLeapYear) {
-          return Days.daysBetween(start, end).getDays() / 365d;
+          return start.numDaysFrom(end) / 365d;
         }
         //one of the start or end is in a leap year, so we work out the number of days separately
-        LocalDate yearSwitchOver = new LocalDate(endYear, 1, 1);
-        double startFraction = Days.daysBetween(start, yearSwitchOver).getDays() / (isStartInLeapYear ? 366d : 365d);
-        double endFraction = Days.daysBetween(yearSwitchOver, end).getDays() / (isEndInLeapYear ? 366d : 365d);
+        FastDate yearSwitchOver = new FastDate(endYear, 1, 1);
+        double startFraction = start.numDaysFrom(yearSwitchOver) / (isStartInLeapYear ? 366d : 365d);
+        double endFraction = yearSwitchOver.numDaysFrom(end) / (isEndInLeapYear ? 366d : 365d);
         return startFraction + endFraction;
       case THIRTYE_360_ISDA:
       default:
@@ -67,12 +70,12 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
-  public List<LocalDate> getFixingDates(List<LocalDate> dates, final RelativeDateOffset fixingOffset) {
-    List<LocalDate> fixingDates = new ArrayList<LocalDate>();
+  public List<FastDate> getFixingDates(List<FastDate> dates, final RelativeDateOffset fixingOffset) {
+    List<FastDate> fixingDates = new ArrayList<FastDate>();
     if(fixingOffset.getPeriod() != PeriodEnum.D) {
       throw new UnsupportedOperationException("Fixing dates only supports day periods");
     }
-    for(LocalDate date : dates) {
+    for(FastDate date : dates) {
       //move by fixing offset, we only count business days
       int offset = fixingOffset.getPeriodMultiplier().intValue();
 //      if(offset == 0) {
@@ -96,7 +99,7 @@ public class CalendarManagerImpl implements CalendarManager {
     return fixingDates;
   }
 
-  private boolean isNonWorkingDay(LocalDate date, BusinessCenters businessCenters) {
+  private boolean isNonWorkingDay(FastDate date, BusinessCenters businessCenters) {
     for(BusinessCenter s : businessCenters.getBusinessCenter()) {
         if(holidayManager.isNonWorkingDay(s.getValue(), date)) {
           return true;
@@ -106,12 +109,12 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
-  public List<LocalDate> getAdjustedDates(LocalDate start, LocalDate end, BusinessDayConventionEnum conventions[], Interval interval, BusinessCenters[] businessCenters, String rollConvention) {
+  public List<FastDate> getAdjustedDates(FastDate start, FastDate end, BusinessDayConventionEnum conventions[], Interval interval, BusinessCenters[] businessCenters, String rollConvention) {
     if(end == null) {
       throw new NullPointerException("end date is null");
     }
-    List<LocalDate> unadjustedDates = getDatesInRange(start, end, interval, rollConvention);
-    if(unadjustedDates.get(unadjustedDates.size() - 1).isBefore(end)) {
+    List<FastDate> unadjustedDates = getDatesInRange(start, end, interval, rollConvention);
+    if(unadjustedDates.get(unadjustedDates.size() - 1).lt(end)) {
       unadjustedDates.add(end);
     }
     //this is a hack that assumes that start dates are always valid, and so we can adjust them with impunity
@@ -126,14 +129,15 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
-  public List<LocalDate> getDatesInRange(LocalDate start, LocalDate end, Interval interval, String rollConvention) {
-    List<LocalDate> unadjustedDates = new ArrayList<LocalDate>();
+  public List<FastDate> getDatesInRange(FastDate start, FastDate end, Interval interval, String rollConvention) {
+    List<FastDate> unadjustedDates = new ArrayList<FastDate>();
     if(interval.getPeriod() == PeriodEnum.T) {
       unadjustedDates.add(start);
       unadjustedDates.add(end);
       return unadjustedDates;
     }
-    LocalDate current = new LocalDate(start);
+    FastDate current = new FastDate(start.getYear(),
+        start.getMonth(), start.getDay());
     boolean isIMM = false;
     boolean isEOM = false;
     int rollDay = 0;
@@ -152,32 +156,32 @@ public class CalendarManagerImpl implements CalendarManager {
     if(!isIMM && !isEOM) {
       rollDay = Integer.parseInt(rollConvention);
     }
-    ReadablePeriod period = getPeriod(interval);
-    while(current.isBefore(end) || current.equals(end)) {
+    while(current.lteq(end)) {
       unadjustedDates.add(current);
-      current = current.plus(period);
-      if(rollDay > 0 && current.getDayOfMonth() != rollDay) {
+      current = plus(current, interval.getPeriod(), interval.getPeriodMultiplier());
+      if(rollDay > 0 && current.getDay() != rollDay) {
         try {
-          current = current.withDayOfMonth(rollDay);
-        } catch(IllegalFieldValueException ex) {
+          current = new FastDate(current.getYear(), current.getMonth(), rollDay);
+        } catch (Exception e) {
           //can't do stuff like feb 29 on a non-leap year etc, it's ok.
         }
       }
       if(isEOM) {
-        current = current.property(DateTimeFieldType.dayOfMonth()).withMaximumValue();
+        current = current.getEndOfMonth();
       } else if(isIMM) {
         //go to the first day
-        current = current.property(DateTimeFieldType.dayOfMonth()).withMinimumValue();
+        current = current.getStartOfMonth();
         //go to the first wednesday
         //if we're after a weds on the first, then our first one is the next week's weds
-        if(current.getDayOfWeek() > DateTimeConstants.WEDNESDAY) {
-          current = current.plusWeeks(1);
+        if(current.getWeekDay() > 4) {
+          current = current.plusDays(7);
         }
-        current = current.withDayOfWeek(DateTimeConstants.WEDNESDAY);
+        int distanceToWeds = current.getWeekDay() - 4;
+        current = current.plusDays(-distanceToWeds);
         //we have the first weds, we want the third, so move forward twice
-        current = current.plusWeeks(2);
+        current = current.plusDays(14);
         if("IMMCAD".equals(rollConvention)) {
-          current = current.minusDays(2);
+          current = current.plusDays(-2);
         } else if("IMMNZD".equals(rollConvention)) {
           throw new UnsupportedOperationException("IMMNZD is not supported yet");
         } else if("IMMAUD".equals(rollConvention)) {
@@ -189,7 +193,7 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
-  public LocalDate applyDayInterval(LocalDate date, Interval interval, BusinessCenters businessCenters) {
+  public FastDate applyDayInterval(FastDate date, Interval interval, BusinessCenters businessCenters) {
     //move by fixing offset, we only count business days
     if(interval instanceof Offset) {
       if(((Offset)interval).getDayType() != DayTypeEnum.BUSINESS) {
@@ -215,33 +219,35 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
-  public LocalDate applyInterval(LocalDate date, Interval interval, BusinessDayConventionEnum convention, BusinessCenters centers) {
-    ReadablePeriod period = getPeriod(interval);
-    date = date.plus(period);
+  public FastDate applyInterval(FastDate date, Interval interval, BusinessDayConventionEnum convention, BusinessCenters centers) {
+    PeriodEnum period = interval.getPeriod();
+    date = plus(date, period, interval.getPeriodMultiplier());
     return adjustDate(date, convention, centers);
   }
 
+  private FastDate plus(FastDate date, PeriodEnum period, BigInteger periodMultiplier) {
+    switch (period) {
+      case D:
+        date = date.plus(0, 0, periodMultiplier.intValue(), Spillover);
+        break;
+      case W:
+        date = date.plus(0, 0, 7 * periodMultiplier.intValue(), Spillover);
+        break;
+      case M:
+        date = date.plus(0, periodMultiplier.intValue(), 0, LastDay);
+        break;
+      case Y:
+        date = date.plus(periodMultiplier.intValue(), 0, 0, LastDay);
+        break;
+    }
+    return date;
+  }
+
   @Override
-  public LocalDate adjustDate(LocalDate date, BusinessDayConventionEnum convention, BusinessCenters businessCenters) {
+  public FastDate adjustDate(FastDate date, BusinessDayConventionEnum convention, BusinessCenters businessCenters) {
     if(convention == BusinessDayConventionEnum.NONE) {
       return date;
     }
     return holidayManager.adjustDate(date, convention, businessCenters);
-  }
-
-  private ReadablePeriod getPeriod(Interval interval) {
-    int multiplier = interval.getPeriodMultiplier().intValue();
-    //T is handled in getDatesInRange
-    switch (interval.getPeriod()) {
-      case D:
-        return Days.days(multiplier);
-      case W:
-        return Weeks.weeks(multiplier);
-      case M:
-        return Months.months(multiplier);
-      case Y:
-        return Years.years(multiplier);
-    }
-    return null;
   }
 }
