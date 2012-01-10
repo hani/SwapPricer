@@ -32,15 +32,15 @@ final class DateTimeInterval {
   private int fMonthIncr;
   private int  fDayIncr;
 
-  private Integer fYear;
-  private Integer fMonth;
-  private Integer fDay;
+  private int fYear;
+  private int fMonth;
+  private int fDay;
 
   private static final int MIN = 0;
   private static final int MAX = 9999;
   private static final boolean PLUS = true;
 
-  private FastDate plusOrMinus(boolean aIsPlus, Integer aYear, Integer aMonth, Integer aDay){
+  private FastDate plusOrMinus(boolean aIsPlus, int aYear, int aMonth, int aDay){
     fIsPlus = aIsPlus;
     fYearIncr = aYear;
     fMonthIncr = aMonth;
@@ -57,7 +57,7 @@ final class DateTimeInterval {
     return new FastDate(fYear, fMonth, fDay);
   }
 
-  private void checkRange(Integer aValue, String aName) {
+  private void checkRange(int aValue, String aName) {
     if ( aValue <  MIN || aValue > MAX ) {
       throw new IllegalArgumentException(aName + " is not in the range " + MIN + ".." + MAX);
     }
