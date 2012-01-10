@@ -1,5 +1,10 @@
 package net.formicary.pricer.impl;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.*;
+
 import javolution.text.TypeFormat;
 import net.formicary.pricer.CurveManager;
 import net.formicary.pricer.model.CurvePillarPoint;
@@ -9,11 +14,6 @@ import org.apache.commons.io.IOUtils;
 import org.fpml.spec503wd3.Interval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.*;
 
 import static org.apache.commons.math.util.FastMath.exp;
 
@@ -171,9 +171,9 @@ public class CurveManagerImpl implements CurveManager {
     String val = tenor.getPeriodMultiplier() + tenor.getPeriod().value();
     double startRate = getInterpolatedForwardRate(start, ccy, val);
     //all LCH curves are quoted /365
-    double startDf = Math.exp(startRate * -(valuationDate.numDaysFrom(start)) / 365d);
+    double startDf = exp(startRate * -(valuationDate.numDaysFrom(start)) / 365d);
     double endRate = getInterpolatedForwardRate(end, ccy, val);
-    double endDf = Math.exp(endRate * - (valuationDate.numDaysFrom(end))/ 365d);
+    double endDf = exp(endRate * - (valuationDate.numDaysFrom(end))/ 365d);
     double forwardRate = ((startDf/endDf) - 1) * (360d/start.numDaysFrom(end));
     return forwardRate;
   }
