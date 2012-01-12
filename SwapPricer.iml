@@ -59,6 +59,17 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/0c1e9413a92eda14bccecda90a1bad09/com.sun.xml.fastinfoset/FastInfoset/1.2.12/jar/FastInfoset-1.2.12.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/0c1e9413a92eda14bccecda90a1bad09/com.sun.xml.fastinfoset/FastInfoset/1.2.12/source/FastInfoset-1.2.12-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/0c1e9413a92eda14bccecda90a1bad09/com.google.inject/guice/3.0/jar/guice-3.0.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -120,6 +131,15 @@
         <SOURCES>
           <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/0c1e9413a92eda14bccecda90a1bad09/org.apache.commons/commons-math/2.2/source/commons-math-2.2-sources.jar!/" />
         </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/caches/artifacts-7/artifacts/0c1e9413a92eda14bccecda90a1bad09/javax.xml.bind/jsr173_api/1.0/jar/jsr173_api-1.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">

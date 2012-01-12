@@ -1,9 +1,5 @@
 package net.formicary.pricer;
 
-import java.io.*;
-import java.util.*;
-import javax.xml.bind.JAXBException;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import net.formicary.pricer.model.Cashflow;
@@ -14,6 +10,16 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import javax.xml.bind.JAXBException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FilenameFilter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -32,7 +38,7 @@ public class CashflowTests {
 
   @BeforeClass
   public void init() throws JAXBException {
-    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule(fpmlDir));
+    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule("src/test/resources/fpml"));
     generator = injector.getInstance(CashflowGenerator.class);
   }
 

@@ -1,18 +1,21 @@
 package net.formicary.pricer.impl;
 
-import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
+import net.formicary.pricer.TradeStore;
+import net.formicary.pricer.impl.parsers.*;
+import org.fpml.spec503wd3.Swap;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-
-import net.formicary.pricer.TradeStore;
-import net.formicary.pricer.impl.parsers.*;
-import org.fpml.spec503wd3.Swap;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static javax.xml.stream.XMLStreamConstants.END_DOCUMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
@@ -23,13 +26,13 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
  *         Time: 9:25 PM
  */
 @Singleton
-public class FpmlTradeStore implements TradeStore {
+public class FpmlSTAXTradeStore implements TradeStore {
 
-  private Map<String, NodeParser> parsers = new HashMap<String, NodeParser>();
+  protected Map<String, NodeParser> parsers = new HashMap<String, NodeParser>();
   private final XMLInputFactory factory;
   private String fpmlDir;
 
-  public FpmlTradeStore() {
+  public FpmlSTAXTradeStore() {
     factory = XMLInputFactory.newFactory();
     factory.setProperty(XMLInputFactory.IS_COALESCING, false);
     factory.setProperty(XMLInputFactory.IS_VALIDATING, false);
@@ -41,6 +44,7 @@ public class FpmlTradeStore implements TradeStore {
     parsers.put("stubCalculationPeriodAmount", new StubParser());
     parsers.put("party", new PartyParser());
   }
+
 
   public String getFpmlDir() {
     return fpmlDir;
@@ -83,13 +87,14 @@ public class FpmlTradeStore implements TradeStore {
   }
 
   public static void main(String[] args) {
-    FpmlTradeStore store = new FpmlTradeStore();
-    store.setFpmlDir("src/test/resources/fpml");
+    FpmlSTAXTradeStore store = new FpmlSTAXTradeStore();
+    store.setFpmlDir("/hani/eurfpml");
     long now = System.currentTimeMillis();
-    for(int i = 0; i < 1000; i++) {
-      store.getTrade("LCH00004300325");
+    String[] list = new File(store.getFpmlDir()).list();
+    for (String s : list) {
+      store.getTrade(s.substring(0, s.lastIndexOf('.')));
     }
     long timeTaken = System.currentTimeMillis() - now;
-    System.out.println("Time to read 1000 trades: " + timeTaken + "ms average:" + (timeTaken / 1000) + "ms");
+    System.out.println("Time to read " + list.length + " trades: " + timeTaken + "ms average:" + (timeTaken / 1000) + "ms");
   }
 }
