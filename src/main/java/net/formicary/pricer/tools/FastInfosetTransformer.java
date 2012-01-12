@@ -35,7 +35,7 @@ public class FastInfosetTransformer {
     })) {
       JAXBElement<DataDocument> dd = (JAXBElement<DataDocument>)um.unmarshal(new File(from, file));
       String target = file.substring(0, file.lastIndexOf('.')) + ".fi";
-      BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(new File(to, file)));
+      BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(new File(to, target)));
       StAXDocumentSerializer serializer = new StAXDocumentSerializer(os);
       m.marshal(dd, (XMLStreamWriter)serializer);
     }
