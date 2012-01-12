@@ -83,7 +83,7 @@ public class StreamContext {
 
     FastDate earliest = firstRegularPeriodStartDate == null ? effectiveDate : firstRegularPeriodStartDate;
     if(isOIS) {
-      calculationDates = calendarManager.getValidDays(earliest, endDate, calculationCenters[1]);
+      calculationDates = calendarManager.getValidDays(earliest, calendarManager.adjustDate(endDate, conventions[2], calculationCenters[2]), calculationCenters[1]);
     } else {
       calculationDates = calendarManager.getAdjustedDates(earliest, endDate, conventions, interval, calculationCenters, null);
     }
