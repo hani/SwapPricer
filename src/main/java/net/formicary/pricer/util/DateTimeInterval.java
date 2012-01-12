@@ -58,7 +58,7 @@ final class DateTimeInterval {
     changeMonth();
     handleMonthOverflow();
     changeDay();
-    return new FastDate(fYear, fMonth, fDay);
+    return new FastDate(fYear, fMonth, fDay, false);
   }
 
   private void checkRange(int aValue, String aName) {

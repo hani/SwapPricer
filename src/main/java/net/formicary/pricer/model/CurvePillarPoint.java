@@ -74,12 +74,16 @@ public class CurvePillarPoint implements Comparable<CurvePillarPoint> {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof CurvePillarPoint)) return false;
+    if (o == null) return false;
+    CurvePillarPoint that;
+    try {
+      that = (CurvePillarPoint) o;
+    } catch(ClassCastException ex) {
+      return false;
+    }
 
-    CurvePillarPoint that = (CurvePillarPoint) o;
-
-    if (!closeDate.equals(that.closeDate)) return false;
     if (!curveName.equals(that.curveName)) return false;
+    if (!maturityDate.equals(that.maturityDate)) return false;
     //if we ever start storing curves for different close dates, we'll need to take that into account here
 
     return true;

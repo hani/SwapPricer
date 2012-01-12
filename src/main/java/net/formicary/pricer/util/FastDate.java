@@ -98,17 +98,21 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
    <P>Although all parameters are optional, many operations on this class require year-month-day to be
    present.
 
-   @param aYear 1..9999, optional
-   @param aMonth 1..12 , optional
-   @param aDay 1..31, cannot exceed the number of days in the given month/year, optional
+   @param year 1..9999, optional
+   @param month 1..12 , optional
+   @param day 1..31, cannot exceed the number of days in the given month/year, optional
    */
-  public FastDate(int aYear, int aMonth, int aDay) {
-    year = aYear;
-    month = aMonth;
-    day = aDay;
-    validateState();
+  public FastDate(int year, int month, int day) {
+    this(year, month, day, true);
   }
 
+  FastDate(int year, int month, int day, boolean validateState) {
+    this.year = year;
+    this.month = month;
+    this.day = day;
+    if(validateState)
+      validateState();
+  }
   /**
    Constructor taking a millisecond value and a {@link TimeZone}.
    This constructor may be use to convert a <tt>java.util.Date</tt> into a <tt>FastDate</tt>.
@@ -124,7 +128,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
     int year = calendar.get(Calendar.YEAR);
     int month = calendar.get(Calendar.MONTH) + 1; // 0-based
     int day = calendar.get(Calendar.DAY_OF_MONTH);
-    return new FastDate(year, month, day);
+    return new FastDate(year, month, day, false);
   }
 
   /**
@@ -433,8 +437,8 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
     return year + "-" + month + "-" + day;
   }
 
-  static final class ItemOutOfRange extends RuntimeException {
-    ItemOutOfRange(String aMessage) {
+  public static final class OutOfRangeException extends RuntimeException {
+    OutOfRangeException(String aMessage) {
       super(aMessage);
     }
     private static final long serialVersionUID = 4760138291907517660L;
@@ -449,44 +453,27 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
   static int getNumDaysInMonth(int aYear, int aMonth) {
     int result = 0;
     if (aYear != 0 && aMonth != 0) {
-      if (aMonth == 1) {
-        result = 31;
-      }
-      else if (aMonth == 2) {
-        result = isLeapYear(aYear) ? 29 : 28;
-      }
-      else if (aMonth == 3) {
-        result = 31;
-      }
-      else if (aMonth == 4) {
-        result = 30;
-      }
-      else if (aMonth == 5) {
-        result = 31;
-      }
-      else if (aMonth == 6) {
-        result = 30;
-      }
-      else if (aMonth == 7) {
-        result = 31;
-      }
-      else if (aMonth == 8) {
-        result = 31;
-      }
-      else if (aMonth == 9) {
-        result = 30;
-      }
-      else if (aMonth == 10) {
-        result = 31;
-      }
-      else if (aMonth == 11) {
-        result = 30;
-      }
-      else if (aMonth == 12) {
-        result = 31;
-      }
-      else {
-        throw new AssertionError("Month is out of range 1..12:" + aMonth);
+      switch(aMonth) {
+        case 1:
+        case 3:
+        case 5:
+        case 7:
+        case 8:
+        case 10:
+        case 12:
+          result = 31;
+          break;
+        case 4:
+        case 6:
+        case 9:
+        case 11:
+          result = 30;
+          break;
+        case 2:
+          result = isLeapYear(aYear) ? 29 : 28;
+          break;
+        default:
+          throw new AssertionError("Month is out of range 1..12:" + aMonth);
       }
     }
     return result;
@@ -504,7 +491,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
     l = j / 11;
     int m = j + 2 - (12 * l);
     int y = 100 * (n - 49) + i + l;
-    return new FastDate(y, m, d);
+    return new FastDate(y, m, d, false);
   }
 
   /**
@@ -533,14 +520,14 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
   private void checkRange(int aValue, int aMin, int aMax, String aName) {
     if(aValue != 0){
       if (aValue < aMin || aValue > aMax){
-        throw new ItemOutOfRange(aName + " is not in the range " + aMin + ".." + aMax + ". Value is:" + aValue);
+        throw new OutOfRangeException(aName + " is not in the range " + aMin + ".." + aMax + ". Value is:" + aValue);
       }
     }
   }
 
   private void checkNumDaysInMonth(int aYear, int aMonth, int aDay) {
     if (aDay > getNumDaysInMonth(aYear, aMonth)) {
-      throw new ItemOutOfRange("The day-of-the-month value '" + aDay + "' exceeds the number of days in the month: " + getNumDaysInMonth(aYear, aMonth));
+      throw new OutOfRangeException("The day-of-the-month value '" + aDay + "' exceeds the number of days in the month: " + getNumDaysInMonth(aYear, aMonth));
     }
   }
 
@@ -559,7 +546,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
   }
 
   private FastDate getStartEndDateTime(int aDay) {
-    return new FastDate(year, month, aDay);
+    return new FastDate(year, month, aDay, false);
   }
 
   /**
