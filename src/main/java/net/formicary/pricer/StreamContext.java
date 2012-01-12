@@ -1,11 +1,11 @@
 package net.formicary.pricer;
 
-import java.util.List;
-
 import net.formicary.pricer.util.DateUtil;
 import net.formicary.pricer.util.FastDate;
 import net.formicary.pricer.util.FpMLUtil;
 import org.fpml.spec503wd3.*;
+
+import java.util.List;
 
 /**
  * @author hani
@@ -38,7 +38,6 @@ public class StreamContext {
   final FastDate terminationDate;
   final double knownAmount;
   final String floatingIndexName;
-  final boolean checkForEndToEndIndexRoll;
   final BusinessCenters[] calculationCenters;
   final boolean isOIS;
 
@@ -81,12 +80,6 @@ public class StreamContext {
     interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
     calculationTenor = interval.getPeriodMultiplier() + interval.getPeriod().value();
     paymentTenor = leg.getPaymentDates().getPaymentFrequency().getPeriodMultiplier() + leg.getPaymentDates().getPaymentFrequency().getPeriod().value();
-    String rollConvention = interval.getRollConvention();
-    boolean maybeCheckForIndexEndToEnd = rollConvention.equals("EOM");
-    if(!maybeCheckForIndexEndToEnd) {
-      maybeCheckForIndexEndToEnd = !rollConvention.startsWith("IMM")  && !rollConvention.equals("NONE") && Integer.parseInt(rollConvention) > 25;
-    }
-    checkForEndToEndIndexRoll = ("EURIBOR".equals(floatingIndexName) || "LIBOR".equals(floatingIndexName)) && maybeCheckForIndexEndToEnd;
 
     FastDate earliest = firstRegularPeriodStartDate == null ? effectiveDate : firstRegularPeriodStartDate;
     calculationDates = calendarManager.getAdjustedDates(earliest, endDate, conventions, interval, calculationCenters, null);
