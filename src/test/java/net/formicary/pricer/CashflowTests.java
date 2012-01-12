@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import javax.xml.bind.JAXBException;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -37,7 +36,7 @@ public class CashflowTests {
   private static final Logger log = LoggerFactory.getLogger(CashflowTests.class);
 
   @BeforeClass
-  public void init() throws JAXBException {
+  public void init() {
     Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule("src/test/resources/fpml"));
     generator = injector.getInstance(CashflowGenerator.class);
   }
@@ -83,7 +82,7 @@ public class CashflowTests {
   @DataProvider(name = "singletrade")
   public Object[][] singleTrade() {
     Object[][] data = new Object[1][];
-    data[0] = new Object[]{"LCH00000923966"};
+    data[0] = new Object[]{"LCH00000926544"};
     return data;
   }
 
