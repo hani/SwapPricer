@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javolution.text.TypeFormat;
 import net.formicary.pricer.CurveManager;
@@ -29,8 +30,7 @@ public class CurveManagerImpl implements CurveManager {
   //a map of curve -> list of pillar points
   private String curveDir = "staticdata";
   private Map<String, List<CurvePillarPoint>> curveData = new HashMap<String, List<CurvePillarPoint>>();
-//  private static final Object NOT_FOUND = new Object();
-//  private Map<String, Object> cache = new ConcurrentHashMap<String, Object>();
+  private Map<String, Map<FastDate, Double>> cache = new ConcurrentHashMap<String, Map<FastDate, Double>>();
 
   public CurveManagerImpl() throws IOException {
     File dir = new File(curveDir);
@@ -114,41 +114,41 @@ public class CurveManagerImpl implements CurveManager {
   @Override
   public double getInterpolatedForwardRate(FastDate date, String ccy, String tenor) {
     String curve = getForwardCurve(ccy, tenor);
-    return getInterpolatedRate(date, ccy, curve);
+    return getInterpolatedRate(date, curve);
   }
 
   @Override
   public double getInterpolatedDiscountRate(FastDate date, String ccy, String tenor) {
     String curve = getDiscountCurve(ccy, tenor);
-    return getInterpolatedRate(date, ccy, curve);
+    return getInterpolatedRate(date, curve);
   }
 
-  public double getInterpolatedRate(FastDate date, String ccy, String curve) {
-//    String key = ccy + curve + date.getYear() + '-' + date.getDayOfYear() + '-' + date.getDayOfMonth();
-//    Object value = cache.get(key);
-//    if(value != null) {
-//      if(value == NOT_FOUND) {
-//        throw new IllegalArgumentException("No curve points found for curve " + curve + " currency " + ccy + " on date " + date);
-//      }
-//      return (Double)value;
-//    }
+  public double getInterpolatedRate(FastDate date, String curve) {
+    Map<FastDate, Double> rateCache = cache.get(curve);
+    if(rateCache == null) {
+      rateCache = new ConcurrentHashMap<FastDate, Double>();
+      cache.put(curve, rateCache);
+    }
+    Double value = rateCache.get(date);
+    if(value != null) {
+      return value;
+    }
 
     List<CurvePillarPoint> points = curveData.get(curve);
     if(points == null) {
-//      cache.put(key, NOT_FOUND);
-      throw new IllegalArgumentException("No curve points found for curve " + curve + " currency " + ccy + " on date " + date);
+      throw new IllegalArgumentException("No curve points found for curve " + curve + " on date " + date);
     }
     //if we're here, then we definitely have to interpolate, and so the search will always return a negative
     int index = Collections.binarySearch(points, new CurvePillarPoint(curve, date));
     if(index > -1) {
       //we have an exact match, no need to interpolate, right?
       double zeroRate = points.get(index).getZeroRate();
-//      cache.put(key, zeroRate);
+      rateCache.put(date, zeroRate);
       return zeroRate;
     } else if(index == -1) {
       //it's right before the first element, so we just use that rate
       double zeroRate = points.get(0).getZeroRate();
-//      cache.put(key, zeroRate);
+      rateCache.put(date, zeroRate);
       return zeroRate;
     } else {
       //we definitely need to interpolate, it's a negative index thats somewhere between two pillar points
@@ -159,7 +159,7 @@ public class CurveManagerImpl implements CurveManager {
       double totalDays = start.getMaturityDate().numDaysFrom(end.getMaturityDate());
       //linear interpolation, nothing fancy
       double interpRate = start.getZeroRate() + daysFromStartToNow * (end.getZeroRate() - start.getZeroRate()) / totalDays;
-//      cache.put(key, interpRate);
+      rateCache.put(date, interpRate);
       return interpRate;
     }
   }

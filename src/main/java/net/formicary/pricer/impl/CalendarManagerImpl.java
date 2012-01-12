@@ -145,17 +145,20 @@ public class CalendarManagerImpl implements CalendarManager {
       CalculationPeriodFrequency f = (CalculationPeriodFrequency)interval;
       rollConvention = f.getRollConvention();
     }
-    if(rollConvention == null) {
+    if(rollConvention == null && interval.getPeriod() != PeriodEnum.D) {
       throw new IllegalArgumentException("No rollconvention specified");
     }
-    if(rollConvention.startsWith("IMM")) {
-      isIMM = true;
-    } else if(rollConvention.equals("EOM")) {
-      isEOM = true;
+    if(rollConvention != null) {
+      if(rollConvention.startsWith("IMM")) {
+        isIMM = true;
+      } else if(rollConvention.equals("EOM")) {
+        isEOM = true;
+      }
+      if(!isIMM && !isEOM) {
+        rollDay = Integer.parseInt(rollConvention);
+      }
     }
-    if(!isIMM && !isEOM) {
-      rollDay = Integer.parseInt(rollConvention);
-    }
+
     while(current.lteq(end)) {
       unadjustedDates.add(current);
       current = plus(current, interval.getPeriod(), interval.getPeriodMultiplier());
