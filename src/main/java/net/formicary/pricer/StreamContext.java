@@ -1,11 +1,11 @@
 package net.formicary.pricer;
 
+import java.util.List;
+
 import net.formicary.pricer.util.DateUtil;
 import net.formicary.pricer.util.FastDate;
 import net.formicary.pricer.util.FpMLUtil;
 import org.fpml.spec503wd3.*;
-
-import java.util.List;
 
 /**
  * @author hani
@@ -82,7 +82,11 @@ public class StreamContext {
     paymentTenor = leg.getPaymentDates().getPaymentFrequency().getPeriodMultiplier() + leg.getPaymentDates().getPaymentFrequency().getPeriod().value();
 
     FastDate earliest = firstRegularPeriodStartDate == null ? effectiveDate : firstRegularPeriodStartDate;
-    calculationDates = calendarManager.getAdjustedDates(earliest, endDate, conventions, interval, calculationCenters, null);
+    if(isOIS) {
+      calculationDates = calendarManager.getValidDays(earliest, endDate, calculationCenters[1]);
+    } else {
+      calculationDates = calendarManager.getAdjustedDates(earliest, endDate, conventions, interval, calculationCenters, null);
+    }
     initialStub = FpMLUtil.getInitialStub(leg);
     finalStub = FpMLUtil.getFinalStub(leg);
 
