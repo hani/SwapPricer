@@ -42,7 +42,7 @@ public class CashflowTests {
     generator = injector.getInstance(CashflowGenerator.class);
   }
 
-  @Test(dataProvider = "singletrade")
+  @Test(dataProvider = "trades")
   public void generateCashflows(String id) throws Exception {
     List<Cashflow> actualFlows;
     try {
@@ -64,8 +64,13 @@ public class CashflowTests {
       Cashflow expected = next.getLchFlow();
       if(actual != null && expected != null) {
         int diff = (int)(actual.getAmount() - expected.getAmount());
-        if(diff > 50) {
+        if(Math.abs(diff) > 50) {
           errors.append("\nAmount diff: " + diff + " for flow on date " + actual.getDate() + " side: " + actual.getType());
+        } else {
+          diff = (int)(actual.getNpv() - expected.getNpv());
+          if(Math.abs(diff) > 50) {
+            errors.append("\nNPV diff: " + diff + " for flow on date " + actual.getDate() + " side: " + actual.getType());
+          }
         }
       }
       if(next.hasDateMismatch()) {
