@@ -120,7 +120,7 @@ public class CalendarManagerImpl implements CalendarManager {
     //this is a hack that assumes that start dates are always valid, and so we can adjust them with impunity
     //the reason we do that is because we might have a stub or some other thing that messes with the start date but is still our 'perceived' start date, so we
     //adjust it for the middle adjustments
-    unadjustedDates.set(0, adjustDate(unadjustedDates.get(0), conventions[1], businessCenters[1]));
+    unadjustedDates.set(0, adjustDate(unadjustedDates.get(0), conventions[0], businessCenters[0]));
     for(int i = 1; i < unadjustedDates.size() - 1; i++) {
       unadjustedDates.set(i, adjustDate(unadjustedDates.get(i), conventions[1], businessCenters[1]));
     }

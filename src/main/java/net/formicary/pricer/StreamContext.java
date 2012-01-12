@@ -86,6 +86,10 @@ public class StreamContext {
       calculationDates = calendarManager.getValidDays(effectiveDate, calendarManager.adjustDate(endDate, conventions[2], calculationCenters[2]), calculationCenters[1]);
     } else {
       calculationDates = calendarManager.getAdjustedDates(earliest, endDate, conventions, interval, calculationCenters, null);
+      //if our first date isn't our effective date, then we adjust it according to calc conventions, not start conventions
+      if(firstRegularPeriodStartDate != null) {
+        calculationDates.set(0, calendarManager.adjustDate(calculationDates.get(0), conventions[1], calculationCenters[1]));
+      }
     }
     initialStub = FpMLUtil.getInitialStub(leg);
     finalStub = FpMLUtil.getFinalStub(leg);

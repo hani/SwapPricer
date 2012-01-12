@@ -64,7 +64,7 @@ public class CashflowGenerator {
         paymentStartDate = ctx.firstRegularPeriodStartDate;
     }
 
-    List<FastDate> paymentDates = calendarManager.getAdjustedDates(paymentStartDate, ctx.endDate, ctx.conventions, paymentInterval, FpMLUtil.getBusinessCenters(leg), interval.getRollConvention());
+    List<FastDate> paymentDates = calendarManager.getAdjustedDates(paymentStartDate, ctx.endDate, ctx.conventions, paymentInterval, ctx.calculationCenters, interval.getRollConvention());
     if(ctx.lastRegularPeriodEndDate != null && ctx.lastRegularPeriodEndDate.lt(ctx.terminationDate)) {
       paymentDates.add(ctx.terminationDate);
     }
