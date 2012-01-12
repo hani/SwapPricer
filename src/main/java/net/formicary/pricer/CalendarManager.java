@@ -1,13 +1,13 @@
 package net.formicary.pricer;
 
+import java.util.List;
+
 import net.formicary.pricer.model.DayCountFraction;
 import net.formicary.pricer.util.FastDate;
 import org.fpml.spec503wd3.BusinessCenters;
 import org.fpml.spec503wd3.BusinessDayConventionEnum;
 import org.fpml.spec503wd3.Interval;
 import org.fpml.spec503wd3.RelativeDateOffset;
-
-import java.util.List;
 
 /**
  * @author hani
@@ -38,4 +38,6 @@ public interface CalendarManager {
    */
   List<FastDate> getAdjustedDates(FastDate paymentStartDate, FastDate endDate, BusinessDayConventionEnum[] conventions,
     Interval interval, BusinessCenters[] businessCenters, String rollConvention);
+
+  List<FastDate> getValidDays(FastDate startDate, FastDate endDate, BusinessCenters calculationCenter);
 }

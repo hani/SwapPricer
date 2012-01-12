@@ -102,12 +102,13 @@ public class CashflowGenerator {
       } else {
         //todo centers should be based on the index centers, and period start should be fixingdate + 2D (to handle case where periodstart is a bad date)
         FastDate tenorEndDate;
-        if(interval.getPeriod() == PeriodEnum.T) {
+        if(interval.getPeriod() == PeriodEnum.T || ctx.isOIS) {
           tenorEndDate = periodEndDate;
         } else {
           tenorEndDate = calendarManager.applyInterval(periodStartDate, interval, BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
         }
-        double impliedForwardRate = curveManager.getImpliedForwardRate(periodStartDate, tenorEndDate, valuationDate, ctx.currency, ctx.calculationTenor);
+        String curve = ctx.isOIS ? "OIS" : ctx.calculationTenor;
+        double impliedForwardRate = curveManager.getImpliedForwardRate(periodStartDate, tenorEndDate, valuationDate, ctx.currency, curve);
         Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, impliedForwardRate);
         flows.add(flow);
       }
@@ -235,7 +236,7 @@ public class CashflowGenerator {
               flow.setAmount(-flow.getAmount());
             }
           }
-          if(ctx.compoundingMethod == CompoundingMethodEnum.FLAT || ctx.compoundingMethod == CompoundingMethodEnum.STRAIGHT) {
+          if(ctx.isOIS || ctx.compoundingMethod == CompoundingMethodEnum.FLAT || ctx.compoundingMethod == CompoundingMethodEnum.STRAIGHT) {
             //we use abs here since compounding is always positive
             notional += Math.abs(flow.getAmount());
           }

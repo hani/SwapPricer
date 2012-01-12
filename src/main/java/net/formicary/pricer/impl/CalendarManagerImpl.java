@@ -222,6 +222,20 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
+  public List<FastDate> getValidDays(FastDate startDate, FastDate endDate, BusinessCenters calculationCenter) {
+    int size = startDate.numDaysFrom(endDate);
+    List<FastDate> dates = new ArrayList<FastDate>(size);
+    FastDate current = startDate;
+    while(current.lteq(endDate)) {
+      if(!isNonWorkingDay(current, calculationCenter)) {
+        dates.add(current);
+      }
+      current = current.plusDays(1);
+    }
+    return dates;
+  }
+
+  @Override
   public FastDate applyInterval(FastDate date, Interval interval, BusinessDayConventionEnum convention, BusinessCenters centers) {
     PeriodEnum period = interval.getPeriod();
     date = plus(date, period, interval.getPeriodMultiplier());
