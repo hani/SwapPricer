@@ -84,7 +84,7 @@ public class CashflowGenerator {
 //          Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, initialFloatingRate.doubleValue());
 //          flows.add(flow);
 //      }
-      if(fixingDate.lteq(valuationDate) && interval.getPeriod() != PeriodEnum.T) {
+      if(fixingDate.lteq(valuationDate) && (interval.getPeriod() != PeriodEnum.T || periodEndDate.lteq(valuationDate))) {
         String tenor = ctx.calculationTenor;
         if(ctx.isOIS) tenor = "1D";
         double rate = rateManager.getZeroRate(ctx.floatingIndexName, ctx.currency, tenor, fixingDate) / 100;
