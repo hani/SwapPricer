@@ -100,11 +100,12 @@ public class CashflowGenerator {
         Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, rate);
         flows.add(flow);
       } else {
-        //todo centers should be based on the index centers, and period start should be fixingdate + 2D (to handle case where periodstart is a bad date)
+        //todo centers should be based on the index centers, and period start should be fixingdate + spot lag of index (2D) (to handle case where periodstart is a bad date)
         FastDate tenorEndDate;
         if(interval.getPeriod() == PeriodEnum.T || ctx.isOIS) {
           tenorEndDate = periodEndDate;
         } else {
+          //todo don't use trade calc center, instead need to use index center + ccy center (need a map of index centers and ccy)
           tenorEndDate = calendarManager.applyInterval(periodStartDate, interval, BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
         }
         String curve = ctx.isOIS ? "OIS" : ctx.calculationTenor;
