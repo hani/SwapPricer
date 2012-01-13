@@ -53,6 +53,7 @@ public class SwapStreamParser implements NodeParser<InterestRateStream> {
       if(event == START_ELEMENT) {
         NodeParser parser = parsers.get(reader.getLocalName());
         if(parser != null) {
+          //todo this is a bit pants, we might as well just have fields for the parsers and a normal switch like every other parser
           Object entity = parser.parse(reader, ctx);
           if(entity instanceof CalculationPeriodAmount) {
             stream.setCalculationPeriodAmount((CalculationPeriodAmount)entity);
