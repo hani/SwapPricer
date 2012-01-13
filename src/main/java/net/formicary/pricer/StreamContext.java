@@ -1,6 +1,10 @@
 package net.formicary.pricer;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.xml.datatype.XMLGregorianCalendar;
 
 import net.formicary.pricer.util.DateUtil;
 import net.formicary.pricer.util.FastDate;
@@ -41,6 +45,7 @@ public class StreamContext {
   final String floatingIndexName;
   final BusinessCenters[] calculationCenters;
   final boolean isOIS;
+  final Map<FastDate, Double> notionalSteps;
 
   public StreamContext(CalendarManager calendarManager, FastDate valuationDate, InterestRateStream leg) {
     this.stream = leg;
@@ -111,9 +116,20 @@ public class StreamContext {
     //stubs can only be on floating side right? Otherwise it'd be a fake stub handled above
     if(calculation != null) {
       AmountSchedule notionalStepSchedule = calculation.getNotionalSchedule().getNotionalStepSchedule();
+      List<Step> steps = notionalStepSchedule.getStep();
+      if(steps.size() > 0) {
+        notionalSteps = new HashMap<FastDate, Double>();
+        for (Step step : steps) {
+          XMLGregorianCalendar cal = step.getStepDate();
+          notionalSteps.put(new FastDate(cal.getYear(), cal.getMonth(), cal.getDay()), step.getStepValue().doubleValue());
+        }
+      } else {
+        notionalSteps = null;
+      }
       currency = notionalStepSchedule.getCurrency().getValue();
       notional = notionalStepSchedule.getInitialValue().doubleValue();
     } else {
+      notionalSteps = null;
       notional = 0;
       currency = knownAmountSchedule.getCurrency().getValue();
     }
