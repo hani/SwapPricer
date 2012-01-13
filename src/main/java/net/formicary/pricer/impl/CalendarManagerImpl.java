@@ -3,7 +3,9 @@ package net.formicary.pricer.impl;
 import java.lang.Math;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Inject;
 
 import net.formicary.pricer.CalendarManager;
@@ -24,6 +26,12 @@ public class CalendarManagerImpl implements CalendarManager {
 
   @Inject
   private HolidayManager holidayManager;
+  private static Map<String, String> currencyCenters = new HashMap<String, String>();
+  static {
+    currencyCenters.put("GBP", "GBLO");
+    currencyCenters.put("USD", "USNY");
+    currencyCenters.put("EURO", "EUTA");
+  }
 
   @Override
   public double getDayCountFraction(FastDate start, FastDate end, DayCountFraction dayCountFraction) {
@@ -240,6 +248,29 @@ public class CalendarManagerImpl implements CalendarManager {
     PeriodEnum period = interval.getPeriod();
     date = plus(date, period, interval.getPeriodMultiplier());
     return adjustDate(date, convention, centers);
+  }
+
+  @Override
+  public FastDate applyIndexInterval(FastDate date, Interval interval, String index, String ccy) {
+    PeriodEnum period = interval.getPeriod();
+    date = plus(date, period, interval.getPeriodMultiplier());
+    String[] centers = new String[2];
+    if("LIBOR".equals(index)) {
+      centers[0] = "GBLO";
+    } else if ("EURIBOR".equals(index)) {
+      centers[0] = "EUTA";
+    }
+    if("EUR".equals(ccy)) {
+      centers[1] = "EUTA";
+    }
+    return adjustDate(date, BusinessDayConventionEnum.MODFOLLOWING, centers);
+  }
+
+  public FastDate adjustDate(FastDate date, BusinessDayConventionEnum convention, String... businessCenters) {
+    if(convention == BusinessDayConventionEnum.NONE) {
+      return date;
+    }
+    return holidayManager.adjustDate(date, convention, businessCenters);
   }
 
   private FastDate plus(FastDate date, PeriodEnum period, BigInteger periodMultiplier) {

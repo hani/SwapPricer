@@ -105,8 +105,11 @@ public class CashflowGenerator {
         if(interval.getPeriod() == PeriodEnum.T || ctx.isOIS) {
           tenorEndDate = periodEndDate;
         } else {
-          //todo don't use trade calc center, instead need to use index center + ccy center (need a map of index centers and ccy)
-          tenorEndDate = calendarManager.applyInterval(periodStartDate, interval, BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
+          tenorEndDate = calendarManager.applyIndexInterval(periodStartDate, interval, ctx.floatingIndexName, ctx.currency);
+//          FastDate oldTenorEndDate = calendarManager.applyIndexInterval(periodStartDate, interval, ctx.floatingIndexName, ctx.currency);
+//          if(!tenorEndDate.equals(oldTenorEndDate)) {
+//            System.out.println("MISMATCH DATES " + tenorEndDate + " and " + oldTenorEndDate);
+//          }
         }
         String curve = ctx.isOIS ? "OIS" : ctx.calculationTenor;
         double impliedForwardRate = curveManager.getImpliedForwardRate(periodStartDate, tenorEndDate, valuationDate, ctx.currency, curve);

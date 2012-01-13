@@ -1,14 +1,14 @@
 package net.formicary.pricer;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import javax.inject.Singleton;
+
 import net.formicary.pricer.util.FastDate;
 import org.fpml.spec503wd3.BusinessCenter;
 import org.fpml.spec503wd3.BusinessCenters;
 import org.fpml.spec503wd3.BusinessDayConventionEnum;
-
-import javax.inject.Singleton;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author hani
@@ -38,6 +38,21 @@ public class HolidayManager {
       for(BusinessCenter center : businessCenters.getBusinessCenter()) {
         while(isNonWorkingDay(center.getValue(), current)) {
           current = adjustDate(current, convention, center.getValue());
+        }
+      }
+    }
+    return current;
+  }
+
+  public FastDate adjustDate(FastDate date, BusinessDayConventionEnum convention, String... businessCenters) {
+    if(convention == BusinessDayConventionEnum.NONE) return date;
+    FastDate current = date;
+    if(businessCenters != null) {
+      for(String center : businessCenters) {
+        if(center != null) {
+          while(isNonWorkingDay(center, current)) {
+            current = adjustDate(current, convention, center);
+          }
         }
       }
     }

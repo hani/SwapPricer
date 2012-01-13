@@ -40,4 +40,17 @@ public interface CalendarManager {
     Interval interval, BusinessCenters[] businessCenters, String rollConvention);
 
   List<FastDate> getValidDays(FastDate startDate, FastDate endDate, BusinessCenters calculationCenter);
+
+  /**
+   * Apply an interval to an index date. This does not take the trade into account as the spot
+   * lag for an index has nothing to do with the trade, and is instead composed of the union of the
+   * index business center (eg, GBLO for LIBOR) and the currency (eg, USNY for USD). It is also
+   * always MODFOLLOWING
+   * @param date The start date
+   * @param interval The interval to apply
+   * @param index The index name (EURIBOR, LIBOR, etc)
+   * @param ccy The currency (USD, GBP, EURO, etc)
+   * @return An adjusted date for the end of the rate's period
+   */
+  FastDate applyIndexInterval(FastDate date, Interval interval, String index, String ccy);
 }
