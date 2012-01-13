@@ -2,12 +2,14 @@ package net.formicary.pricer.impl.parsers;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
+import net.formicary.pricer.util.DateUtil;
 import org.fpml.spec503wd3.*;
 
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
@@ -37,7 +39,10 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
     fixedRateSchedule,
     compoundingMethod,
     initialRate,
-    knownAmountSchedule
+    knownAmountSchedule,
+    step,
+    stepDate,
+    stepValue
   }
 
   @Override
@@ -98,6 +103,19 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
           case notionalStepSchedule:
             AmountSchedule schedule = new AmountSchedule();
             cpa.getCalculation().getNotionalSchedule().setNotionalStepSchedule(schedule);
+            break;
+          case step:
+            cpa.getCalculation().getNotionalSchedule().getNotionalStepSchedule().getStep().add(new Step());
+            break;
+          case stepDate:
+            List<Step> steps = cpa.getCalculation().getNotionalSchedule().getNotionalStepSchedule().getStep();
+            Step step = steps.get(steps.size() - 1);
+            step.setStepDate(DateUtil.getCalendar(reader.getElementText()));
+            break;
+          case stepValue:
+            steps = cpa.getCalculation().getNotionalSchedule().getNotionalStepSchedule().getStep();
+            step = steps.get(steps.size() - 1);
+            step.setStepValue(new BigDecimal(reader.getElementText()));
             break;
         }
       } else if (event == END_ELEMENT) {
