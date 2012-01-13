@@ -1,8 +1,5 @@
 package net.formicary.pricer.util;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -548,25 +545,4 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
   private FastDate getStartEndDateTime(int aDay) {
     return new FastDate(year, month, aDay, false);
   }
-
-  /**
-   Always treat de-serialization as a full-blown constructor, by
-   validating the final state of the de-serialized object.
-   */
-  private void readObject(ObjectInputStream aInputStream) throws ClassNotFoundException, IOException {
-    //always perform the default de-serialization first
-    aInputStream.defaultReadObject();
-    //no mutable fields in this case
-    validateState();
-  }
-
-  /**
-   This is the default implementation of writeObject.
-   Customise if necessary.
-   */
-  private void writeObject(ObjectOutputStream aOutputStream) throws IOException {
-    //perform the default serialization for all non-transient, non-static fields
-    aOutputStream.defaultWriteObject();
-  }
-
 }
