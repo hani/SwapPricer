@@ -218,7 +218,6 @@ public class CashflowGenerator {
         }
       }
     }
-    boolean isFirstPeriod = true;
     for(int i = start; i < paymentDates.size(); i++) {
       Cashflow payment = new Cashflow();
       FastDate paymentDate = paymentDates.get(i);
