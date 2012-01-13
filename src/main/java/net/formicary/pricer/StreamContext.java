@@ -29,6 +29,7 @@ public class StreamContext {
   final double notional;
   final boolean paying;
   final CompoundingMethodEnum compoundingMethod;
+  final boolean compounding;
   final DayCountFraction fraction;
   final FastDate firstRegularPeriodStartDate;
   //we'll always pretend to be partyA from the LCH pov, to match the dmp tool
@@ -63,6 +64,7 @@ public class StreamContext {
       compoundingMethod = null;
     }
 
+    compounding = isOIS || compoundingMethod == CompoundingMethodEnum.STRAIGHT || compoundingMethod == CompoundingMethodEnum.FLAT;
     AmountSchedule knownAmountSchedule = leg.getCalculationPeriodAmount().getKnownAmountSchedule();
     if(knownAmountSchedule != null) {
       knownAmount = knownAmountSchedule.getInitialValue().doubleValue();

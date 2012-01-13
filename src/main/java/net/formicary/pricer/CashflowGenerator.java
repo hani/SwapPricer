@@ -218,6 +218,7 @@ public class CashflowGenerator {
         }
       }
     }
+    boolean isFirstPeriod = true;
     for(int i = start; i < paymentDates.size(); i++) {
       Cashflow payment = new Cashflow();
       FastDate paymentDate = paymentDates.get(i);
@@ -236,7 +237,7 @@ public class CashflowGenerator {
               flow.setAmount(-flow.getAmount());
             }
           }
-          if(ctx.isOIS || ctx.compoundingMethod == CompoundingMethodEnum.FLAT || ctx.compoundingMethod == CompoundingMethodEnum.STRAIGHT) {
+          if(ctx.compounding) {
             //we use abs here since compounding is always positive
             notional += Math.abs(flow.getAmount());
           }
