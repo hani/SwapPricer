@@ -1,14 +1,16 @@
 package net.formicary.pricer.impl.parsers;
 
+import java.util.HashMap;
+import java.util.Map;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
 import net.formicary.pricer.HrefListener;
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
 import org.fpml.spec503wd3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
@@ -33,13 +35,23 @@ public class SwapStreamParser implements NodeParser<InterestRateStream> {
     calculationPeriodAmount
   }
 
+  protected Map<String, NodeParser> parsers = new HashMap<String, NodeParser>();
+
+  public SwapStreamParser() {
+    parsers.put("calculationPeriodDates", new CalculationPeriodDatesParser());
+    parsers.put("calculationPeriodAmount", new CalculationPeriodAmountParser());
+    parsers.put("resetDates", new ResetDatesParser());
+    parsers.put("paymentDates", new PaymentDatesParser());
+    parsers.put("stubCalculationPeriodAmount", new StubParser());
+  }
+
   @Override
   public InterestRateStream parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
     final InterestRateStream stream = new InterestRateStream();
     while(reader.hasNext()) {
       int event = reader.next();
       if(event == START_ELEMENT) {
-        NodeParser parser = ctx.getParsers().get(reader.getLocalName());
+        NodeParser parser = parsers.get(reader.getLocalName());
         if(parser != null) {
           Object entity = parser.parse(reader, ctx);
           if(entity instanceof CalculationPeriodAmount) {
@@ -81,7 +93,6 @@ public class SwapStreamParser implements NodeParser<InterestRateStream> {
         final Element element = Element.valueOf(reader.getLocalName());
         switch(element) {
           case swapStream:
-            ctx.getStreams().add(stream);
             return stream;
         }
       }

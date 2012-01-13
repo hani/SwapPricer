@@ -14,9 +14,10 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import net.formicary.pricer.TradeStore;
-import net.formicary.pricer.impl.parsers.*;
+import net.formicary.pricer.impl.parsers.FRAParser;
+import net.formicary.pricer.impl.parsers.PartyParser;
+import net.formicary.pricer.impl.parsers.SwapParser;
 import org.fpml.spec503wd3.Product;
-import org.fpml.spec503wd3.Swap;
 
 import static javax.xml.stream.XMLStreamConstants.END_DOCUMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
@@ -37,13 +38,8 @@ public class FpmlSTAXTradeStore implements TradeStore {
     factory = XMLInputFactory.newFactory();
     factory.setProperty(XMLInputFactory.IS_COALESCING, false);
     factory.setProperty(XMLInputFactory.IS_VALIDATING, false);
-    parsers.put("calculationPeriodDates", new CalculationPeriodDatesParser());
-    parsers.put("calculationPeriodAmount", new CalculationPeriodAmountParser());
-    parsers.put("resetDates", new ResetDatesParser());
-    parsers.put("paymentDates", new PaymentDatesParser());
-    parsers.put("swapStream", new SwapStreamParser());
     parsers.put("fra", new FRAParser());
-    parsers.put("stubCalculationPeriodAmount", new StubParser());
+    parsers.put("swap", new SwapParser());
     parsers.put("party", new PartyParser());
   }
 
@@ -68,24 +64,30 @@ public class FpmlSTAXTradeStore implements TradeStore {
   }
 
   public Product readFpml(File f) throws XMLStreamException, IOException {
-    Swap swap = new Swap();
     FpmlContext ctx = new FpmlContext();
-    ctx.setParsers(parsers);
     //most fpml files are around 8.5k
     BufferedInputStream is = new BufferedInputStream(new FileInputStream(f), 12000);
     XMLStreamReader reader = factory.createXMLStreamReader(is);
+    Product p = getProduct(ctx, reader);
+    is.close();
+    return p;
+  }
+
+  protected Product getProduct(FpmlContext ctx, XMLStreamReader reader) throws XMLStreamException {
+    Product p = null;
     for (int event = reader.next(); event != END_DOCUMENT; event = reader.next()) {
       if (event == START_ELEMENT) {
         NodeParser parser = parsers.get(reader.getLocalName());
         if(parser != null) {
-          parser.parse(reader, ctx);
+          Object o = parser.parse(reader, ctx);
+          if(o instanceof Product) {
+            p = (Product)o;
+          }
         }
       }
     }
     reader.close();
-    is.close();
-    swap.getSwapStream().addAll(ctx.getStreams());
-    return swap;
+    return p;
   }
 
   public static void main(String[] args) {

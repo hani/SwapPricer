@@ -10,10 +10,6 @@ import javax.xml.stream.XMLStreamReader;
 
 import com.sun.xml.fastinfoset.stax.StAXDocumentParser;
 import org.fpml.spec503wd3.Product;
-import org.fpml.spec503wd3.Swap;
-
-import static javax.xml.stream.XMLStreamConstants.END_DOCUMENT;
-import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 
 /**
  * @author hani
@@ -24,24 +20,13 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 public class FpmlFastInfosetTradeStore extends  FpmlSTAXTradeStore {
 
   public Product readFpml(File f) throws XMLStreamException, IOException {
-    Swap swap = new Swap();
     FpmlContext ctx = new FpmlContext();
-    ctx.setParsers(parsers);
-    //most fpml fi files are around 4k
+    //most fast infoset files are around 4k
     BufferedInputStream is = new BufferedInputStream(new FileInputStream(f), 6000);
     XMLStreamReader reader = new StAXDocumentParser(is);
-    for (int event = reader.next(); event != END_DOCUMENT; event = reader.next()) {
-      if (event == START_ELEMENT) {
-        NodeParser parser = parsers.get(reader.getLocalName());
-        if(parser != null) {
-          parser.parse(reader, ctx);
-        }
-      }
-    }
-    reader.close();
+    Product p = getProduct(ctx, reader);
     is.close();
-    swap.getSwapStream().addAll(ctx.getStreams());
-    return swap;
+    return p;
   }
 
   public static void main(String[] args) {
