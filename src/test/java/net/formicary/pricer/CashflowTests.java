@@ -73,7 +73,7 @@ public class CashflowTests {
         }
       }
       if(next.hasDateMismatch()) {
-        errors.append("Date break: ").append(next);
+        errors.append("\nDate break: ").append(next);
       }
     }
     assertTrue(errors.length() == 0, "Rec failed for trade " + id + errors);
@@ -82,7 +82,7 @@ public class CashflowTests {
   @DataProvider(name = "singletrade")
   public Object[][] singleTrade() {
     Object[][] data = new Object[1][];
-    data[0] = new Object[]{"LCH00000926544"};
+    data[0] = new Object[]{"LCH00001074112"};
     return data;
   }
 

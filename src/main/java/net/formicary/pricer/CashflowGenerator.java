@@ -28,11 +28,9 @@ public class CashflowGenerator {
     for(InterestRateStream stream : swap.getSwapStream()) {
       if(FpMLUtil.isFixedStream(stream)) {
         List<Cashflow> fixed = generateFixedFlows(valuationDate, stream);
-        adjustForPaymentOffset(stream, fixed);
         flows.addAll(fixed);
       } else {
         List<Cashflow> floating = generateFloatingFlows(valuationDate, stream);
-        adjustForPaymentOffset(stream, floating);
         flows.addAll(floating);
       }
     }
@@ -129,6 +127,7 @@ public class CashflowGenerator {
       flows.add(calculateStubCashflow(ctx, startDate, endDate, ctx.finalStub.getFloatingRate()));
     }
     flows = convertToPaymentFlows(ctx, flows, paymentDates);
+    adjustForPaymentOffset(leg, flows);
     for(Cashflow flow : flows) {
       discountFlow(ctx, flow);
     }
@@ -164,6 +163,9 @@ public class CashflowGenerator {
           flow.setAmount(-flow.getAmount());
         }
       }
+    }
+    adjustForPaymentOffset(leg, flows);
+    for (Cashflow flow : flows) {
       discountFlow(ctx, flow);
     }
     return flows;
