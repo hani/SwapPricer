@@ -1,13 +1,13 @@
 package net.formicary.pricer.impl.parsers;
 
+import java.math.BigInteger;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
 import net.formicary.pricer.HrefListener;
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
 import org.fpml.spec503wd3.*;
-
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import java.math.BigInteger;
 
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
@@ -18,6 +18,8 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
  *         Time: 2:49 PM
  */
 public class ResetDatesParser implements NodeParser<ResetDates> {
+  private BusinessCentersParser bcParser = new BusinessCentersParser();
+
   enum Element {
     resetDates,
     resetFrequency,
@@ -32,7 +34,6 @@ public class ResetDatesParser implements NodeParser<ResetDates> {
     businessDayConvention,
     businessCentersReference,
     businessCenters,
-    businessCenter,
     //TODO need to impl this one
     dateRelativeTo
   }
@@ -84,17 +85,11 @@ public class ResetDatesParser implements NodeParser<ResetDates> {
             multiplier = new BigInteger(reader.getElementText());
             break;
           case businessCenters:
-            centers = new BusinessCenters();
+            centers = bcParser.parse(reader, ctx);
             break;
           case fixingDates:
             fixingDates = new RelativeDateOffset();
             dates.setFixingDates(fixingDates);
-            break;
-          case businessCenter:
-            BusinessCenter bc = new BusinessCenter();
-            bc.setId(reader.getElementText());
-            bc.setValue(bc.getId());
-            centers.getBusinessCenter().add(bc);
             break;
           case businessCentersReference:
             ctx.addHrefListener(reader.getAttributeValue(null, "href"), new HrefListener() {

@@ -1,14 +1,14 @@
 package net.formicary.pricer.impl.parsers;
 
+import java.math.BigInteger;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
 import net.formicary.pricer.HrefListener;
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
 import net.formicary.pricer.util.DateUtil;
 import org.fpml.spec503wd3.*;
-
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import java.math.BigInteger;
 
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
@@ -20,6 +20,8 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
  */
 public class CalculationPeriodDatesParser implements NodeParser<CalculationPeriodDates> {
 
+  private BusinessCentersParser bcParser = new BusinessCentersParser();
+
   enum Element {
     effectiveDate,
     terminationDate,
@@ -28,7 +30,6 @@ public class CalculationPeriodDatesParser implements NodeParser<CalculationPerio
     lastRegularPeriodEndDate,
     businessDayConvention,
     businessCentersReference,
-    businessCenter,
     unadjustedDate,
     dateAdjustments,
     businessCenters,
@@ -107,15 +108,11 @@ public class CalculationPeriodDatesParser implements NodeParser<CalculationPerio
             }
             break;
           case businessCenters:
-            holder.centers = new BusinessCenters();
+            BusinessCenters bc = bcParser.parse(reader, ctx);
             if(holder.currentDate == null) {
-              dates.getCalculationPeriodDatesAdjustments().setBusinessCenters(holder.centers);
+              dates.getCalculationPeriodDatesAdjustments().setBusinessCenters(bc);
             } else {
-              holder.currentDate.getDateAdjustments().setBusinessCenters(holder.centers);
-            }
-            String id = reader.getAttributeValue(null, "id");
-            if(id != null) {
-              ctx.registerObject(id, holder.centers);
+              holder.currentDate.getDateAdjustments().setBusinessCenters(bc);
             }
             break;
           case businessCentersReference:
@@ -130,12 +127,6 @@ public class CalculationPeriodDatesParser implements NodeParser<CalculationPerio
               }
             });
             break;
-          case businessCenter:
-            BusinessCenter bc = new BusinessCenter();
-            bc.setId(reader.getElementText());
-            bc.setValue(bc.getId());
-            holder.centers.getBusinessCenter().add(bc);
-            break;
         }
       } else if(event == END_ELEMENT) {
         Element element = Element.valueOf(reader.getLocalName());
@@ -143,8 +134,6 @@ public class CalculationPeriodDatesParser implements NodeParser<CalculationPerio
           case calculationPeriodDates:
             //we're done
             return dates;
-          case businessCentersReference:
-            break;
         }
       }
     }

@@ -1,13 +1,13 @@
 package net.formicary.pricer.impl.parsers;
 
+import java.math.BigInteger;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
 import net.formicary.pricer.HrefListener;
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
 import org.fpml.spec503wd3.*;
-
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import java.math.BigInteger;
 
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
@@ -17,6 +17,8 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
  *         Time: 2:49 PM
  */
 public class PaymentDatesParser implements NodeParser<PaymentDates> {
+  private BusinessCentersParser bcParser = new BusinessCentersParser();
+
   enum Element {
     paymentDates,
     calculationPeriodDates,
@@ -29,7 +31,6 @@ public class PaymentDatesParser implements NodeParser<PaymentDates> {
     businessDayConvention,
     businessCentersReference,
     businessCenters,
-    businessCenter,
     paymentDaysOffset,
     dayType
   }
@@ -67,11 +68,8 @@ public class PaymentDatesParser implements NodeParser<PaymentDates> {
               }
             });
             break;
-          case businessCenter:
-            BusinessCenter bc = new BusinessCenter();
-            bc.setId(reader.getElementText());
-            bc.setValue(bc.getId());
-            adjustments.getBusinessCenters().getBusinessCenter().add(bc);
+          case businessCenters:
+            adjustments.setBusinessCenters(bcParser.parse(reader, ctx));
             break;
           case calculationPeriodDates:
             throw new RuntimeException("Not implemented: " + element.name());
