@@ -1,15 +1,16 @@
 package net.formicary.pricer.impl;
 
-import com.sun.xml.fastinfoset.stax.StAXDocumentParser;
-import org.fpml.spec503wd3.Swap;
-
-import javax.inject.Singleton;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import javax.inject.Singleton;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
+import com.sun.xml.fastinfoset.stax.StAXDocumentParser;
+import org.fpml.spec503wd3.Product;
+import org.fpml.spec503wd3.Swap;
 
 import static javax.xml.stream.XMLStreamConstants.END_DOCUMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
@@ -22,7 +23,7 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 @Singleton
 public class FpmlFastInfosetTradeStore extends  FpmlSTAXTradeStore {
 
-  public Swap readFpml(File f) throws XMLStreamException, IOException {
+  public Product readFpml(File f) throws XMLStreamException, IOException {
     Swap swap = new Swap();
     FpmlContext ctx = new FpmlContext();
     ctx.setParsers(parsers);

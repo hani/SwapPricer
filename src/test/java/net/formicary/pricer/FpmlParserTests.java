@@ -1,5 +1,11 @@
 package net.formicary.pricer;
 
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.*;
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import net.formicary.pricer.impl.FpmlSTAXTradeStore;
 import org.apache.commons.jexl2.Expression;
 import org.apache.commons.jexl2.JexlContext;
@@ -11,16 +17,10 @@ import org.cdmckay.coffeedom.Text;
 import org.cdmckay.coffeedom.input.SAXBuilder;
 import org.cdmckay.coffeedom.xpath.XPath;
 import org.fpml.spec503wd3.IdentifiedDate;
-import org.fpml.spec503wd3.Swap;
+import org.fpml.spec503wd3.Product;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import javax.xml.datatype.XMLGregorianCalendar;
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.util.*;
 
 import static org.testng.Assert.assertEquals;
 
@@ -73,8 +73,8 @@ public class FpmlParserTests {
   @Test(dataProvider = "fpml")
   public void checkFields(String id) throws IOException {
     File file = new File(store.getFpmlDir(), id + ".xml");
-    Swap swap = store.getTrade(id);
-    JexlContext jc = new ObjectContext<Swap>(engine, swap);
+    Product p = store.getTrade(id);
+    JexlContext jc = new ObjectContext<Product>(engine, p);
     Document doc = builder.build(file);
     for (Map.Entry<String, Pair> entry : expressions.entrySet()) {
       Text el = (Text)entry.getValue().xpath.selectSingleNode(doc);

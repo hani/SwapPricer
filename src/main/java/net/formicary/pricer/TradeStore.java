@@ -2,7 +2,7 @@ package net.formicary.pricer;
 
 import com.google.inject.ImplementedBy;
 import net.formicary.pricer.impl.FpmlSTAXTradeStore;
-import org.fpml.spec503wd3.Swap;
+import org.fpml.spec503wd3.Product;
 
 /**
  * @author hani
@@ -11,5 +11,5 @@ import org.fpml.spec503wd3.Swap;
  */
 @ImplementedBy(FpmlSTAXTradeStore.class)
 public interface TradeStore {
-  Swap getTrade(String id);
+  Product getTrade(String id);
 }

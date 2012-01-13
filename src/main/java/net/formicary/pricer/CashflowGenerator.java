@@ -22,8 +22,11 @@ public class CashflowGenerator {
   @Inject RateManager rateManager;
 
   public List<Cashflow> generateCashflows(FastDate valuationDate, String id) {
-    Swap swap = tradeStore.getTrade(id);
-
+    Product trade = tradeStore.getTrade(id);
+    if(!(trade instanceof Swap)) {
+      throw new UnsupportedOperationException("Trade of type " + trade.getClass().getSimpleName() + " not supported");
+    }
+    Swap swap = (Swap)trade;
     List<Cashflow> flows = new ArrayList<Cashflow>(80);
     for(InterestRateStream stream : swap.getSwapStream()) {
       if(FpMLUtil.isFixedStream(stream)) {

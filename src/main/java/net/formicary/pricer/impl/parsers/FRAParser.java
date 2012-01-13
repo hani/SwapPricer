@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import net.formicary.pricer.HrefListener;
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
 import net.formicary.pricer.util.DateUtil;
@@ -49,12 +50,12 @@ public class FRAParser implements NodeParser<Fra> {
 
   @Override
   public Fra parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
-    Fra fra = new Fra();
+    final Fra fra = new Fra();
     Interval interval = null;
     while (reader.hasNext()) {
       int event = reader.next();
       if (event == START_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName());
+        final Element element = Element.valueOf(reader.getLocalName());
         switch (element) {
           case fixingDateOffset:
             RelativeDateOffset offset = new RelativeDateOffset();
@@ -65,8 +66,20 @@ public class FRAParser implements NodeParser<Fra> {
             fra.getFixingDateOffset().setBusinessCenters(bcParser.parse(reader, ctx));
             break;
           case buyerPartyReference:
-            break;
           case sellerPartyReference:
+            ctx.addHrefListener(reader.getAttributeValue(null, "href"), new HrefListener() {
+              @Override
+              public void nodeAdded(String id, Object o) {
+                Party p = (Party)o;
+                PartyOrTradeSideReference ref = new PartyOrTradeSideReference();
+                ref.setHref(p);
+                if(element == Element.buyerPartyReference) {
+                  fra.setBuyerPartyReference(ref);
+                } else {
+                  fra.setSellerPartyReference(ref);
+                }
+              }
+            });
             break;
           case adjustedEffectiveDate:
             RequiredIdentifierDate d = new RequiredIdentifierDate();

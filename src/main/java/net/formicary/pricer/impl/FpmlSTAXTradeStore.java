@@ -1,21 +1,22 @@
 package net.formicary.pricer.impl;
 
-import net.formicary.pricer.TradeStore;
-import net.formicary.pricer.impl.parsers.*;
-import org.fpml.spec503wd3.Swap;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
+import net.formicary.pricer.TradeStore;
+import net.formicary.pricer.impl.parsers.*;
+import org.fpml.spec503wd3.Product;
+import org.fpml.spec503wd3.Swap;
 
 import static javax.xml.stream.XMLStreamConstants.END_DOCUMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
@@ -41,6 +42,7 @@ public class FpmlSTAXTradeStore implements TradeStore {
     parsers.put("resetDates", new ResetDatesParser());
     parsers.put("paymentDates", new PaymentDatesParser());
     parsers.put("swapStream", new SwapStreamParser());
+    parsers.put("fra", new FRAParser());
     parsers.put("stubCalculationPeriodAmount", new StubParser());
     parsers.put("party", new PartyParser());
   }
@@ -55,17 +57,17 @@ public class FpmlSTAXTradeStore implements TradeStore {
     this.fpmlDir = fpmlDir;
   }
 
-  public Swap getTrade(String id) {
+  public Product getTrade(String id) {
     try {
-      Swap swap = readFpml(new File(fpmlDir, id + ".xml"));
-      swap.setId(id);
-      return swap;
+      Product trade = readFpml(new File(fpmlDir, id + ".xml"));
+      trade.setId(id);
+      return trade;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
-  public Swap readFpml(File f) throws XMLStreamException, IOException {
+  public Product readFpml(File f) throws XMLStreamException, IOException {
     Swap swap = new Swap();
     FpmlContext ctx = new FpmlContext();
     ctx.setParsers(parsers);

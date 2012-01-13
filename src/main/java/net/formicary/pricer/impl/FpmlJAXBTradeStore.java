@@ -1,10 +1,7 @@
 package net.formicary.pricer.impl;
 
-import net.formicary.pricer.TradeStore;
-import org.fpml.spec503wd3.DataDocument;
-import org.fpml.spec503wd3.Swap;
-import org.fpml.spec503wd3.Trade;
-
+import java.io.File;
+import java.io.IOException;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -12,8 +9,11 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import java.io.File;
-import java.io.IOException;
+
+import net.formicary.pricer.TradeStore;
+import org.fpml.spec503wd3.DataDocument;
+import org.fpml.spec503wd3.Product;
+import org.fpml.spec503wd3.Trade;
 
 /**
  * @author hani
@@ -42,12 +42,10 @@ public class FpmlJAXBTradeStore implements TradeStore {
     this.fpmlDir = fpmlDir;
   }
 
-  public Swap getTrade(String id) {
+  public Product getTrade(String id) {
     try {
       Trade trade = readFpml(new File(fpmlDir, id + ".xml"));
-      Swap swap = (Swap)trade.getProduct().getValue();
-      //swap.setId(id);
-      return swap;
+      return trade.getProduct().getValue();
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
