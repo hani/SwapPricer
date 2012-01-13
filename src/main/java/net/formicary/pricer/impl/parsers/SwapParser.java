@@ -1,7 +1,5 @@
 package net.formicary.pricer.impl.parsers;
 
-import java.util.HashMap;
-import java.util.Map;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
@@ -23,11 +21,6 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 public class SwapParser implements NodeParser<Swap> {
   private static final Logger log = LoggerFactory.getLogger(SwapParser.class);
   private SwapStreamParser streamParser = new SwapStreamParser();
-  protected Map<String, NodeParser> parsers = new HashMap<String, NodeParser>();
-
-  public SwapParser() {
-    parsers.put("swapStream", new SwapStreamParser());
-  }
 
   @Override
   public Swap parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
