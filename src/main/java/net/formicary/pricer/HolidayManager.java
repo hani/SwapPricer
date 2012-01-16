@@ -18,7 +18,7 @@ import org.fpml.spec503wd3.BusinessDayConventionEnum;
 @Singleton
 public class HolidayManager {
 
-  private Map<String, Set<FastDate>> holidays = new HashMap<String, Set<FastDate>>();
+  private Map<String, Set<FastDate>> holidays = new HashMap<String, Set<FastDate>>(50);
 
   public void registerHolidays(String key, Set<FastDate> value) {
     holidays.put(key, value);
