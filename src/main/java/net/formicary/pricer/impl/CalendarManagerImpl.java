@@ -255,7 +255,7 @@ public class CalendarManagerImpl implements CalendarManager {
     PeriodEnum period = interval.getPeriod();
     date = plus(date, period, interval.getPeriodMultiplier());
     String[] centers = new String[2];
-    if("LIBOR".equals(index)) {
+    if("LIBOR".equals(index) && !"EUR".equals(ccy)) {
       centers[0] = "GBLO";
     } else if ("EURIBOR".equals(index)) {
       centers[0] = "EUTA";
