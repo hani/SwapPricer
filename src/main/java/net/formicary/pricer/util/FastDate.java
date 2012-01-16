@@ -302,19 +302,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
    any change is made to the day. If the day exceeds the number of days in the given month/year, then
    (and only then) the given {@link DayOverflow} policy applied, and the day-of-the-month is adusted accordingly.
 
-   <P>Afterwards, the day is then changed in the usual way, followed by the remaining items (hour, minute, and second).
-   Changes to the fractional seconds are not included in this method, since there doesn't seem to be much practical use for it.
-
    <P>The returned value cannot come after <tt>9999-12-13 23:59:59</tt>.
-
-   <P>This class works with <tt>FastDate</tt>'s having the following items present :
-   <ul>
-   <li>year-month-day and hour-minute-second (and optional nanoseconds)
-   <li>year-month-day only. In this case, if a calculation with a time part is performed, that time part
-   will be initialized by this class to 00:00:00.0, and the <tt>FastDate</tt> returned by this class will include a time part.
-   <li>hour-minute-second (and optional nanoseconds) only. In this case, the calculation is done starting with the
-   the arbitrary date <tt>0001-01-01</tt> (in order to remain within a valid state space of <tt>FastDate</tt>).
-   </ul>
 
    @param aNumYears positive, required, in range 0...9999
    @param aNumMonths positive, required, in range 0...9999
@@ -330,6 +318,7 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
 
    <P>Requires year-month-day to be present; if not, a runtime exception is thrown.
    @param aNumDays can be either sign; if negative, then the days are subtracted.
+   todo add copy parameter so caller can decide if they want to modify this date or get a new instance
    */
   public FastDate plusDays(int aNumDays) {
     int thisJDAtNoon = getModifiedJulianDayNumber() + 1 + EPOCH_MODIFIED_JD;
