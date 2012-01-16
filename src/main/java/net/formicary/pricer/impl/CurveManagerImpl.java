@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import javolution.text.TypeFormat;
 import net.formicary.pricer.CurveManager;
 import net.formicary.pricer.model.CurvePillarPoint;
@@ -30,7 +32,9 @@ public class CurveManagerImpl implements CurveManager {
   //a map of curve -> list of pillar points
   private String curveDir = "staticdata";
   private Map<String, List<CurvePillarPoint>> curveData = new HashMap<String, List<CurvePillarPoint>>();
-  private Map<String, Map<FastDate, Double>> cache = new ConcurrentHashMap<String, Map<FastDate, Double>>();
+  //this is naughty, we're creating a large enough cache to make sure we don't run into a 'resize' operation,
+  //if we do run into it, then we're screwed because all sorts of concurrency problems happen
+  private Map<String, Object2DoubleMap<FastDate>> cache = new ConcurrentHashMap<String, Object2DoubleMap<FastDate>>();
 
   public CurveManagerImpl() throws IOException {
     File dir = new File(curveDir);
@@ -124,13 +128,13 @@ public class CurveManagerImpl implements CurveManager {
   }
 
   public double getInterpolatedRate(FastDate date, String curve) {
-    Map<FastDate, Double> rateCache = cache.get(curve);
+    Object2DoubleMap<FastDate> rateCache = cache.get(curve);
     if(rateCache == null) {
-      rateCache = new ConcurrentHashMap<FastDate, Double>();
+      rateCache = new Object2DoubleOpenHashMap<FastDate>(50000);
       cache.put(curve, rateCache);
     }
-    Double value = rateCache.get(date);
-    if(value != null) {
+    double value = rateCache.getDouble(date);
+    if(value != 0) {
       return value;
     }
 

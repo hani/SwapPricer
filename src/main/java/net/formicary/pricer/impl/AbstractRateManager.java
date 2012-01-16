@@ -1,8 +1,7 @@
 package net.formicary.pricer.impl;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import net.formicary.pricer.RateManager;
 import net.formicary.pricer.util.FastDate;
 
@@ -14,27 +13,23 @@ import static org.apache.commons.math.util.FastMath.exp;
  *         Time: 5:30 PM
  */
 public abstract class AbstractRateManager implements RateManager {
-  private static final Object NOT_FOUND = new Object();
   private boolean caching = true;
-  private Map<String, Object> cache = new ConcurrentHashMap<String, Object>();
+  //this is naughty, we're creating a large enough cache to make sure we don't run into a 'resize' operation,
+  //if we do run into it, then we're screwed because all sorts of concurrency problems happen
+  private Object2DoubleMap<String> cache = new Object2DoubleOpenHashMap<String>(20000);
 
   @Override
   public double getZeroRate(String indexName, String currency, String tenor, FastDate date) {
     //avoid date.toString as it's relatively expensive
-    String key = indexName + "-" + currency + "-" + date.getYear() + '-' + date.getDayOfYear() + '-' + date.getDay() + "-" + tenor;
+    String key = indexName + "-" + currency + "-" + date.hashCode() + "-" + tenor;
     if(caching) {
-      Object value = cache.get(key);
-      if(value != null) {
-        if(value == NOT_FOUND) {
-          throw new IllegalArgumentException("No " + indexName + " rate found for " + currency + " " + tenor + " on " + date);
-        }
-        return (Double)value;
+      double value = cache.getDouble(key);
+      if(value != 0) {
+        return value;
       }
     }
     double rate = getRate(key, indexName, currency, tenor, date);
     if(rate == 0) {
-      if(caching)
-        cache.put(key, NOT_FOUND);
       throw new IllegalArgumentException("No " + indexName + " rate found for " + currency + " " + tenor + " on " + date);
     }
     if(caching)
