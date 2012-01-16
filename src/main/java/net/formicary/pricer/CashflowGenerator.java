@@ -46,7 +46,11 @@ public class CashflowGenerator {
   private void adjustForPaymentOffset(InterestRateStream leg, List<Cashflow> flows) {
     Offset paymentOffset = leg.getPaymentDates().getPaymentDaysOffset();
     if(paymentOffset != null) {
-      BusinessCenters centers = leg.getPaymentDates().getPaymentDatesAdjustments().getBusinessCenters();
+      BusinessDayAdjustments paymentDatesAdjustments = leg.getPaymentDates().getPaymentDatesAdjustments();
+      BusinessCenters centers = paymentDatesAdjustments.getBusinessCenters();
+      if(paymentDatesAdjustments.getBusinessCentersReference() != null) {
+        centers = (BusinessCenters)paymentDatesAdjustments.getBusinessCentersReference().getHref();
+      }
       for (Cashflow flow : flows) {
         flow.setDate(calendarManager.applyDayInterval(flow.getDate(), paymentOffset, centers));
       }
@@ -181,17 +185,23 @@ public class CashflowGenerator {
   }
 
   private Cashflow calculateStubCashflow(StreamContext ctx, FastDate startDate, FastDate endDate, List<FloatingRate> stubRates) {
-    BusinessCenters centers = ctx.stream.getCalculationPeriodDates().getCalculationPeriodDatesAdjustments().getBusinessCenters();
+
+    BusinessDayAdjustments adjustments = ctx.stream.getCalculationPeriodDates().getCalculationPeriodDatesAdjustments();
+    BusinessCenters centers = adjustments.getBusinessCenters();
+    if(adjustments.getBusinessCentersReference() != null) {
+      centers = (BusinessCenters)adjustments.getBusinessCentersReference().getHref();
+    }
     endDate = calendarManager.adjustDate(endDate, ctx.conventions[1], centers);
     double rate1Value = 0, rate2Value = 0;
     if(stubRates.size() > 0) {
+      FastDate tenorStartDate = calendarManager.adjustDate(startDate, BusinessDayConventionEnum.FOLLOWING, ctx.calculationCenters[1]);
       FloatingRate rate1 = stubRates.get(0);
-      FastDate rate1EndDate = calendarManager.applyInterval(startDate, rate1.getIndexTenor(), BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
-      rate1Value = curveManager.getImpliedForwardRate(startDate, rate1EndDate, ctx.valuationDate, ctx.currency, ctx.calculationTenor);
+      FastDate rate1EndDate = calendarManager.applyIndexInterval(startDate, rate1.getIndexTenor(), ctx.floatingIndexName, ctx.currency);
+      rate1Value = curveManager.getImpliedForwardRate(tenorStartDate, rate1EndDate, ctx.valuationDate, ctx.currency, ctx.calculationTenor);
       if(stubRates.size() == 2) {
         FloatingRate rate2 = stubRates.get(1);
-        FastDate rate2EndDate = calendarManager.applyInterval(startDate, rate2.getIndexTenor(), BusinessDayConventionEnum.MODFOLLOWING, ctx.calculationCenters[1]);
-        rate2Value = curveManager.getImpliedForwardRate(startDate, rate2EndDate, ctx.valuationDate, ctx.currency, ctx.calculationTenor);
+        FastDate rate2EndDate = calendarManager.applyIndexInterval(startDate, rate2.getIndexTenor(), ctx.floatingIndexName, ctx.currency);
+        rate2Value = curveManager.getImpliedForwardRate(tenorStartDate, rate2EndDate, ctx.valuationDate, ctx.currency, ctx.calculationTenor);
       }
     }
     double rateToUse = rate1Value;
