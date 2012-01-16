@@ -67,35 +67,25 @@ public class SwapStreamParser implements NodeParser<InterestRateStream> {
             stream.setStubCalculationPeriodAmount((StubCalculationPeriodAmount)entity);
           }
         } else {
-          final Element element = Element.valueOf(reader.getLocalName());
-          switch(element) {
-            case receiverPartyReference:
-            case payerPartyReference:
-              ctx.addHrefListener(reader.getAttributeValue(null, "href"), new HrefListener() {
-                @Override
-                public void nodeAdded(String id, Object o) {
-                  Party p = (Party)o;
-                  PartyOrAccountReference ref = new PartyOrAccountReference();
-                  ref.setHref(p);
-                  if(element == Element.payerPartyReference) {
-                    stream.setPayerPartyReference(ref);
-                  } else {
-                    stream.setReceiverPartyReference(ref);
-                  }
+          final String name = reader.getLocalName();
+          if(name.endsWith("PartyReference")) {
+            ctx.addHrefListener(reader.getAttributeValue(null, "href"), new HrefListener() {
+              @Override
+              public void nodeAdded(String id, Object o) {
+                Party p = (Party)o;
+                PartyOrAccountReference ref = new PartyOrAccountReference();
+                ref.setHref(p);
+                if(name.equals("payerPartyReference")) {
+                  stream.setPayerPartyReference(ref);
+                } else {
+                  stream.setReceiverPartyReference(ref);
                 }
-              });
-              break;
-            default:
-              log.warn("No parser for {}" + reader.getLocalName());
+              }
+            });
           }
         }
-
       } else if(event == END_ELEMENT) {
-        final Element element = Element.valueOf(reader.getLocalName());
-        switch(element) {
-          case swapStream:
-            return stream;
-        }
+        if("swapStream".equals(reader.getLocalName())) return stream;
       }
     }
     return null;

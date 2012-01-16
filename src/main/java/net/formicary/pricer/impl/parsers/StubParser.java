@@ -1,14 +1,13 @@
 package net.formicary.pricer.impl.parsers;
 
+import java.math.BigInteger;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
 import net.formicary.pricer.HrefListener;
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
 import org.fpml.spec503wd3.*;
-
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-
-import java.math.BigInteger;
 
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
@@ -80,10 +79,8 @@ public class StubParser implements NodeParser<StubCalculationPeriodAmount> {
             floatingRate.getIndexTenor().setPeriod(PeriodEnum.fromValue(reader.getElementText()));
         }
       } else if (event == END_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName());
-        switch (element) {
-          case stubCalculationPeriodAmount:
-            return stubAmount;
+        if("stubCalculationPeriodAmount".equals(reader.getLocalName())) {
+          return stubAmount;
         }
       }
     }
