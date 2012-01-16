@@ -67,10 +67,8 @@ public class AdjustableDateParser implements NodeParser<AdjustableDate> {
 
         }
       } else if(event == END_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName());
-        switch(element) {
-          case dateAdjustments:
-            return date;
+        if("dateAdjustments".equals(reader.getLocalName())) {
+          return date;
         }
       }
     }

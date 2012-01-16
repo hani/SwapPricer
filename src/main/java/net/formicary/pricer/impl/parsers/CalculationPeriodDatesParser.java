@@ -40,11 +40,6 @@ public class CalculationPeriodDatesParser implements NodeParser<CalculationPerio
     calculationPeriodDates
   }
 
-  private class Holder {
-    BusinessCenters centers;
-    AdjustableDate currentDate;
-  }
-
   @Override
   public CalculationPeriodDates parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
     final CalculationPeriodDates dates = new CalculationPeriodDates();
@@ -53,7 +48,6 @@ public class CalculationPeriodDatesParser implements NodeParser<CalculationPerio
     if(myId != null) {
       ctx.registerObject(myId, dates);
     }
-    final Holder holder = new Holder();
     while(reader.hasNext()) {
       int event = reader.next();
       if (event == START_ELEMENT) {
@@ -95,7 +89,9 @@ public class CalculationPeriodDatesParser implements NodeParser<CalculationPerio
             ctx.addHrefListener(reader.getAttributeValue(null, "href"), new HrefListener() {
               @Override
               public void nodeAdded(String id, Object o) {
-                dates.getCalculationPeriodDatesAdjustments().setBusinessCenters(holder.centers);
+                BusinessCentersReference ref = new BusinessCentersReference();
+                ref.setHref(o);
+                dates.getCalculationPeriodDatesAdjustments().setBusinessCentersReference(ref);
               }
             });
             break;

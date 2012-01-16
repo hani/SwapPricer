@@ -17,10 +17,6 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
  *         Time: 12:27 PM
  */
 public class BusinessCentersParser implements NodeParser<BusinessCenters> {
-  enum Element {
-    businessCenters,
-    businessCenter
-  }
 
   @Override
   public BusinessCenters parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
@@ -31,21 +27,16 @@ public class BusinessCentersParser implements NodeParser<BusinessCenters> {
     }
     while(reader.hasNext()) {
       int event = reader.next();
-      if (event == START_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName());
-        switch(element) {
-          case businessCenter:
-            BusinessCenter c = new BusinessCenter();
-            c.setId(reader.getElementText());
-            c.setValue(c.getId());
-            bc.getBusinessCenter().add(c);
-            break;
+      if(event == START_ELEMENT) {
+        if("businessCenter".equals(reader.getLocalName())) {
+          BusinessCenter c = new BusinessCenter();
+          c.setId(reader.getElementText());
+          c.setValue(c.getId());
+          bc.getBusinessCenter().add(c);
         }
       } else if(event == END_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName());
-        switch(element) {
-          case businessCenters:
-            return bc;
+        if("businessCenters".equals(reader.getLocalName())) {
+          return bc;
         }
       }
     }
