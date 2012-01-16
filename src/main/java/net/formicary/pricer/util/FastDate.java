@@ -477,7 +477,9 @@ public final class FastDate implements Comparable<FastDate>, Serializable {
     l = j / 11;
     int m = j + 2 - (12 * l);
     int y = 100 * (n - 49) + i + l;
-    return new FastDate(y, m, d, false);
+    FastDate f = new FastDate(y, m, d, false);
+    f.julianDayNumber = aJDAtNoon;
+    return f;
   }
 
   /**
