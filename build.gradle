@@ -27,6 +27,7 @@ dependencies {
   compile 'com.google.inject:guice:3.0'
   compile 'org.codehaus.woodstox:woodstox-core-asl:4.1.2'
   compile 'commons-io:commons-io:2.0.1'
+  compile 'it.unimi.dsi:fastutil:6.4.1'
   compile 'org.fpml:confirmation-extension:5.0.3wd3'
   compile 'org.slf4j:slf4j-api:1.6.4'
   compile 'org.apache.commons:commons-math:2.2'
