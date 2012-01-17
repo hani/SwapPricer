@@ -1,11 +1,6 @@
 package net.formicary.pricer.impl;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.*;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -30,17 +25,16 @@ import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 @Singleton
 public class FpmlSTAXTradeStore implements TradeStore {
 
-  protected Map<String, NodeParser> parsers = new HashMap<String, NodeParser>();
   private final XMLInputFactory factory;
   private String fpmlDir;
+  private final SwapParser swapParser = new SwapParser();
+  private final FRAParser fraParser = new FRAParser();
+  private final PartyParser partyParser = new PartyParser();
 
   public FpmlSTAXTradeStore() {
     factory = XMLInputFactory.newFactory();
     factory.setProperty(XMLInputFactory.IS_COALESCING, false);
     factory.setProperty(XMLInputFactory.IS_VALIDATING, false);
-    parsers.put("fra", new FRAParser());
-    parsers.put("swap", new SwapParser());
-    parsers.put("party", new PartyParser());
   }
 
 
@@ -77,12 +71,13 @@ public class FpmlSTAXTradeStore implements TradeStore {
     Product p = null;
     for (int event = reader.next(); event != END_DOCUMENT; event = reader.next()) {
       if (event == START_ELEMENT) {
-        NodeParser parser = parsers.get(reader.getLocalName());
-        if(parser != null) {
-          Object o = parser.parse(reader, ctx);
-          if(o instanceof Product) {
-            p = (Product)o;
-          }
+        String name = reader.getLocalName();
+        if("swap".equals(name)) {
+          p = swapParser.parse(reader, ctx);
+        } else if("party".equals(name)) {
+          partyParser.parse(reader, ctx);
+        } else if("fra".equals(name)) {
+          fraParser.parse(reader, ctx);
         }
       }
     }
