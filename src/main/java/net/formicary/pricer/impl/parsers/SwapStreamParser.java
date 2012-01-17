@@ -1,14 +1,14 @@
 package net.formicary.pricer.impl.parsers;
 
-import java.util.HashMap;
-import java.util.Map;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import net.formicary.pricer.HrefListener;
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
-import org.fpml.spec503wd3.*;
+import org.fpml.spec503wd3.InterestRateStream;
+import org.fpml.spec503wd3.Party;
+import org.fpml.spec503wd3.PartyOrAccountReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,19 +31,17 @@ public class SwapStreamParser implements NodeParser<InterestRateStream> {
     calculationPeriodStartDates,
     payerPartyReference,
     receiverPartyReference,
+    calculationPeriodAmount,
+    calculationPeriodDates,
     calculationPeriodDatesReference,
-    calculationPeriodAmount
+    stubCalculationPeriodAmount
   }
 
-  protected Map<String, NodeParser> parsers = new HashMap<String, NodeParser>();
-
-  public SwapStreamParser() {
-    parsers.put("calculationPeriodDates", new CalculationPeriodDatesParser());
-    parsers.put("calculationPeriodAmount", new CalculationPeriodAmountParser());
-    parsers.put("resetDates", new ResetDatesParser());
-    parsers.put("paymentDates", new PaymentDatesParser());
-    parsers.put("stubCalculationPeriodAmount", new StubParser());
-  }
+  private final CalculationPeriodDatesParser calculationPeriodDatesParser = new CalculationPeriodDatesParser();
+  private final CalculationPeriodAmountParser calculationPeriodAmountParser = new CalculationPeriodAmountParser();
+  private final ResetDatesParser resetDatesParser = new ResetDatesParser();
+  private final PaymentDatesParser paymentDatesParser = new PaymentDatesParser();
+  private final StubParser stubParser = new StubParser();
 
   @Override
   public InterestRateStream parse(XMLStreamReader reader, FpmlContext ctx) throws XMLStreamException {
@@ -51,38 +49,38 @@ public class SwapStreamParser implements NodeParser<InterestRateStream> {
     while(reader.hasNext()) {
       int event = reader.next();
       if(event == START_ELEMENT) {
-        NodeParser parser = parsers.get(reader.getLocalName());
-        if(parser != null) {
-          //todo this is a bit pants, we might as well just have fields for the parsers and a normal switch like every other parser
-          Object entity = parser.parse(reader, ctx);
-          if(entity instanceof CalculationPeriodAmount) {
-            stream.setCalculationPeriodAmount((CalculationPeriodAmount)entity);
-          } else if(entity instanceof CalculationPeriodDates) {
-            stream.setCalculationPeriodDates((CalculationPeriodDates)entity);
-          } else if(entity instanceof PaymentDates) {
-            stream.setPaymentDates((PaymentDates)entity);
-          } else if(entity instanceof ResetDates) {
-            stream.setResetDates((ResetDates)entity);
-          } else if(entity instanceof StubCalculationPeriodAmount) {
-            stream.setStubCalculationPeriodAmount((StubCalculationPeriodAmount)entity);
-          }
-        } else {
-          final String name = reader.getLocalName();
-          if(name.endsWith("PartyReference")) {
+        final Element element = Element.valueOf(reader.getLocalName());
+        switch(element) {
+          case calculationPeriodAmount:
+            stream.setCalculationPeriodAmount(calculationPeriodAmountParser.parse(reader, ctx));
+            break;
+          case calculationPeriodDates:
+            stream.setCalculationPeriodDates(calculationPeriodDatesParser.parse(reader, ctx));
+            break;
+          case paymentDates:
+            stream.setPaymentDates(paymentDatesParser.parse(reader, ctx));
+            break;
+          case resetDates:
+            stream.setResetDates(resetDatesParser.parse(reader, ctx));
+            break;
+          case stubCalculationPeriodAmount:
+            stream.setStubCalculationPeriodAmount(stubParser.parse(reader, ctx));
+            break;
+          case payerPartyReference:
+          case receiverPartyReference:
             ctx.addHrefListener(reader.getAttributeValue(null, "href"), new HrefListener() {
               @Override
               public void nodeAdded(String id, Object o) {
                 Party p = (Party)o;
                 PartyOrAccountReference ref = new PartyOrAccountReference();
                 ref.setHref(p);
-                if(name.equals("payerPartyReference")) {
+                if(element == Element.payerPartyReference) {
                   stream.setPayerPartyReference(ref);
                 } else {
                   stream.setReceiverPartyReference(ref);
                 }
               }
             });
-          }
         }
       } else if(event == END_ELEMENT) {
         if("swapStream".equals(reader.getLocalName())) return stream;

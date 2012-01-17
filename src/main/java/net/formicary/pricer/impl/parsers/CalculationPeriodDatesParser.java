@@ -27,8 +27,6 @@ public class CalculationPeriodDatesParser implements NodeParser<CalculationPerio
     effectiveDate,
     terminationDate,
     calculationPeriodDatesAdjustments,
-    firstRegularPeriodStartDate,
-    lastRegularPeriodEndDate,
     businessDayConvention,
     businessCentersReference,
     dateAdjustments,
@@ -37,7 +35,9 @@ public class CalculationPeriodDatesParser implements NodeParser<CalculationPerio
     periodMultiplier,
     period,
     rollConvention,
-    calculationPeriodDates
+    calculationPeriodDates,
+    firstRegularPeriodStartDate,
+    lastRegularPeriodEndDate,
   }
 
   @Override
@@ -97,11 +97,8 @@ public class CalculationPeriodDatesParser implements NodeParser<CalculationPerio
             break;
         }
       } else if(event == END_ELEMENT) {
-        Element element = Element.valueOf(reader.getLocalName());
-        switch(element) {
-          case calculationPeriodDates:
-            //we're done
-            return dates;
+        if("calculationPeriodDates".equals(reader.getLocalName())) {
+          return dates;
         }
       }
     }
