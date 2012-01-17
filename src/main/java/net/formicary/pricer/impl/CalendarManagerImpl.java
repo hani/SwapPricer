@@ -263,6 +263,9 @@ public class CalendarManagerImpl implements CalendarManager {
     if("EUR".equals(ccy)) {
       centers[1] = "EUTA";
     }
+    if("USD".equals(ccy)) {
+      centers[1] = "USNY";
+    }
     return adjustDate(date, BusinessDayConventionEnum.MODFOLLOWING, centers);
   }
 
