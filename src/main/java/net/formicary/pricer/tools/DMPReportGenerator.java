@@ -42,6 +42,9 @@ public class DMPReportGenerator {
   }
 
   public void generateReport() throws IOException {
+    if(config == null) {
+      throw new IllegalArgumentException("No configuration specified. Please call setConfig()");
+    }
     final FastDate date = new FastDate(2011, 11, 4);
     List<String> files = new ArrayList<String>();
     File dir = new File(config.getInputDir());
