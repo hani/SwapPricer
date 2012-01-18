@@ -46,6 +46,7 @@ public class StreamContext {
   final BusinessCenters[] calculationCenters;
   final boolean isOIS;
   final Map<FastDate, Double> notionalSteps;
+  final FastDate firstPaymentDate;
 
   public StreamContext(CalendarManager calendarManager, FastDate valuationDate, InterestRateStream leg) {
     this.stream = leg;
@@ -86,7 +87,9 @@ public class StreamContext {
     }
     interval = leg.getCalculationPeriodDates().getCalculationPeriodFrequency();
     calculationTenor = interval.getPeriodMultiplier() + interval.getPeriod().value();
-    paymentTenor = leg.getPaymentDates().getPaymentFrequency().getPeriodMultiplier() + leg.getPaymentDates().getPaymentFrequency().getPeriod().value();
+    PaymentDates paymentDates = leg.getPaymentDates();
+    firstPaymentDate = DateUtil.getDate(paymentDates.getFirstPaymentDate());
+    paymentTenor = paymentDates.getPaymentFrequency().getPeriodMultiplier() + paymentDates.getPaymentFrequency().getPeriod().value();
 
     FastDate earliest = firstRegularPeriodStartDate == null ? effectiveDate : firstRegularPeriodStartDate;
     if(isOIS) {

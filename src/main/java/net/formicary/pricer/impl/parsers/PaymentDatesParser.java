@@ -7,6 +7,7 @@ import javax.xml.stream.XMLStreamReader;
 import net.formicary.pricer.HrefListener;
 import net.formicary.pricer.impl.FpmlContext;
 import net.formicary.pricer.impl.NodeParser;
+import net.formicary.pricer.util.DateUtil;
 import org.fpml.spec503wd3.*;
 
 import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
@@ -32,7 +33,8 @@ public class PaymentDatesParser implements NodeParser<PaymentDates> {
     businessCentersReference,
     businessCenters,
     paymentDaysOffset,
-    dayType
+    dayType,
+    firstPaymentDate
   }
 
   @Override
@@ -89,6 +91,9 @@ public class PaymentDatesParser implements NodeParser<PaymentDates> {
             break;
           case dayType:
             dates.getPaymentDaysOffset().setDayType(DayTypeEnum.fromValue(reader.getElementText()));
+            break;
+          case firstPaymentDate:
+            dates.setFirstPaymentDate(DateUtil.getCalendar(reader.getElementText()));
             break;
         }
       } else if(event == END_ELEMENT) {

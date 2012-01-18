@@ -41,19 +41,19 @@ public class CashflowTests {
     generator = injector.getInstance(CashflowGenerator.class);
   }
 
-  @Test(dataProvider = "singletrade")
+  @Test(dataProvider = "trades")
   public void generateCashflows(String id) throws Exception {
     List<Cashflow> actualFlows;
     try {
-      actualFlows = generator.generateCashflows(new FastDate(2011, 11, 4), id);
+      actualFlows = generator.generateCashflows(new FastDate(2012, 1, 17), id);
     } catch(Exception e) {
       log.error("Error generating flows for trade {}", id);
       throw e;
     }
     BufferedReader reader = new BufferedReader(new FileReader(fpmlDir + id + ".csv"));
     List<String> lines = IOUtils.readLines(reader);
-    assertEquals(actualFlows.size(), lines.size());
     List<Cashflow> expectedFlows = transform(lines);
+    assertEquals(actualFlows.size(), lines.size());
     Reconciler rec = new Reconciler(expectedFlows, actualFlows);
     Iterator<FlowComparison> i = rec.getFlowComparisons().iterator();
     StringBuilder errors = new StringBuilder();

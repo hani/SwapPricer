@@ -57,7 +57,11 @@ public class FpmlSTAXTradeStore implements TradeStore {
       trade.setId(id);
       return trade;
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      if(e instanceof RuntimeException) {
+        throw (RuntimeException)e;
+      } else {
+        throw new RuntimeException(e);
+      }
     }
   }
 
@@ -81,7 +85,7 @@ public class FpmlSTAXTradeStore implements TradeStore {
         } else if("party".equals(name)) {
           partyParser.parse(reader, ctx);
         } else if("fra".equals(name)) {
-          fraParser.parse(reader, ctx);
+          p = fraParser.parse(reader, ctx);
         }
       }
     }
