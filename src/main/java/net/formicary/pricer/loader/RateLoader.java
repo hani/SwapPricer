@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory;
 public abstract class RateLoader {
   private static final Logger log = LoggerFactory.getLogger(RateLoader.class);
 
-  public void importHistoricRates(String fileName) throws IOException {
+  public void importHistoricRates(String file) throws IOException {
     long now = System.currentTimeMillis();
-    BufferedReader is = new BufferedReader(new FileReader(fileName));
+    BufferedReader is = new BufferedReader(new FileReader(file));
     is.readLine();
     String line;
     int count = 0;
@@ -45,7 +45,7 @@ public abstract class RateLoader {
           log.info("Saved " + count  + " rates");
         }
       } catch(NumberFormatException e) {
-        log.info("Invalid rate found for index " + index + ":" + items[5]);
+        log.info("Invalid rate found for index " + index + ":" + items[6]);
       }
     }
     log.info("Initialised historic rates in " + (System.currentTimeMillis() - now) + "ms with " + count + " rates");
