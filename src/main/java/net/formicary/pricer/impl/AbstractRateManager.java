@@ -5,8 +5,6 @@ import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import net.formicary.pricer.RateManager;
 import net.formicary.pricer.util.FastDate;
 
-import static org.apache.commons.math.util.FastMath.exp;
-
 /**
  * @author hani
  *         Date: 10/14/11
@@ -45,12 +43,5 @@ public abstract class AbstractRateManager implements RateManager {
 
   public void setCaching(boolean caching) {
     this.caching = caching;
-  }
-
-  @Override
-  public double getDiscountFactor(String indexName, String currency, String tenor, FastDate date, FastDate valuationDate) {
-    double zero = getZeroRate(indexName, currency, tenor, date) / 100;
-    double days = date.numDaysFrom(valuationDate);
-    return exp(zero * -(days) / 365d);
   }
 }

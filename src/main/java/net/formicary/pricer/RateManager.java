@@ -9,5 +9,4 @@ import net.formicary.pricer.util.FastDate;
  */
 public interface RateManager {
   double getZeroRate(String indexName, String currency, String tenor, FastDate date);
-  double getDiscountFactor(String indexName, String currency, String tenor, FastDate date, FastDate valuationDate);
 }
