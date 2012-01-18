@@ -8,6 +8,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.inject.Inject;
 
+import com.beust.jcommander.JCommander;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import javolution.text.TextBuilder;
@@ -28,14 +29,23 @@ import org.slf4j.LoggerFactory;
 public class DMPReportGenerator {
   @Inject private CashflowGenerator generator;
   @Inject private Executor executor;
-  private boolean showTraces = false;
 
   private static final Logger log = LoggerFactory.getLogger(DMPReportGenerator.class);
 
-  public void generateReport(String inputDir, String outputFile) throws IOException {
+  private DMPConfig DMPConfig;
+
+  public DMPConfig getDMPConfig() {
+    return DMPConfig;
+  }
+
+  public void setDMPConfig(DMPConfig DMPConfig) {
+    this.DMPConfig = DMPConfig;
+  }
+
+  public void generateReport() throws IOException {
     final FastDate date = new FastDate(2011, 11, 4);
     List<String> files = new ArrayList<String>();
-    File dir = new File(inputDir);
+    File dir = new File(DMPConfig.getInputDir());
     if(!dir.exists() || !dir.isDirectory()) {
       throw new IllegalArgumentException("Input dir " + dir.getAbsolutePath() +" does not exist or is not a directory");
     }
@@ -45,7 +55,7 @@ public class DMPReportGenerator {
         return name.startsWith("LCH") && name.endsWith(".xml");
       }
     }));
-    final BufferedWriter os = new BufferedWriter(new FileWriter(outputFile, false));
+    final BufferedWriter os = new BufferedWriter(new FileWriter(DMPConfig.getOutputFile(), false));
     os.write("LchTradeId,NpvAmount,CashflowDate,CashflowAmount\n");
     final AtomicInteger failures = new AtomicInteger(0);
     CompletionService<List<Cashflow>> service = new ExecutorCompletionService<List<Cashflow>>(executor);
@@ -59,7 +69,7 @@ public class DMPReportGenerator {
               return generator.generateCashflows(date, id);
             } catch(Exception e) {
               failures.incrementAndGet();
-              if(showTraces)
+              if(DMPConfig.isShowTraces())
                 log.error("Error calculating cashflows for trade " + id, e);
               else
                 log.error("Error calculating cashflows for trade " + id + ": " + e.getMessage());
@@ -105,8 +115,11 @@ public class DMPReportGenerator {
   }
 
   public static void main(final String[] args) throws IOException {
-    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule(args[0]));
+    DMPConfig config = new DMPConfig();
+    new JCommander(config,  args);
+    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule(config.getInputDir()));
     DMPReportGenerator reporter = injector.getInstance(DMPReportGenerator.class);
-    reporter.generateReport(args[0], args[1]);
+    reporter.setDMPConfig(config);
+    reporter.generateReport();
   }
 }
