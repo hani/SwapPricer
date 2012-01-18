@@ -45,6 +45,7 @@ public class FRAParser implements NodeParser<Fra> {
     amount,
     fixedRate,
     floatingRateIndex,
+    dateRelativeTo,
     indexTenor
   }
 
