@@ -193,22 +193,31 @@ public class CashflowGenerator {
     }
     endDate = calendarManager.adjustDate(endDate, ctx.conventions[1], centers);
     double rate1Value = 0, rate2Value = 0;
+    FastDate tenor1End = null, tenor2End = null;
     if(stubRates.size() > 0) {
       FastDate tenorStartDate = calendarManager.adjustDate(startDate, BusinessDayConventionEnum.FOLLOWING, ctx.calculationCenters[1]);
       FloatingRate rate1 = stubRates.get(0);
-      FastDate rate1EndDate = calendarManager.applyIndexInterval(startDate, rate1.getIndexTenor(), ctx.floatingIndexName, ctx.currency);
-      rate1Value = curveManager.getImpliedForwardRate(tenorStartDate, rate1EndDate, ctx.valuationDate, ctx.currency, ctx.calculationTenor);
+      Interval rate1IndexTenor = rate1.getIndexTenor();
+      tenor1End = calendarManager.applyIndexInterval(startDate, rate1IndexTenor, ctx.floatingIndexName, ctx.currency);
+      if(tenorStartDate.lt(ctx.cutoffDate)) {
+        rate1Value = rateManager.getZeroRate(ctx.floatingIndexName, ctx.currency, rate1IndexTenor.getPeriodMultiplier().toString() + rate1IndexTenor.getPeriod() , tenorStartDate) / 100;
+      } else {
+        rate1Value = curveManager.getImpliedForwardRate(tenorStartDate, tenor1End, ctx.valuationDate, ctx.currency, ctx.calculationTenor);
+      }
       if(stubRates.size() == 2) {
         FloatingRate rate2 = stubRates.get(1);
-        FastDate rate2EndDate = calendarManager.applyIndexInterval(startDate, rate2.getIndexTenor(), ctx.floatingIndexName, ctx.currency);
-        rate2Value = curveManager.getImpliedForwardRate(tenorStartDate, rate2EndDate, ctx.valuationDate, ctx.currency, ctx.calculationTenor);
+        Interval rate2IndexTenor = rate2.getIndexTenor();
+        tenor2End = calendarManager.applyIndexInterval(startDate, rate2.getIndexTenor(), ctx.floatingIndexName, ctx.currency);
+        if(tenorStartDate.lt(ctx.cutoffDate)) {
+          rate2Value = rateManager.getZeroRate(ctx.floatingIndexName, ctx.currency, rate2IndexTenor.getPeriodMultiplier().toString() + rate2IndexTenor.getPeriod() , tenorStartDate) / 100;
+        } else {
+          rate2Value = curveManager.getImpliedForwardRate(tenorStartDate, tenor2End, ctx.valuationDate, ctx.currency, ctx.calculationTenor);
+        }
       }
     }
     double rateToUse = rate1Value;
     if(stubRates.size() == 2) {
       int periodLength = startDate.numDaysFrom(endDate);
-      FastDate tenor1End = calendarManager.applyInterval(startDate, stubRates.get(0).getIndexTenor(), ctx.conventions[1], centers);
-      FastDate tenor2End = calendarManager.applyInterval(startDate, stubRates.get(1).getIndexTenor(), ctx.conventions[1], centers);
       int rate1Period = startDate.numDaysFrom(tenor1End);
       int rate2Period = startDate.numDaysFrom(tenor2End);
       rateToUse = rate1Value + (periodLength - rate1Period) * (rate2Value - rate1Value)/(rate2Period - rate1Period);
