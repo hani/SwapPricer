@@ -58,7 +58,7 @@ public class FastInfosetTransformer {
       String name = file.getName().substring(0, file.getName().lastIndexOf('.')) + ".fi";
       File destDir = to;
       //if it's nested and we're sending it somewhere else, then create the same dir structure
-      if(!file.getParent().equals(to) && !to.equals(from)) {
+      if(!file.getParentFile().equals(to) && !to.equals(from)) {
         String subPath = file.getParentFile().getAbsolutePath().substring(from.getAbsolutePath().length());
         destDir = new File(to, subPath);
         destDir.mkdirs();
