@@ -33,10 +33,6 @@ public class DMPReportGenerator {
 
   private DMPConfig config;
 
-  public DMPConfig getConfig() {
-    return config;
-  }
-
   public void setConfig(DMPConfig config) {
     this.config = config;
   }
@@ -45,10 +41,10 @@ public class DMPReportGenerator {
     if(config == null) {
       throw new IllegalArgumentException("No configuration specified. Please call setConfig()");
     }
-    final FastDate date = new FastDate(2011, 11, 4);
+    final FastDate date = getDate(config.valuationDate);
     List<String> files = new ArrayList<String>();
-    File dir = new File(config.getInputDir());
-    final String ext = config.isFastinfoset() ? ".fi" : ".xml";
+    File dir = new File(config.inputDir);
+    final String ext = config.isFastinfoset ? ".fi" : ".xml";
     if(!dir.exists() || !dir.isDirectory()) {
       throw new IllegalArgumentException("Input dir " + dir.getAbsolutePath() +" does not exist or is not a directory");
     }
@@ -62,7 +58,7 @@ public class DMPReportGenerator {
       log.warn("No {} files found in {}", ext, dir.getAbsolutePath());
       return;
     }
-    final BufferedWriter os = new BufferedWriter(new FileWriter(config.getOutputFile(), false));
+    final BufferedWriter os = new BufferedWriter(new FileWriter(config.outputFile, false));
     os.write("LchTradeId,NpvAmount,CashflowDate,CashflowAmount\n");
     final AtomicInteger failures = new AtomicInteger(0);
     CompletionService<List<Cashflow>> service = new ExecutorCompletionService<List<Cashflow>>(executor);
@@ -76,7 +72,7 @@ public class DMPReportGenerator {
               return generator.generateCashflows(date, id);
             } catch(Exception e) {
               failures.incrementAndGet();
-              if(config.isShowTraces())
+              if(config.showTraces)
                 log.error("Error calculating cashflows for trade " + id, e);
               else
                 log.error("Error calculating cashflows for trade " + id + ": " + e.getMessage());
@@ -104,6 +100,14 @@ public class DMPReportGenerator {
     os.close();
   }
 
+  private FastDate getDate(String valuationDate) {
+    int dash = valuationDate.indexOf('-');
+    int year = Integer.parseInt(valuationDate.substring(0, dash));
+    int month = Integer.parseInt(valuationDate.substring(dash + 1, valuationDate.indexOf('-', dash + 1)));
+    int day = Integer.parseInt(valuationDate.substring(valuationDate.lastIndexOf('-') + 1));
+    return new FastDate(year, month, day);
+  }
+
   private void writeCashflows(Writer os, String id, List<Cashflow> cashflows) throws IOException {
     TextBuilder sb = TextBuilder.newInstance();
     for (Cashflow cashflow : cashflows) {
@@ -124,11 +128,11 @@ public class DMPReportGenerator {
   public static void main(final String[] args) throws IOException {
     final DMPConfig config = new DMPConfig();
     new JCommander(config,  args);
-    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule(config.getInputDir()) {
+    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule(config.inputDir) {
       @Override
       protected void configure() {
         super.configure();
-        if(config.isFastinfoset()) {
+        if(config.isFastinfoset) {
           bind(TradeStore.class).to(FpmlFastInfosetTradeStore.class);
         }
       }
