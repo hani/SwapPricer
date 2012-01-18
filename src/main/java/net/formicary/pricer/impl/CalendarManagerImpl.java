@@ -78,6 +78,24 @@ public class CalendarManagerImpl implements CalendarManager {
   }
 
   @Override
+  public FastDate getFixingDate(FastDate date, final RelativeDateOffset fixingOffset) {
+    if(fixingOffset.getPeriod() != PeriodEnum.D) {
+      throw new UnsupportedOperationException("Fixing dates only supports day periods");
+    }
+    int offset = fixingOffset.getPeriodMultiplier().intValue();
+    final int numberOfStepsLeft = Math.abs(offset);
+    final int step = (offset < 0 ? -1 : 1);
+
+    for(int i = 0; i < numberOfStepsLeft; i++) {
+      do {
+        date = date.plusDays(step);
+      }
+      while(isNonWorkingDay(date, fixingOffset.getBusinessCenters()));
+    }
+    return date;
+  }
+
+  @Override
   public List<FastDate> getFixingDates(List<FastDate> dates, final RelativeDateOffset fixingOffset) {
     List<FastDate> fixingDates = new ArrayList<FastDate>(dates.size());
     if(fixingOffset.getPeriod() != PeriodEnum.D) {

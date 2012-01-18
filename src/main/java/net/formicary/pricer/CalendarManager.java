@@ -53,4 +53,6 @@ public interface CalendarManager {
    * @return An adjusted date for the end of the rate's period
    */
   FastDate applyIndexInterval(FastDate date, Interval interval, String index, String ccy);
+
+  FastDate getFixingDate(FastDate date, RelativeDateOffset fixingOffset);
 }

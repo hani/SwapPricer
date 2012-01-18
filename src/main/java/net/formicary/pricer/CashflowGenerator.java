@@ -198,20 +198,21 @@ public class CashflowGenerator {
     FastDate tenor1End = null, tenor2End = null;
     if(stubRates.size() > 0) {
       FastDate tenorStartDate = calendarManager.adjustDate(startDate, BusinessDayConventionEnum.FOLLOWING, ctx.calculationCenters[1]);
+      FastDate fixing = calendarManager.getFixingDate(tenorStartDate, ctx.stream.getResetDates().getFixingDates());
       FloatingRate rate1 = stubRates.get(0);
       Interval rate1IndexTenor = rate1.getIndexTenor();
-      tenor1End = calendarManager.applyIndexInterval(startDate, rate1IndexTenor, ctx.floatingIndexName, ctx.currency);
+      tenor1End = calendarManager.applyIndexInterval(tenorStartDate, rate1IndexTenor, ctx.floatingIndexName, ctx.currency);
       if(tenorStartDate.lt(ctx.cutoffDate)) {
-        rate1Value = rateManager.getZeroRate(ctx.floatingIndexName, ctx.currency, rate1IndexTenor.getPeriodMultiplier().toString() + rate1IndexTenor.getPeriod() , tenorStartDate) / 100;
+        rate1Value = rateManager.getZeroRate(ctx.floatingIndexName, ctx.currency, rate1IndexTenor.getPeriodMultiplier().toString() + rate1IndexTenor.getPeriod() , fixing) / 100;
       } else {
         rate1Value = curveManager.getImpliedForwardRate(tenorStartDate, tenor1End, ctx.valuationDate, ctx.currency, ctx.calculationTenor);
       }
       if(stubRates.size() == 2) {
         FloatingRate rate2 = stubRates.get(1);
         Interval rate2IndexTenor = rate2.getIndexTenor();
-        tenor2End = calendarManager.applyIndexInterval(startDate, rate2.getIndexTenor(), ctx.floatingIndexName, ctx.currency);
+        tenor2End = calendarManager.applyIndexInterval(tenorStartDate, rate2.getIndexTenor(), ctx.floatingIndexName, ctx.currency);
         if(tenorStartDate.lt(ctx.cutoffDate)) {
-          rate2Value = rateManager.getZeroRate(ctx.floatingIndexName, ctx.currency, rate2IndexTenor.getPeriodMultiplier().toString() + rate2IndexTenor.getPeriod() , tenorStartDate) / 100;
+          rate2Value = rateManager.getZeroRate(ctx.floatingIndexName, ctx.currency, rate2IndexTenor.getPeriodMultiplier().toString() + rate2IndexTenor.getPeriod() , fixing) / 100;
         } else {
           rate2Value = curveManager.getImpliedForwardRate(tenorStartDate, tenor2End, ctx.valuationDate, ctx.currency, ctx.calculationTenor);
         }
