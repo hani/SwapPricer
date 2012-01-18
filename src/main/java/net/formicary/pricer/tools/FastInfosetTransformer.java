@@ -47,12 +47,13 @@ public class FastInfosetTransformer {
     return files;
   }
 
-  private void convert() throws FileNotFoundException, JAXBException {
+  private void convert() throws IOException, JAXBException {
     Unmarshaller um = context.createUnmarshaller();
     Marshaller m = context.createMarshaller();
     List<File> files = list(from);
     int count = 1;
     long now = System.currentTimeMillis();
+    log.info("Starting transformation of {} files...", files.size());
     for (File file : files) {
       JAXBElement<DataDocument> dd = (JAXBElement<DataDocument>)um.unmarshal(file);
       String name = file.getName().substring(0, file.getName().lastIndexOf('.')) + ".fi";
@@ -70,11 +71,12 @@ public class FastInfosetTransformer {
       if(++count % 5000 == 0) {
         log.info("Transformed {} files", count);
       }
+      os.close();
     }
     log.info("Transformed {} files in {}ms", count, System.currentTimeMillis() - now);
   }
 
-  public static void main(String[] args) throws JAXBException, FileNotFoundException {
+  public static void main(String[] args) throws JAXBException, IOException {
     FastInfosetTransformer transformer = new FastInfosetTransformer(args[0], args[1]);
     transformer.convert();
   }
