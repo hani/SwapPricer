@@ -13,9 +13,8 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import javolution.text.TextBuilder;
 import javolution.text.TypeFormat;
-import net.formicary.pricer.CashflowGenerator;
-import net.formicary.pricer.PersistenceModule;
-import net.formicary.pricer.PricerModule;
+import net.formicary.pricer.*;
+import net.formicary.pricer.impl.FpmlFastInfosetTradeStore;
 import net.formicary.pricer.model.Cashflow;
 import net.formicary.pricer.util.FastDate;
 import org.slf4j.Logger;
@@ -32,30 +31,35 @@ public class DMPReportGenerator {
 
   private static final Logger log = LoggerFactory.getLogger(DMPReportGenerator.class);
 
-  private DMPConfig DMPConfig;
+  private DMPConfig config;
 
-  public DMPConfig getDMPConfig() {
-    return DMPConfig;
+  public DMPConfig getConfig() {
+    return config;
   }
 
-  public void setDMPConfig(DMPConfig DMPConfig) {
-    this.DMPConfig = DMPConfig;
+  public void setConfig(DMPConfig config) {
+    this.config = config;
   }
 
   public void generateReport() throws IOException {
     final FastDate date = new FastDate(2011, 11, 4);
     List<String> files = new ArrayList<String>();
-    File dir = new File(DMPConfig.getInputDir());
+    File dir = new File(config.getInputDir());
+    final String ext = config.isFastinfoset() ? ".fi" : ".xml";
     if(!dir.exists() || !dir.isDirectory()) {
       throw new IllegalArgumentException("Input dir " + dir.getAbsolutePath() +" does not exist or is not a directory");
     }
     Collections.addAll(files, dir.list(new FilenameFilter() {
       @Override
       public boolean accept(File dir, String name) {
-        return name.startsWith("LCH") && name.endsWith(".xml");
+        return name.startsWith("LCH") && name.endsWith(ext);
       }
     }));
-    final BufferedWriter os = new BufferedWriter(new FileWriter(DMPConfig.getOutputFile(), false));
+    if(files.size() == 0) {
+      log.warn("No {} files found in {}", ext, dir.getAbsolutePath());
+      return;
+    }
+    final BufferedWriter os = new BufferedWriter(new FileWriter(config.getOutputFile(), false));
     os.write("LchTradeId,NpvAmount,CashflowDate,CashflowAmount\n");
     final AtomicInteger failures = new AtomicInteger(0);
     CompletionService<List<Cashflow>> service = new ExecutorCompletionService<List<Cashflow>>(executor);
@@ -69,7 +73,7 @@ public class DMPReportGenerator {
               return generator.generateCashflows(date, id);
             } catch(Exception e) {
               failures.incrementAndGet();
-              if(DMPConfig.isShowTraces())
+              if(config.isShowTraces())
                 log.error("Error calculating cashflows for trade " + id, e);
               else
                 log.error("Error calculating cashflows for trade " + id + ": " + e.getMessage());
@@ -115,11 +119,19 @@ public class DMPReportGenerator {
   }
 
   public static void main(final String[] args) throws IOException {
-    DMPConfig config = new DMPConfig();
+    final DMPConfig config = new DMPConfig();
     new JCommander(config,  args);
-    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule(config.getInputDir()));
+    Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule(config.getInputDir()) {
+      @Override
+      protected void configure() {
+        super.configure();
+        if(config.isFastinfoset()) {
+          bind(TradeStore.class).to(FpmlFastInfosetTradeStore.class);
+        }
+      }
+    });
     DMPReportGenerator reporter = injector.getInstance(DMPReportGenerator.class);
-    reporter.setDMPConfig(config);
+    reporter.setConfig(config);
     reporter.generateReport();
   }
 }
