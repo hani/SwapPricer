@@ -45,7 +45,7 @@ public class CashflowTests {
   public void generateCashflows(String id) throws Exception {
     List<Cashflow> actualFlows;
     try {
-      actualFlows = generator.generateCashflows(new FastDate(2012, 1, 17), id);
+      actualFlows = generator.generateCashflows(new FastDate(2011, 11, 4), id);
     } catch(Exception e) {
       log.error("Error generating flows for trade {}", id);
       throw e;
@@ -53,7 +53,7 @@ public class CashflowTests {
     BufferedReader reader = new BufferedReader(new FileReader(fpmlDir + id + ".csv"));
     List<String> lines = IOUtils.readLines(reader);
     List<Cashflow> expectedFlows = transform(lines);
-    assertEquals(actualFlows.size(), lines.size());
+    assertEquals(actualFlows.size(), lines.size(), "Mismatched number of flows for trade " + id);
     Reconciler rec = new Reconciler(expectedFlows, actualFlows);
     Iterator<FlowComparison> i = rec.getFlowComparisons().iterator();
     StringBuilder errors = new StringBuilder();

@@ -121,9 +121,11 @@ public class CashflowGenerator {
   }
 
   private void applyStubs(StreamContext ctx, List<Cashflow> flows) {
-    if(ctx.initialStub != null && ctx.firstRegularPeriodStartDate.gt(ctx.cutoffDate)) {
-      FastDate endDate = ctx.firstRegularPeriodStartDate;
-      flows.add(0, calculateStubCashflow(ctx, ctx.effectiveDate, endDate, ctx.initialStub.getFloatingRate()));
+    if(ctx.initialStub != null) {
+      FastDate stubPaymentDate = ctx.firstPaymentDate == null ? ctx.firstRegularPeriodStartDate : ctx.firstPaymentDate;
+      if(stubPaymentDate.gt(ctx.cutoffDate)) {
+        flows.add(0, calculateStubCashflow(ctx, ctx.effectiveDate, stubPaymentDate, ctx.initialStub.getFloatingRate()));
+      }
     }
     if(ctx.finalStub != null) {
       FastDate endDate = ctx.terminationDate;
