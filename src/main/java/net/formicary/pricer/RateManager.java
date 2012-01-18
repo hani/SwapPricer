@@ -1,7 +1,6 @@
 package net.formicary.pricer;
 
 import net.formicary.pricer.util.FastDate;
-import org.fpml.spec503wd3.Interval;
 
 /**
  * @author hani

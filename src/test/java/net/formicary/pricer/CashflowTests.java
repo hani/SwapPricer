@@ -41,7 +41,7 @@ public class CashflowTests {
     generator = injector.getInstance(CashflowGenerator.class);
   }
 
-  @Test(dataProvider = "trades")
+  @Test(dataProvider = "singletrade")
   public void generateCashflows(String id) throws Exception {
     List<Cashflow> actualFlows;
     try {
@@ -82,7 +82,7 @@ public class CashflowTests {
   @DataProvider(name = "singletrade")
   public Object[][] singleTrade() {
     Object[][] data = new Object[1][];
-    data[0] = new Object[]{"LCH00000932242"};
+    data[0] = new Object[]{"LCH00000787894"};
     return data;
   }
 
