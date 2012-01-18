@@ -29,6 +29,11 @@ public class FpmlFastInfosetTradeStore extends  FpmlSTAXTradeStore {
     return p;
   }
 
+  @Override
+  protected String getExt() {
+    return "fi";
+  }
+
   public static void main(String[] args) {
     FpmlFastInfosetTradeStore store = new FpmlFastInfosetTradeStore();
     store.setFpmlDir("/hani/eurfpml-fastinfoset");

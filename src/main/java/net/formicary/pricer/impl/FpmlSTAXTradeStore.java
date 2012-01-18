@@ -47,9 +47,13 @@ public class FpmlSTAXTradeStore implements TradeStore {
     this.fpmlDir = fpmlDir;
   }
 
+  protected String getExt() {
+    return "xml";
+  }
+
   public Product getTrade(String id) {
     try {
-      Product trade = readFpml(new File(fpmlDir, id + ".xml"));
+      Product trade = readFpml(new File(fpmlDir, id + '.' + getExt()));
       trade.setId(id);
       return trade;
     } catch (Exception e) {
