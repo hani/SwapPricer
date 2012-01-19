@@ -99,10 +99,9 @@ public class CashflowGenerator {
         if(interval.getPeriod() == PeriodEnum.T || ctx.isOIS) {
           tenorEndDate = periodEndDate;
         } else {
-          tenorEndDate = calendarManager.applyIndexInterval(periodStartDate, interval, ctx.floatingIndexName, ctx.currency);
+          tenorEndDate = calendarManager.applyInterval(periodStartDate, interval, BusinessDayConventionEnum.MODFOLLOWING, IndexBusinessCenters.getCenters(ctx.floatingIndexName, ctx.currency));
         }
-        //todo we need to use the index center, not trade
-        tenorStartDate = calendarManager.adjustDate(periodStartDate, BusinessDayConventionEnum.FOLLOWING, ctx.calculationCenters[1]);
+        tenorStartDate = calendarManager.adjustDate(periodStartDate, BusinessDayConventionEnum.FOLLOWING, IndexBusinessCenters.getCenters(ctx.floatingIndexName, ctx.currency));
         String curve = ctx.isOIS ? "OIS" : ctx.calculationTenor;
         double impliedForwardRate = curveManager.getImpliedForwardRate(tenorStartDate, tenorEndDate, valuationDate, ctx.currency, curve);
         Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, impliedForwardRate);
@@ -201,7 +200,7 @@ public class CashflowGenerator {
       FastDate fixing = calendarManager.getFixingDate(tenorStartDate, ctx.stream.getResetDates().getFixingDates());
       FloatingRate rate1 = stubRates.get(0);
       Interval rate1IndexTenor = rate1.getIndexTenor();
-      tenor1End = calendarManager.applyIndexInterval(tenorStartDate, rate1IndexTenor, ctx.floatingIndexName, ctx.currency);
+      tenor1End = calendarManager.applyInterval(tenorStartDate, rate1IndexTenor, BusinessDayConventionEnum.MODFOLLOWING, IndexBusinessCenters.getCenters(ctx.floatingIndexName, ctx.currency));
       if(tenorStartDate.lt(ctx.cutoffDate)) {
         rate1Value = rateManager.getZeroRate(ctx.floatingIndexName, ctx.currency, rate1IndexTenor.getPeriodMultiplier().toString() + rate1IndexTenor.getPeriod() , fixing) / 100;
       } else {
@@ -210,7 +209,7 @@ public class CashflowGenerator {
       if(stubRates.size() == 2) {
         FloatingRate rate2 = stubRates.get(1);
         Interval rate2IndexTenor = rate2.getIndexTenor();
-        tenor2End = calendarManager.applyIndexInterval(tenorStartDate, rate2.getIndexTenor(), ctx.floatingIndexName, ctx.currency);
+        tenor2End = calendarManager.applyInterval(tenorStartDate, rate2IndexTenor, BusinessDayConventionEnum.MODFOLLOWING, IndexBusinessCenters.getCenters(ctx.floatingIndexName, ctx.currency));
         if(tenorStartDate.lt(ctx.cutoffDate)) {
           rate2Value = rateManager.getZeroRate(ctx.floatingIndexName, ctx.currency, rate2IndexTenor.getPeriodMultiplier().toString() + rate2IndexTenor.getPeriod() , fixing) / 100;
         } else {

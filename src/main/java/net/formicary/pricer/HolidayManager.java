@@ -44,21 +44,6 @@ public class HolidayManager {
     return current;
   }
 
-  public FastDate adjustDate(FastDate date, BusinessDayConventionEnum convention, String... businessCenters) {
-    if(convention == BusinessDayConventionEnum.NONE) return date;
-    FastDate current = date;
-    if(businessCenters != null) {
-      for(String center : businessCenters) {
-        if(center != null) {
-          while(isNonWorkingDay(center, current)) {
-            current = adjustDate(current, convention, center);
-          }
-        }
-      }
-    }
-    return current;
-  }
-
   private FastDate adjustDate(FastDate date, BusinessDayConventionEnum convention, String value) {
     switch(convention) {
       case NONE:
