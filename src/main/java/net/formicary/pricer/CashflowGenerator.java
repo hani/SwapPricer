@@ -10,6 +10,11 @@ import net.formicary.pricer.util.FastDate;
 import net.formicary.pricer.util.FpMLUtil;
 import org.fpml.spec503wd3.*;
 
+import static org.fpml.spec503wd3.BusinessDayConventionEnum.FOLLOWING;
+import static org.fpml.spec503wd3.BusinessDayConventionEnum.MODFOLLOWING;
+import static org.fpml.spec503wd3.CompoundingMethodEnum.FLAT;
+import static org.fpml.spec503wd3.CompoundingMethodEnum.STRAIGHT;
+
 /**
  * @author hani
  *         Date: 10/11/11
@@ -65,7 +70,17 @@ public class CashflowGenerator {
     int nextCalculationIndex = getNextDateIndex(ctx, paymentDates);
     //we want the last calc thats before the cutoff date, that's when our calculations start
 
-    List<FastDate> fixingDates = calendarManager.getFixingDates(calculationDates, leg.getResetDates().getFixingDates());
+    List<FastDate> fixingDates;
+//    if(ctx.isOIS) {
+//      RelativeDateOffset oisFixingOffset = IndexProperties.getOISFixingOffset(ctx.currency);
+//      if(oisFixingOffset != null) {
+//        fixingDates = calendarManager.getFixingDates(calculationDates, oisFixingOffset);
+//      } else {
+//        fixingDates = calculationDates;
+//      }
+//    } else {
+      fixingDates = calendarManager.getFixingDates(calculationDates, leg.getResetDates().getFixingDates());
+//    }
     List<Cashflow> flows = new ArrayList<Cashflow>(calculationDates.size() - nextCalculationIndex + 2);
     for(int i = nextCalculationIndex; i < calculationDates.size(); i++) {
       FastDate periodEndDate = calculationDates.get(i);
@@ -85,11 +100,11 @@ public class CashflowGenerator {
         flows.add(flow);
       } else {
         FastDate tenorEndDate, tenorStartDate;
-        tenorStartDate = calendarManager.adjustDate(periodStartDate, BusinessDayConventionEnum.FOLLOWING, IndexBusinessCenters.getCenters(ctx.floatingIndexName, ctx.currency));
+        tenorStartDate = calendarManager.adjustDate(periodStartDate, FOLLOWING, IndexProperties.getCenters(ctx.floatingIndexName, ctx.currency));
         if(interval.getPeriod() == PeriodEnum.T || ctx.isOIS) {
           tenorEndDate = periodEndDate;
         } else {
-          tenorEndDate = calendarManager.applyInterval(tenorStartDate, interval, BusinessDayConventionEnum.MODFOLLOWING, IndexBusinessCenters.getCenters(ctx.floatingIndexName, ctx.currency));
+          tenorEndDate = calendarManager.applyInterval(tenorStartDate, interval, MODFOLLOWING, IndexProperties.getCenters(ctx.floatingIndexName, ctx.currency));
         }
         String curve = ctx.isOIS ? "OIS" : ctx.calculationTenor;
         double impliedForwardRate = curveManager.getImpliedForwardRate(tenorStartDate, tenorEndDate, valuationDate, ctx.currency, curve);
@@ -203,11 +218,11 @@ public class CashflowGenerator {
     double rate1Value = 0, rate2Value = 0;
     FastDate tenor1End = null, tenor2End = null;
     if(stubRates.size() > 0) {
-      FastDate tenorStartDate = calendarManager.adjustDate(startDate, BusinessDayConventionEnum.FOLLOWING, ctx.calculationCenters[1]);
+      FastDate tenorStartDate = calendarManager.adjustDate(startDate, FOLLOWING, ctx.calculationCenters[1]);
       FastDate fixing = calendarManager.getFixingDate(tenorStartDate, ctx.stream.getResetDates().getFixingDates());
       FloatingRate rate1 = stubRates.get(0);
       Interval rate1IndexTenor = rate1.getIndexTenor();
-      tenor1End = calendarManager.applyInterval(tenorStartDate, rate1IndexTenor, BusinessDayConventionEnum.MODFOLLOWING, IndexBusinessCenters.getCenters(ctx.floatingIndexName, ctx.currency));
+      tenor1End = calendarManager.applyInterval(tenorStartDate, rate1IndexTenor, MODFOLLOWING, IndexProperties.getCenters(ctx.floatingIndexName, ctx.currency));
       if(tenorStartDate.lt(ctx.cutoffDate)) {
         rate1Value = rateManager.getZeroRate(ctx.floatingIndexName, ctx.currency, rate1IndexTenor.getPeriodMultiplier().toString() + rate1IndexTenor.getPeriod() , fixing) / 100;
       } else {
@@ -216,7 +231,7 @@ public class CashflowGenerator {
       if(stubRates.size() == 2) {
         FloatingRate rate2 = stubRates.get(1);
         Interval rate2IndexTenor = rate2.getIndexTenor();
-        tenor2End = calendarManager.applyInterval(tenorStartDate, rate2IndexTenor, BusinessDayConventionEnum.MODFOLLOWING, IndexBusinessCenters.getCenters(ctx.floatingIndexName, ctx.currency));
+        tenor2End = calendarManager.applyInterval(tenorStartDate, rate2IndexTenor, MODFOLLOWING, IndexProperties.getCenters(ctx.floatingIndexName, ctx.currency));
         if(tenorStartDate.lt(ctx.cutoffDate)) {
           rate2Value = rateManager.getZeroRate(ctx.floatingIndexName, ctx.currency, rate2IndexTenor.getPeriodMultiplier().toString() + rate2IndexTenor.getPeriod() , fixing) / 100;
         } else {
@@ -233,10 +248,6 @@ public class CashflowGenerator {
     }
     Cashflow flow = getCashflow(startDate, endDate, ctx, rateToUse);
     flow.setAmount(ctx.notional * flow.getRate() * flow.getDayCountFraction());
-    if(ctx.paying) {
-      //we're paying, so reverse values
-      flow.setAmount(-flow.getAmount());
-    }
     return flow;
   }
 
@@ -267,33 +278,44 @@ public class CashflowGenerator {
       payment.setDate(paymentDate);
       double notional = ctx.notional;
       Iterator<Cashflow> iter = flows.iterator();
+      List<Cashflow> previousFlows = new ArrayList<Cashflow>(flows.size());
       while(iter.hasNext()) {
         Cashflow flow = iter.next();
         if(flow.getDate().lteq(paymentDate)) {
           if(flow.getAmount() == 0) {
             double rate = flow.getRate();
-            rate = rate + spread;
+//            if(ctx.compoundingMethod == STRAIGHT || (ctx.compoundingMethod == FLAT && previousFlows.isEmpty()))
+              rate = rate + spread;
             flow.setAmount(notional * rate * flow.getDayCountFraction());
-            if(ctx.paying) {
-              //we're paying, so reverse values
-              flow.setAmount(-flow.getAmount());
+            if(previousFlows.size() > 0 && ctx.compoundingMethod == FLAT) {
+              double total = 0;
+              for(Cashflow previousFlow : previousFlows) {
+                total += previousFlow.getAmount();
+              }
+              flow.setAmount(flow.getAmount() + (total * flow.getRate() * flow.getDayCountFraction()));
             }
           }
-          if(ctx.compounding) {
-            //we use abs here since compounding is always positive
+          if(ctx.compounding && ctx.compoundingMethod == STRAIGHT) {
             notional += Math.abs(flow.getAmount());
           }
           payment.setAmount(payment.getAmount() + flow.getAmount());
           if(payment.getType() == null)
             payment.setType(flow.getType());
+          previousFlows.add(flow);
           iter.remove();
         } else {
           //we have a flow after our current payment, let it go to the next payment date
           break;
         }
       }
-      if(payment.getAmount() != 0)
+      if(payment.getAmount() != 0) {
         paymentFlows.add(payment);
+      }
+    }
+    if(ctx.paying) {
+      for(Cashflow paymentFlow : paymentFlows) {
+        paymentFlow.setAmount(-paymentFlow.getAmount());
+      }
     }
     return paymentFlows;
   }
