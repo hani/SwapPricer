@@ -116,6 +116,7 @@
                   <periodMultiplier>1</periodMultiplier>
                   <period>Y</period>
                </paymentFrequency>
+               <firstPaymentDate>2021-11-07</firstPaymentDate>
                <payRelativeTo>CalculationPeriodEndDate</payRelativeTo>
                <paymentDatesAdjustments>
                   <businessDayConvention>MODFOLLOWING</businessDayConvention>

@@ -91,23 +91,21 @@ public class StreamContext {
     firstPaymentDate = DateUtil.getDate(paymentDates.getFirstPaymentDate());
     paymentTenor = paymentDates.getPaymentFrequency().getPeriodMultiplier() + paymentDates.getPaymentFrequency().getPeriod().value();
 
-    FastDate earliest = firstRegularPeriodStartDate == null ? effectiveDate : firstRegularPeriodStartDate;
-    if(isOIS) {
-      calculationDates = calendarManager.getValidDays(effectiveDate, calendarManager.adjustDate(endDate, conventions[2], calculationCenters[2]), calculationCenters[1]);
-    } else {
-      calculationDates = calendarManager.getAdjustedDates(earliest, endDate, conventions, interval, calculationCenters, null);
-      //if our first date isn't our effective date, then we adjust it according to calc conventions, not start conventions
-      if(firstRegularPeriodStartDate != null) {
-        calculationDates.set(0, calendarManager.adjustDate(calculationDates.get(0), conventions[1], calculationCenters[1]));
-      }
-    }
     initialStub = FpMLUtil.getInitialStub(leg);
     finalStub = FpMLUtil.getFinalStub(leg);
 
-    if(firstRegularPeriodStartDate != null && firstRegularPeriodStartDate.gt(cutoffDate) && initialStub == null) {
-      //it's an imaginary stub! We have a hidden flow between effectivedate and calcperiodstart date
-      if(!calculationDates.get(0).equals(effectiveDate))
-        calculationDates.add(0, calendarManager.adjustDate(effectiveDate, conventions[1], calculationCenters[1]));
+    if(isOIS) {
+      calculationDates = calendarManager.getValidDays(effectiveDate, calendarManager.adjustDate(endDate, conventions[2], calculationCenters[2]), calculationCenters[1]);
+    } else {
+      //our first date will always be the effective date
+      FastDate earliest = firstRegularPeriodStartDate == null ? effectiveDate : firstRegularPeriodStartDate;
+      calculationDates = calendarManager.getAdjustedDates(earliest, endDate, conventions, interval, calculationCenters, null);
+      if(firstRegularPeriodStartDate != null) {
+        //if our first date isn't our effective date, then we adjust it according to calc conventions, not start conventions
+        calculationDates.set(0, calendarManager.adjustDate(calculationDates.get(0), conventions[1], calculationCenters[1]));
+        //if we have a stub, we add the calculation start date
+        calculationDates.add(0, calendarManager.adjustDate(effectiveDate, conventions[0], calculationCenters[0]));
+      }
     }
     //now check if we have a back stub of some sort
     terminationDate = DateUtil.getDate(leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue());

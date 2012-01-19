@@ -60,31 +60,20 @@ public class CashflowGenerator {
   private List<Cashflow> generateFloatingFlows(FastDate valuationDate, InterestRateStream leg) {
     StreamContext ctx = new StreamContext(calendarManager, valuationDate, leg);
     List<FastDate> calculationDates = ctx.calculationDates;
+    List<FastDate> paymentDates = getPaymentDates(ctx);
     CalculationPeriodFrequency interval = ctx.interval;
-    Interval paymentInterval = leg.getPaymentDates().getPaymentFrequency();
-    FastDate paymentStartDate = ctx.effectiveDate;
-    if(interval.getPeriod() == paymentInterval.getPeriod() && interval.getPeriodMultiplier().equals(paymentInterval.getPeriodMultiplier())) {
-      paymentInterval = interval;
-      if(ctx.firstRegularPeriodStartDate != null)
-        paymentStartDate = ctx.firstRegularPeriodStartDate;
-    }
-
-    List<FastDate> paymentDates = calendarManager.getAdjustedDates(paymentStartDate, ctx.endDate, ctx.conventions, paymentInterval, ctx.calculationCenters, interval.getRollConvention());
-    if(ctx.lastRegularPeriodEndDate != null && ctx.lastRegularPeriodEndDate.lt(ctx.terminationDate)) {
-      paymentDates.add(ctx.terminationDate);
-    }
-    int nextPaymentIndex = getNextPaymentIndex(ctx, paymentDates);
-    //we want the last payment thats before the cutoff date, that's when our calculations start
+    int nextCalculationIndex = getNextDateIndex(ctx, paymentDates);
+    //we want the last calc thats before the cutoff date, that's when our calculations start
 
     List<FastDate> fixingDates = calendarManager.getFixingDates(calculationDates, leg.getResetDates().getFixingDates());
-    List<Cashflow> flows = new ArrayList<Cashflow>(calculationDates.size() - nextPaymentIndex + 2);
-    for(int i = nextPaymentIndex; i < calculationDates.size(); i++) {
+    List<Cashflow> flows = new ArrayList<Cashflow>(calculationDates.size() - nextCalculationIndex + 2);
+    for(int i = nextCalculationIndex; i < calculationDates.size(); i++) {
       FastDate periodEndDate = calculationDates.get(i);
       FastDate fixingDate = fixingDates.get(i -1);
       FastDate periodStartDate = calculationDates.get(i - 1);
       //todo need to figure out how to handle this
  //     BigDecimal initialFloatingRate = FpMLUtil.getInitialFloatingRate(calculation);
-//      if(i == nextPaymentIndex && initialFloatingRate != null) {
+//      if(i == nextCalculationIndex && initialFloatingRate != null) {
 //          Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, initialFloatingRate.doubleValue());
 //          flows.add(flow);
 //      }
@@ -119,11 +108,29 @@ public class CashflowGenerator {
     return flows;
   }
 
+  private List<FastDate> getPaymentDates(StreamContext ctx) {
+    Interval paymentInterval = ctx.stream.getPaymentDates().getPaymentFrequency();
+    FastDate paymentStartDate = ctx.effectiveDate;
+    if(ctx.firstPaymentDate != null) {
+      paymentStartDate = ctx.firstPaymentDate;
+    } else if(ctx.firstRegularPeriodStartDate != null) {
+      paymentStartDate = ctx.firstRegularPeriodStartDate;
+    }
+
+    List<FastDate> paymentDates = calendarManager.getAdjustedDates(paymentStartDate, ctx.endDate, ctx.conventions, paymentInterval, ctx.calculationCenters, ctx.interval.getRollConvention());
+    if(ctx.lastRegularPeriodEndDate != null && ctx.lastRegularPeriodEndDate.lt(ctx.terminationDate)) {
+      paymentDates.add(ctx.terminationDate);
+    }
+    return paymentDates;
+  }
+
   private void applyStubs(StreamContext ctx, List<Cashflow> flows) {
     if(ctx.initialStub != null) {
-      FastDate stubPaymentDate = ctx.firstPaymentDate == null ? ctx.firstRegularPeriodStartDate : ctx.firstPaymentDate;
-      if(stubPaymentDate.gt(ctx.cutoffDate)) {
-        flows.add(0, calculateStubCashflow(ctx, ctx.effectiveDate, stubPaymentDate, ctx.initialStub.getFloatingRate()));
+      FastDate stubCalculationDate = ctx.firstRegularPeriodStartDate;
+      if(stubCalculationDate == null) stubCalculationDate = ctx.firstPaymentDate;
+      if(stubCalculationDate.gt(ctx.cutoffDate)) {
+        Cashflow cashflow = calculateStubCashflow(ctx, ctx.effectiveDate, stubCalculationDate, ctx.initialStub.getFloatingRate());
+        flows.set(0, cashflow);
       }
     }
     if(ctx.finalStub != null) {
@@ -133,19 +140,19 @@ public class CashflowGenerator {
     }
   }
 
-  private int getNextPaymentIndex(StreamContext ctx, List<FastDate> paymentDates) {
-    int nextPaymentIndex = Collections.binarySearch(paymentDates, ctx.cutoffDate.plusDays(1));
-    if(nextPaymentIndex == 0) {
+  private int getNextDateIndex(StreamContext ctx, List<FastDate> dates) {
+    int index = Collections.binarySearch(dates, ctx.cutoffDate.plusDays(1));
+    if(index == 0) {
       //we have a trade that starts 'now' effectively, so the first date we calculate is actually the start date
-      //and we can move to the next one which will be the first pauyment
-      nextPaymentIndex = 1;
+      //and we can move to the next one which will be the first calc
+      index = 1;
     }
-    else if(nextPaymentIndex < 0) {
-      nextPaymentIndex = -(nextPaymentIndex + 1);
-      //if index = 0, means we have a payment at the start (which doesn't count, since nothing has happened yet)
-      if(nextPaymentIndex == 0) nextPaymentIndex = 1;
+    else if(index < 0) {
+      index = -(index + 1);
+      //if index = 0, means we have a calc at the start (which doesn't count, since nothing has happened yet)
+      if(index == 0) index = 1;
     }
-    return nextPaymentIndex;
+    return index;
   }
 
   private List<Cashflow> generateFixedFlows(FastDate valuationDate, InterestRateStream leg) {
