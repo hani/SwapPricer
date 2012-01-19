@@ -96,12 +96,12 @@ public class CashflowGenerator {
         flows.add(flow);
       } else {
         FastDate tenorEndDate, tenorStartDate;
+        tenorStartDate = calendarManager.adjustDate(periodStartDate, BusinessDayConventionEnum.FOLLOWING, IndexBusinessCenters.getCenters(ctx.floatingIndexName, ctx.currency));
         if(interval.getPeriod() == PeriodEnum.T || ctx.isOIS) {
           tenorEndDate = periodEndDate;
         } else {
-          tenorEndDate = calendarManager.applyInterval(periodStartDate, interval, BusinessDayConventionEnum.MODFOLLOWING, IndexBusinessCenters.getCenters(ctx.floatingIndexName, ctx.currency));
+          tenorEndDate = calendarManager.applyInterval(tenorStartDate, interval, BusinessDayConventionEnum.MODFOLLOWING, IndexBusinessCenters.getCenters(ctx.floatingIndexName, ctx.currency));
         }
-        tenorStartDate = calendarManager.adjustDate(periodStartDate, BusinessDayConventionEnum.FOLLOWING, IndexBusinessCenters.getCenters(ctx.floatingIndexName, ctx.currency));
         String curve = ctx.isOIS ? "OIS" : ctx.calculationTenor;
         double impliedForwardRate = curveManager.getImpliedForwardRate(tenorStartDate, tenorEndDate, valuationDate, ctx.currency, curve);
         Cashflow flow = getCashflow(periodStartDate, periodEndDate, ctx, impliedForwardRate);
