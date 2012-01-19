@@ -162,8 +162,7 @@ public class CalendarManagerImpl implements CalendarManager {
       unadjustedDates.add(end);
       return unadjustedDates;
     }
-    FastDate current = new FastDate(start.getYear(),
-        start.getMonth(), start.getDay());
+    FastDate current = new FastDate(start.getYear(), start.getMonth(), start.getDay());
     boolean isIMM = false;
     boolean isEOM = false;
     int rollDay = 0;
