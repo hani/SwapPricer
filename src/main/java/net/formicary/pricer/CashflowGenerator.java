@@ -48,20 +48,6 @@ public class CashflowGenerator {
     return flows;
   }
 
-  private void adjustForPaymentOffset(InterestRateStream leg, List<Cashflow> flows) {
-    Offset paymentOffset = leg.getPaymentDates().getPaymentDaysOffset();
-    if(paymentOffset != null) {
-      BusinessDayAdjustments paymentDatesAdjustments = leg.getPaymentDates().getPaymentDatesAdjustments();
-      BusinessCenters centers = paymentDatesAdjustments.getBusinessCenters();
-      if(paymentDatesAdjustments.getBusinessCentersReference() != null) {
-        centers = (BusinessCenters)paymentDatesAdjustments.getBusinessCentersReference().getHref();
-      }
-      for (Cashflow flow : flows) {
-        flow.setDate(calendarManager.applyDayInterval(flow.getDate(), paymentOffset, centers));
-      }
-    }
-  }
-
   private List<Cashflow> generateFloatingFlows(FastDate valuationDate, InterestRateStream leg) {
     StreamContext ctx = new StreamContext(calendarManager, valuationDate, leg);
     List<FastDate> calculationDates = ctx.calculationDates;
@@ -336,4 +322,19 @@ public class CashflowGenerator {
     flow.setDiscountFactor(discountFactor);
     flow.setNpv(discountFactor * flow.getAmount());
   }
+
+  private void adjustForPaymentOffset(InterestRateStream leg, List<Cashflow> flows) {
+    Offset paymentOffset = leg.getPaymentDates().getPaymentDaysOffset();
+    if(paymentOffset != null) {
+      BusinessDayAdjustments paymentDatesAdjustments = leg.getPaymentDates().getPaymentDatesAdjustments();
+      BusinessCenters centers = paymentDatesAdjustments.getBusinessCenters();
+      if(paymentDatesAdjustments.getBusinessCentersReference() != null) {
+        centers = (BusinessCenters)paymentDatesAdjustments.getBusinessCentersReference().getHref();
+      }
+      for (Cashflow flow : flows) {
+        flow.setDate(calendarManager.applyDayInterval(flow.getDate(), paymentOffset, centers));
+      }
+    }
+  }
+
 }
