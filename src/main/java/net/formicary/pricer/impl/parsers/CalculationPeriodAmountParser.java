@@ -2,6 +2,7 @@ package net.formicary.pricer.impl.parsers;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.JAXBElement;
 import javax.xml.stream.XMLStreamException;
@@ -51,7 +52,7 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
 
     String initialValue = null;
     Currency currency = null;
-
+    List<Step> steps = null;
     while (reader.hasNext()) {
       int event = reader.next();
       if (event == START_ELEMENT) {
@@ -105,15 +106,16 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
             cpa.getCalculation().getNotionalSchedule().setNotionalStepSchedule(schedule);
             break;
           case step:
-            cpa.getCalculation().getNotionalSchedule().getNotionalStepSchedule().getStep().add(new Step());
+            if(steps == null) {
+              steps = new ArrayList<Step>(20);
+            }
+            steps.add(new Step());
             break;
           case stepDate:
-            List<Step> steps = cpa.getCalculation().getNotionalSchedule().getNotionalStepSchedule().getStep();
             Step step = steps.get(steps.size() - 1);
             step.setStepDate(DateUtil.getCalendar(reader.getElementText()));
             break;
           case stepValue:
-            steps = cpa.getCalculation().getNotionalSchedule().getNotionalStepSchedule().getStep();
             step = steps.get(steps.size() - 1);
             step.setStepValue(new BigDecimal(reader.getElementText()));
             break;
@@ -128,8 +130,13 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
             initialValue = null;
             break;
           case notionalStepSchedule:
-            cpa.getCalculation().getNotionalSchedule().getNotionalStepSchedule().setInitialValue(new BigDecimal(initialValue));
-            cpa.getCalculation().getNotionalSchedule().getNotionalStepSchedule().setCurrency(currency);
+            Notional notionalSchedule = cpa.getCalculation().getNotionalSchedule();
+            notionalSchedule.getNotionalStepSchedule().setInitialValue(new BigDecimal(initialValue));
+            notionalSchedule.getNotionalStepSchedule().setCurrency(currency);
+            if(steps != null) {
+              notionalSchedule.getNotionalStepSchedule().getStep().addAll(steps);
+              steps = null;
+            }
             initialValue = null;
             currency = null;
             break;
@@ -143,6 +150,10 @@ public class CalculationPeriodAmountParser implements NodeParser<CalculationPeri
             Schedule fr = new Schedule();
             fr.setInitialValue(new BigDecimal(initialValue));
             cpa.getCalculation().setFixedRateSchedule(fr);
+            if(steps != null) {
+              fr.getStep().addAll(steps);
+              steps = null;
+            }
             break;
         }
       }
