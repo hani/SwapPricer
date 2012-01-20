@@ -57,16 +57,16 @@ public class CashflowGenerator {
     //we want the last calc thats before the cutoff date, that's when our calculations start
 
     List<FastDate> fixingDates;
-//    if(ctx.isOIS) {
-//      RelativeDateOffset oisFixingOffset = IndexProperties.getOISFixingOffset(ctx.currency);
-//      if(oisFixingOffset != null) {
-//        fixingDates = calendarManager.getFixingDates(calculationDates, oisFixingOffset);
-//      } else {
-//        fixingDates = calculationDates;
-//      }
-//    } else {
+    if(ctx.isOIS) {
+      RelativeDateOffset oisFixingOffset = IndexProperties.getOISFixingOffset(ctx.currency);
+      if(oisFixingOffset != null) {
+        fixingDates = calendarManager.getFixingDates(calculationDates, oisFixingOffset);
+      } else {
+        fixingDates = calculationDates;
+      }
+    } else {
       fixingDates = calendarManager.getFixingDates(calculationDates, leg.getResetDates().getFixingDates());
-//    }
+    }
     List<Cashflow> flows = new ArrayList<Cashflow>(calculationDates.size() - nextCalculationIndex + 2);
     for(int i = nextCalculationIndex; i < calculationDates.size(); i++) {
       FastDate periodEndDate = calculationDates.get(i);
@@ -230,6 +230,7 @@ public class CashflowGenerator {
       int periodLength = startDate.numDaysFrom(endDate);
       int rate1Period = startDate.numDaysFrom(tenor1End);
       int rate2Period = startDate.numDaysFrom(tenor2End);
+      //note that LCH rounds to 7dp here and we don't, so our stubs will often be a little off (up to 300-400)
       rateToUse = rate1Value + (periodLength - rate1Period) * (rate2Value - rate1Value)/(rate2Period - rate1Period);
     }
     Cashflow flow = getCashflow(startDate, endDate, ctx, rateToUse);
@@ -258,13 +259,14 @@ public class CashflowGenerator {
         }
       }
     }
+    int size = flows.size();
     for(int i = start; i < paymentDates.size(); i++) {
       Cashflow payment = new Cashflow();
       FastDate paymentDate = paymentDates.get(i);
       payment.setDate(paymentDate);
       double notional = ctx.notional;
       Iterator<Cashflow> iter = flows.iterator();
-      List<Cashflow> previousFlows = new ArrayList<Cashflow>(flows.size());
+      List<Cashflow> previousFlows = new ArrayList<Cashflow>(size);
       while(iter.hasNext()) {
         Cashflow flow = iter.next();
         if(flow.getDate().lteq(paymentDate)) {
@@ -289,6 +291,7 @@ public class CashflowGenerator {
             payment.setType(flow.getType());
           previousFlows.add(flow);
           iter.remove();
+          size--;
         } else {
           //we have a flow after our current payment, let it go to the next payment date
           break;
