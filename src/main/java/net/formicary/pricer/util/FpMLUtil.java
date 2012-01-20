@@ -31,6 +31,7 @@ public class FpMLUtil {
     fractionMapping.put("30/360", THIRTY_360);
     fractionMapping.put("30E/360", THIRTYE_360);
     fractionMapping.put("30E/360.ISDA", THIRTYE_360_ISDA);
+    fractionMapping.put("ACT/365.FIXED", ACT_365);
   }
 
   public static InterestRateStream getFixedStream(Swap s) {
