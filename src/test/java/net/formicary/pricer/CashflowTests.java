@@ -1,19 +1,16 @@
 package net.formicary.pricer;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.io.*;
+import java.util.*;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import net.formicary.pricer.model.Cashflow;
 import net.formicary.pricer.util.FastDate;
 import org.apache.commons.io.IOUtils;
+import org.fpml.spec503wd3.Calculation;
+import org.fpml.spec503wd3.Product;
+import org.fpml.spec503wd3.Swap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
@@ -34,11 +31,13 @@ public class CashflowTests {
   public static final String fpmlDir = "src/test/resources/fpml/";
   private CashflowGenerator generator;
   private static final Logger log = LoggerFactory.getLogger(CashflowTests.class);
+  private TradeStore store;
 
   @BeforeClass
   public void init() {
     Injector injector = Guice.createInjector(new PricerModule(), new PersistenceModule("src/test/resources/fpml"));
     generator = injector.getInstance(CashflowGenerator.class);
+    store = injector.getInstance(TradeStore.class);
   }
 
   @Test(dataProvider = "trades")
@@ -62,12 +61,21 @@ public class CashflowTests {
       Cashflow actual = next.getMemberFlow();
       Cashflow expected = next.getLchFlow();
       if(actual != null && expected != null) {
-        int diff = (int)(actual.getAmount() - expected.getAmount());
-        if(Math.abs(diff) > 50) {
+        Product p = store.getTrade(id);
+        Calculation calculation = ((Swap)p).getSwapStream().get(0).getCalculationPeriodAmount().getCalculation();
+        //check the other leg
+        if(calculation == null) {
+          calculation = ((Swap)p).getSwapStream().get(1).getCalculationPeriodAmount().getCalculation();
+        }
+        double notional = calculation.getNotionalSchedule().getNotionalStepSchedule().getInitialValue().doubleValue();
+        double diff = actual.getAmount() - expected.getAmount();
+        double diffPercent = Math.abs(diff / notional);
+        if(diffPercent > 0.0001) {
           errors.append("\nAmount diff: " + diff + " for flow on date " + actual.getDate() + " side: " + actual.getType());
         } else {
-          diff = (int)(actual.getNpv() - expected.getNpv());
-          if(Math.abs(diff) > 50) {
+          diff = actual.getNpv() - expected.getNpv();
+          diffPercent = Math.abs(diff / notional);
+          if(diffPercent > 0.0001) {
             errors.append("\nNPV diff: " + diff + " for flow on date " + actual.getDate() + " side: " + actual.getType());
           }
         }
@@ -82,7 +90,7 @@ public class CashflowTests {
   @DataProvider(name = "singletrade")
   public Object[][] singleTrade() {
     Object[][] data = new Object[1][];
-    data[0] = new Object[]{"LCH00001073244"};
+    data[0] = new Object[]{"LCH00001367465"};
     return data;
   }
 
