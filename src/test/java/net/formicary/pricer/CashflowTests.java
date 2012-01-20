@@ -1,6 +1,7 @@
 package net.formicary.pricer;
 
 import java.io.*;
+import java.text.NumberFormat;
 import java.util.*;
 
 import com.google.inject.Guice;
@@ -32,6 +33,10 @@ public class CashflowTests {
   private CashflowGenerator generator;
   private static final Logger log = LoggerFactory.getLogger(CashflowTests.class);
   private TradeStore store;
+  private static final NumberFormat percentFormat = NumberFormat.getPercentInstance();
+  static {
+    percentFormat.setMaximumFractionDigits(5);
+  }
 
   @BeforeClass
   public void init() {
@@ -40,7 +45,7 @@ public class CashflowTests {
     store = injector.getInstance(TradeStore.class);
   }
 
-  @Test(dataProvider = "trades")
+  @Test(dataProvider = "singletrade")
   public void generateCashflows(String id) throws Exception {
     List<Cashflow> actualFlows;
     try {
@@ -71,7 +76,7 @@ public class CashflowTests {
         double diff = actual.getAmount() - expected.getAmount();
         double diffPercent = Math.abs(diff / notional);
         if(diffPercent > 0.0001) {
-          errors.append("\nAmount diff: " + (int)diff + " for flow on date " + actual.getDate() + " side: " + actual.getType());
+          errors.append("\nAmount diff: " + (int)diff + " for flow on date " + actual.getDate() + " side: " + actual.getType() + " diff: " + percentFormat.format(diffPercent));
         } else {
           diff = actual.getNpv() - expected.getNpv();
           diffPercent = Math.abs(diff / notional);
@@ -90,7 +95,7 @@ public class CashflowTests {
   @DataProvider(name = "singletrade")
   public Object[][] singleTrade() {
     Object[][] data = new Object[1][];
-    data[0] = new Object[]{"LCH00000738324"};
+    data[0] = new Object[]{"LCH00001366462"};
     return data;
   }
 
