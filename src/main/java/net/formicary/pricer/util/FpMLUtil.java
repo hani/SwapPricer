@@ -34,28 +34,10 @@ public class FpMLUtil {
     fractionMapping.put("ACT/365.FIXED", ACT_365);
   }
 
-  public static InterestRateStream getFixedStream(Swap s) {
-    for (InterestRateStream stream : s.getSwapStream()) {
-      if(isFixedStream(stream)) {
-        return stream;
-      }
-    }
-    throw new IllegalArgumentException("Trades with two floating streams not supported yet");
-  }
-
   public static boolean isFixedStream(InterestRateStream stream) {
     Calculation calculation = stream.getCalculationPeriodAmount().getCalculation();
     return (calculation != null && calculation.getFixedRateSchedule() != null)
       || stream.getCalculationPeriodAmount().getKnownAmountSchedule() != null;
-  }
-
-  public static InterestRateStream getFloatingStream(Swap s) {
-    for (InterestRateStream stream : s.getSwapStream()) {
-      if(stream.getCalculationPeriodAmount().getCalculation().getFixedRateSchedule() == null) {
-        return stream;
-      }
-    }
-    return null;
   }
 
   public static DayCountFraction getDayCountFraction(String value) {
@@ -107,16 +89,6 @@ public class FpMLUtil {
     //no stub, just use the termination date
     if(cal == null) cal = leg.getCalculationPeriodDates().getTerminationDate().getUnadjustedDate().getValue();
     return DateUtil.getDate(cal);
-  }
-
-  public static FastDate getStartDate(FastDate valuationDate, InterestRateStream leg) {
-    XMLGregorianCalendar cal = leg.getCalculationPeriodDates().getFirstRegularPeriodStartDate();
-    if(cal != null) {
-      return DateUtil.getDate(cal);
-    }
-
-    FastDate effectiveDate = DateUtil.getDate(leg.getCalculationPeriodDates().getEffectiveDate().getUnadjustedDate().getValue());
-    return effectiveDate;
   }
 
   public static BigDecimal getInitialFloatingRate(Calculation calculation) {
