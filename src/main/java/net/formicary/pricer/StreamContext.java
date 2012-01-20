@@ -60,6 +60,9 @@ public class StreamContext {
 
     Calculation calculation = leg.getCalculationPeriodAmount().getCalculation();
     String[] floatingIndexName = FpMLUtil.getFloatingIndexName(calculation);
+    if("Federal Funds".equals(floatingIndexName[0])) {
+      floatingIndexName[0] = "FEDFUND";
+    }
     this.floatingIndexName = floatingIndexName[0];
     isOIS = floatingIndexName[1] != null && floatingIndexName[1].contains("OIS-COMPOUND");
     if(calculation != null) {

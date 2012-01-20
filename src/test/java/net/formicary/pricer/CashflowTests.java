@@ -71,12 +71,12 @@ public class CashflowTests {
         double diff = actual.getAmount() - expected.getAmount();
         double diffPercent = Math.abs(diff / notional);
         if(diffPercent > 0.0001) {
-          errors.append("\nAmount diff: " + diff + " for flow on date " + actual.getDate() + " side: " + actual.getType());
+          errors.append("\nAmount diff: " + (int)diff + " for flow on date " + actual.getDate() + " side: " + actual.getType());
         } else {
           diff = actual.getNpv() - expected.getNpv();
           diffPercent = Math.abs(diff / notional);
           if(diffPercent > 0.0001) {
-            errors.append("\nNPV diff: " + diff + " for flow on date " + actual.getDate() + " side: " + actual.getType());
+            errors.append("\nNPV diff: " + (int)diff + " for flow on date " + actual.getDate() + " side: " + actual.getType());
           }
         }
       }
@@ -90,7 +90,7 @@ public class CashflowTests {
   @DataProvider(name = "singletrade")
   public Object[][] singleTrade() {
     Object[][] data = new Object[1][];
-    data[0] = new Object[]{"LCH00001367465"};
+    data[0] = new Object[]{"LCH00000738324"};
     return data;
   }
 
